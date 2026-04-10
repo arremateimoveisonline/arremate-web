@@ -1,7 +1,8 @@
 /**
  * caixa-csv-downloader.js — Baixa CSVs da CAIXA usando Puppeteer (resolve Radware JS challenge)
- * Estratégia: Puppeteer resolve Radware, usa Browser.setDownloadBehavior para capturar
- *             downloads nativos do Chrome em diretório temporário.
+ * Estratégia: abre o site da CAIXA com Puppeteer (browser real) para passar o Radware,
+ *             depois usa page.evaluate(fetch) no contexto do browser para pegar o CSV
+ *             sem depender de download nativo (que falha quando Radware serve HTML).
  * Uso: node caixa-csv-downloader.js [SP RJ GO ...]   (sem args = todos os estados)
  */
 const puppeteer = require('puppeteer-core');
@@ -10,7 +11,6 @@ const path = require('path');
 
 const BASE_URL  = 'https://venda-imoveis.caixa.gov.br/';
 const CSV_DIR   = process.env.CSV_DIR || '/var/www/dados/csv';
-const DL_TMP    = '/tmp/arremate-csv-dl';
 const LOG_FILE  = '/var/log/arremate_scraper.log';
 
 /* Detecta o caminho do Chrome conforme o ambiente:
@@ -18,9 +18,10 @@ const LOG_FILE  = '/var/log/arremate_scraper.log';
  * - VPS: /snap/bin/chromium
  * - Pode ser sobrescrito pela variável CHROME_PATH */
 const CHROME_PATH = process.env.CHROME_PATH ||
-  (require('fs').existsSync('/usr/bin/google-chrome') ? '/usr/bin/google-chrome' :
-   require('fs').existsSync('/usr/bin/chromium-browser') ? '/usr/bin/chromium-browser' :
+  (fs.existsSync('/usr/bin/google-chrome')      ? '/usr/bin/google-chrome'      :
+   fs.existsSync('/usr/bin/chromium-browser')   ? '/usr/bin/chromium-browser'   :
    '/snap/bin/chromium');
+
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
 
 const ALL_UFS = ['AC','AL','AM','AP','BA','CE','DF','ES','GO','MA','MG','MS','MT',
@@ -35,65 +36,19 @@ function log(msg) {
   try { fs.appendFileSync(LOG_FILE, line + '\n'); } catch(e) {}
 }
 
-function isBlocked(buf) {
-  const sample = buf.slice(0, 4096).toString('utf8');
+function isBlocked(text) {
+  const sample = text.slice(0, 4096);
   return sample.includes('Radware') || sample.includes('captcha') ||
          sample.includes('perfdrive') || sample.includes('shieldsquare') ||
-         sample.includes('Bot Manager') || sample.includes('hcaptcha');
-}
-
-/** Remove arquivos do dir de download temporário */
-function limparDlTmp() {
-  try {
-    for (const f of fs.readdirSync(DL_TMP)) {
-      fs.unlinkSync(path.join(DL_TMP, f));
-    }
-  } catch(e) {}
-}
-
-/**
- * Aguarda um arquivo aparecer em DL_TMP que corresponda a `uf`.
- * Chrome nomeia o download como Lista_imoveis_XX.csv (ou .crdownload enquanto baixa).
- * Retorna o path do arquivo quando completo, ou lança erro em timeout.
- */
-function aguardarDownload(uf, timeoutMs = 30000) {
-  return new Promise((resolve, reject) => {
-    const esperado = `Lista_imoveis_${uf}.csv`;
-    const inicio = Date.now();
-
-    const check = setInterval(() => {
-      try {
-        const files = fs.readdirSync(DL_TMP);
-        // Arquivo completo: sem .crdownload
-        if (files.includes(esperado)) {
-          clearInterval(check);
-          resolve(path.join(DL_TMP, esperado));
-          return;
-        }
-        // Ainda baixando?
-        const parcial = files.find(f => f.startsWith(`Lista_imoveis_${uf}`) && f.endsWith('.crdownload'));
-        if (!parcial && Date.now() - inicio > 5000) {
-          // Nenhum arquivo parcial nem completo após 5s — provavelmente não disparou download
-          clearInterval(check);
-          reject(new Error('download nao iniciado'));
-          return;
-        }
-      } catch(e) {}
-
-      if (Date.now() - inicio > timeoutMs) {
-        clearInterval(check);
-        reject(new Error('timeout aguardando download'));
-      }
-    }, 300);
-  });
+         sample.includes('Bot Manager') || sample.includes('hcaptcha') ||
+         sample.includes('<!DOCTYPE') || sample.includes('<html');
 }
 
 async function main() {
   if (!fs.existsSync(CSV_DIR)) fs.mkdirSync(CSV_DIR, { recursive: true });
-  if (!fs.existsSync(DL_TMP)) fs.mkdirSync(DL_TMP, { recursive: true });
-  limparDlTmp();
 
-  log(`=== CSV DOWNLOADER (puppeteer + download nativo) ===`);
+  log(`=== CSV DOWNLOADER (puppeteer + fetch interno) ===`);
+  log(`Chrome: ${CHROME_PATH}`);
   log(`Estados: ${UFS.join(',')}`);
 
   const browser = await puppeteer.launch({
@@ -106,26 +61,18 @@ async function main() {
     ],
   });
 
-  // Configura download nativo via CDP no nível do browser
-  const browserClient = await browser.target().createCDPSession();
-  await browserClient.send('Browser.setDownloadBehavior', {
-    behavior: 'allow',
-    downloadPath: DL_TMP,
-    eventsEnabled: true,
-  });
-
   const page = await browser.newPage();
   await page.setUserAgent(UA);
   await page.setExtraHTTPHeaders({ 'Accept-Language': 'pt-BR,pt;q=0.9,en;q=0.8' });
 
-  // Resolve Radware JS challenge na homepage
+  // Resolve desafio JS do Radware na homepage
   log('Iniciando sessão na CAIXA...');
   try {
     await page.goto(BASE_URL, { waitUntil: 'networkidle2', timeout: 30000 });
-  } catch(e) {}
+  } catch(e) { log(`  (aviso homepage: ${e.message})`); }
   await new Promise(r => setTimeout(r, 3000));
 
-  // Visita listagem para consolidar sessão
+  // Visita listagem para consolidar cookies de sessão
   try {
     await page.goto(`${BASE_URL}sistema/site/acesso.aspx?hdnimovel=&tipo=imovel&estados=SP`, {
       waitUntil: 'networkidle2', timeout: 20000
@@ -140,29 +87,43 @@ async function main() {
   for (const uf of UFS) {
     const url = `${BASE_URL}listaweb/Lista_imoveis_${uf}.csv`;
     log(`CSV ${uf}...`);
-    limparDlTmp();
 
     try {
-      // Navega para o CSV — Chrome vai disparar o download automaticamente
-      page.goto(url).catch(() => {});
+      // Faz o fetch do CSV dentro do contexto do browser:
+      // usa os cookies e sessão já estabelecidos, passando pelo Radware
+      const result = await page.evaluate(async (csvUrl) => {
+        try {
+          const resp = await fetch(csvUrl, {
+            credentials: 'include',
+            headers: { 'Accept': 'text/csv,text/plain,*/*;q=0.9' },
+          });
+          if (!resp.ok) return { error: `HTTP ${resp.status}`, content: null };
+          const text = await resp.text();
+          return { error: null, content: text };
+        } catch(e) {
+          return { error: e.message, content: null };
+        }
+      }, url);
 
-      // Aguarda o arquivo aparecer no dir de download
-      const dlPath = await aguardarDownload(uf, 30000);
+      if (result.error || !result.content) {
+        falhou++;
+        log(`  ✗ ERRO: ${result.error || 'sem conteúdo'}`);
+        continue;
+      }
 
-      const body = fs.readFileSync(dlPath);
-
-      if (isBlocked(body)) {
+      if (isBlocked(result.content)) {
         bloqueados++;
         log(`  ✗ BLOQUEADO por Radware/captcha`);
-      } else if (body.length < 500) {
+      } else if (result.content.length < 500) {
         falhou++;
-        log(`  ✗ FALHA: arquivo muito pequeno (${body.length} bytes)`);
+        log(`  ✗ FALHA: conteúdo muito pequeno (${result.content.length} bytes)`);
       } else {
+        // Grava em ISO-8859-1 para manter compatibilidade com o importador PHP
         const dest = path.join(CSV_DIR, `Lista_imoveis_${uf}.csv`);
-        fs.copyFileSync(dlPath, dest);
-        const linhas = body.toString('latin1').split('\n').length;
+        fs.writeFileSync(dest, Buffer.from(result.content, 'binary'));
+        const linhas = result.content.split('\n').length;
         ok++;
-        log(`  ✓ OK: ${linhas} linhas (${(body.length / 1024).toFixed(1)} KB)`);
+        log(`  ✓ OK: ${linhas} linhas (${(result.content.length / 1024).toFixed(1)} KB)`);
       }
     } catch(e) {
       falhou++;
@@ -173,7 +134,6 @@ async function main() {
   }
 
   await browser.close();
-  limparDlTmp();
 
   log(`CSVs válidos: ${ok} | Bloqueados: ${bloqueados} | Falhou: ${falhou}`);
 
