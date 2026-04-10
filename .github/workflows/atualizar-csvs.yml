@@ -113,7 +113,7 @@ jobs:
               ICON="⏰"; MODAL_LABEL="Venda Online"
             fi
 
-            LINK="https://venda-imoveis.caixa.gov.br/sistema/detalhe-imovel.asp?hdnimovel=${hdn}"
+            LINK="https://www.arremateimoveisonline.com.br/imovel.php?hdnimovel=${hdn}"
             TITULO="${ICON} ${cidade} | ${tipo^} | R\$ ${preco} (-${desc}%)"
             CORPO="${MODAL_LABEL} — Clique para ver detalhes e fotos na CAIXA"
 
