@@ -90,10 +90,12 @@ jobs:
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
         run: |
           # Busca top 5 em SP: Venda Online + Compra Direta, 40%+ desc, R$60k-120k
+          # Inclui foto_url para anexar imagem em cada notificação
           RESULTADO=$(ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no \
             root@lcmcreativestudio.vps-kinghost.net \
             "sqlite3 /var/www/dados/imoveis.db \
-              \"SELECT cidade, tipo, ROUND(preco/100.0,0), desconto, modalidade_raw, hdnimovel \
+              \"SELECT cidade, tipo, ROUND(preco/100.0,0), CAST(desconto AS INTEGER), \
+                       modalidade_raw, hdnimovel, COALESCE(foto_url,'') \
                 FROM imoveis \
                 WHERE uf='SP' \
                   AND desconto >= 40 \
@@ -101,28 +103,40 @@ jobs:
                   AND modalidade_raw LIKE '%Venda Online%' \
                 ORDER BY desconto DESC LIMIT 5;\"" 2>/dev/null)
 
-          MSG=""
-          while IFS='|' read -r cidade tipo preco desc modal hdn; do
+          # Envia uma notificação por imóvel, com foto anexada
+          while IFS='|' read -r cidade tipo preco desc modal hdn foto; do
             [ -z "$cidade" ] && continue
-            # Ícone por modalidade
-            if echo "$modal" | grep -qi "Direta"; then
-              ICON="🏷️ Compra Direta"
-            else
-              ICON="⏰ Venda Online"
-            fi
-            PRECO_FMT=$(printf "R\$ %'.0f" "$preco" 2>/dev/null || echo "R\$ $preco")
-            DESC_INT=${desc%.*}
-            LINK="https://venda-imoveis.caixa.gov.br/sistema/detalhe-imovel.asp?hdnimovel=${hdn}"
-            MSG="${MSG}${ICON} | ${cidade} | ${tipo} | ${PRECO_FMT} (-${DESC_INT}%)\n${LINK}\n\n"
-          done <<< "$RESULTADO"
 
-          if [ -n "$MSG" ]; then
-            curl -s "https://ntfy.sh/${NTFY_TOPIC}" \
-              -H "Title: 🏠 Top oportunidades SP hoje (40%+ desc, R\$60k-120k)" \
-              -H "Priority: default" \
-              -H "Tags: moneybag" \
-              -d "$(printf '%b' "$MSG")" || true
-          fi
+            if echo "$modal" | grep -qi "Direta"; then
+              ICON="🏷️"; MODAL_LABEL="Compra Direta"
+            else
+              ICON="⏰"; MODAL_LABEL="Venda Online"
+            fi
+
+            LINK="https://venda-imoveis.caixa.gov.br/sistema/detalhe-imovel.asp?hdnimovel=${hdn}"
+            TITULO="${ICON} ${cidade} | ${tipo^} | R\$ ${preco} (-${desc}%)"
+            CORPO="${MODAL_LABEL} — Clique para ver detalhes e fotos na CAIXA"
+
+            # Envia com foto se disponível, sem foto caso contrário
+            if [ -n "$foto" ]; then
+              curl -s "https://ntfy.sh/${NTFY_TOPIC}" \
+                -H "Title: ${TITULO}" \
+                -H "Priority: default" \
+                -H "Tags: moneybag" \
+                -H "Click: ${LINK}" \
+                -H "Attach: ${foto}" \
+                -d "${CORPO}" || true
+            else
+              curl -s "https://ntfy.sh/${NTFY_TOPIC}" \
+                -H "Title: ${TITULO}" \
+                -H "Priority: default" \
+                -H "Tags: moneybag" \
+                -H "Click: ${LINK}" \
+                -d "${CORPO}" || true
+            fi
+
+            sleep 1  # intervalo entre notificações
+          done <<< "$RESULTADO"
 
       - name: Scraping de datas de leilão/licitação
         run: |
