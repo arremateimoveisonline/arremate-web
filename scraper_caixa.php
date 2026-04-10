@@ -141,7 +141,8 @@ if ($importOnly) {
             $csvFalhou++;
         }
     }
-    logMsg("Import-only: " . count($csvValidos) . " CSVs disponíveis.");
+    $totalValidos = count($csvValidos);
+    logMsg("Import-only: {$totalValidos} CSVs disponíveis.");
 } else {
 foreach ($ufsAlvo as $uf) {
     logMsg("CSV {$uf}...");
