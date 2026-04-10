@@ -118,22 +118,8 @@ jobs:
             echo "Datas encontradas: $TOTAL_DATAS"
 
             if [ "$TOTAL_DATAS" -gt 0 ]; then
-              # Gera arquivo SQL com os UPDATEs
-              python3 - <<'PYEOF'
-import json, sys
-
-datas = json.load(open('/tmp/datas_leilao.json'))
-if not datas:
-    sys.exit(0)
-
-with open('/tmp/update_datas.sql', 'w') as f:
-    for hdn, data in datas.items():
-        hdn  = hdn.replace("'", "''")
-        data = data.replace("'", "''")
-        f.write(f"UPDATE imoveis SET data_encerramento='{data}', scraped_at=datetime('now') WHERE hdnimovel='{hdn}';\n")
-
-print(f"{len(datas)} updates gerados em /tmp/update_datas.sql")
-PYEOF
+              # Gera arquivo SQL com os UPDATEs usando script do repositório
+              python3 gerar-sql-datas.py
 
               # Envia o SQL para a VPS e aplica no banco
               scp -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no \
