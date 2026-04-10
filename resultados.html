@@ -915,16 +915,27 @@ function mascaraPct(el){
     }
 
     /* ── Localização ── */
+    // Converte "SAO PAULO" → "São Paulo" (title case para nome de cidade)
+    function titleCase(str) {
+      var minusculas = ['de','da','do','das','dos','e','a','o'];
+      return str.toLowerCase().split(' ').map(function(w, i) {
+        if (i > 0 && minusculas.indexOf(w) !== -1) return w;
+        return w.charAt(0).toUpperCase() + w.slice(1);
+      }).join(' ');
+    }
+
     var locStr;
     if (cidades.length > 0 && nomeUf) {
-      var cidStr = cidades.length <= 3
-        ? cidades.join(', ')
-        : cidades.slice(0, 2).join(', ') + ' e mais ' + (cidades.length - 2);
+      var cidadesFmt = cidades.map(titleCase);
+      var cidStr = cidadesFmt.length <= 3
+        ? cidadesFmt.join(', ')
+        : cidadesFmt.slice(0, 2).join(', ') + ' e mais ' + (cidades.length - 2);
       locStr = 'em ' + cidStr + ' — ' + nomeUf;
     } else if (cidades.length > 0) {
-      var cidStr2 = cidades.length <= 3
-        ? cidades.join(', ')
-        : cidades.slice(0, 2).join(', ') + ' e mais ' + (cidades.length - 2);
+      var cidadesFmt2 = cidades.map(titleCase);
+      var cidStr2 = cidadesFmt2.length <= 3
+        ? cidadesFmt2.join(', ')
+        : cidadesFmt2.slice(0, 2).join(', ') + ' e mais ' + (cidades.length - 2);
       locStr = 'em ' + cidStr2;
     } else if (nomeUf) {
       locStr = 'em todo o estado de ' + nomeUf;
