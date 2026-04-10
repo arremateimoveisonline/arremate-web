@@ -87,10 +87,16 @@ if ($found) {
     $tipoTxt = 'Imóvel';
     foreach ($tipos as $k => $v) { if (strpos($descLow, $k) !== false) { $tipoTxt = $v; break; } }
 
-    /* WhatsApp dinâmico por imóvel */
-    $waMsgRaw = "Olá, vi o imóvel ID: {$hdn} — {$tipoTxt} em {$cidade}/{$uf}\n"
-              . "Endereço: {$endereco}\nPreço: {$precoBrl}\n"
-              . "No Arremate Imóveis Online e gostaria de informações.";
+    /* URL canônica da página — usada no OG e na mensagem WhatsApp */
+    $proto   = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+    $pageUrl = $proto . '://' . ($_SERVER['HTTP_HOST'] ?? 'arremate.com.br') . '/imovel.php?hdnimovel=' . $hdn;
+
+    /* WhatsApp dinâmico por imóvel — URL no texto gera preview automático */
+    $waMsgRaw = "Olá! Tenho interesse neste imóvel da CAIXA:\n"
+              . "{$tipoTxt} em {$cidade}/{$uf}\n"
+              . "Endereço: {$endereco}\n"
+              . "Preço: {$precoBrl}\n\n"
+              . $pageUrl;
     $waUrl = 'https://wa.me/' . WA_NUMBER . '?text=' . rawurlencode($waMsgRaw);
 
     /* Fallback edital: padrão EL{hdn}.PDF (principal) e E{hdn}.pdf (alternativo) */
@@ -130,7 +136,13 @@ if ($found) {
   <meta property="og:title" content="<?= esc($pageTitle) ?>">
   <meta property="og:description" content="<?= esc($pageDesc) ?>">
   <meta property="og:image" content="<?= esc($fotoUrl) ?>">
+  <meta property="og:image:width" content="800">
+  <meta property="og:image:height" content="600">
+  <meta property="og:url" content="<?= esc($pageUrl) ?>">
   <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Arremate Imóveis Online">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="<?= esc($fotoUrl) ?>">
 <?php endif; ?>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -143,7 +155,7 @@ if ($found) {
     body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--azul-bg);color:var(--texto);line-height:1.55;font-size:15px}
     a{color:inherit;text-decoration:none}
     .menu-chk{display:none!important;position:absolute;left:-9999px}
-    .site-header{position:sticky;top:0;z-index:200;background:#01468d;box-shadow:0 2px 10px rgba(0,0,0,.25)}
+    .site-header{position:sticky;top:0;z-index:200;background:#01468d;box-shadow:0 2px 10px rgba(0,0,0,.25);width:100%;overflow-x:clip}
     .hdr{max-width:1400px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 20px;min-height:84px}
     .logo{display:flex;align-items:center;gap:12px;flex-shrink:0}
     .logo-icon{width:70px;height:70px;flex-shrink:0;border-radius:14px;overflow:hidden}
@@ -166,7 +178,7 @@ if ($found) {
     .nav-mobile a:hover{background:#cde5ff}
     .nav-mob-cta{background:#e97500!important;color:#fff!important;font-weight:900!important;border-bottom:none!important}
     .nav-mob-close{display:flex;align-items:center;padding:12px 20px;font-size:.9rem;font-weight:700;color:#01468d;background:#c8e0f8;border-bottom:2px solid #a8cfee;cursor:pointer}
-    @media(max-width:900px){.hdr{padding:0 12px;min-height:76px;gap:8px}.nav-links{display:none!important}.hamburger{display:flex!important}.logo-icon{width:54px!important;height:54px!important}.logo-icon-img{width:54px!important;height:54px!important}.logo-aio{font-size:1.13rem}.logo-sub-full{display:none}.logo-sub-mobile{display:block}.logo-sub{white-space:normal;font-size:.71rem;text-align:left;text-align-last:left}}
+    @media(max-width:900px){.hdr{padding:0 12px;min-height:76px;gap:8px}.nav-links{display:none!important}.hamburger{display:flex!important}.logo-icon{width:54px!important;height:54px!important}.logo-icon-img{width:54px!important;height:54px!important}.logo-aio{font-size:1.13rem}.logo{flex-shrink:1;min-width:0}.logo-txt{min-width:0;overflow:hidden;max-width:calc(100vw - 150px)}.logo-sub-full{display:none}.logo-sub-mobile{display:block}.logo-sub{white-space:normal;font-size:.71rem;text-align:left;text-align-last:left}}
     .page-wrap{max-width:1100px;margin:0 auto;padding:20px 16px 24px}
     .breadcrumb{display:flex;align-items:center;gap:8px;font-size:.82rem;color:var(--muted);margin-bottom:16px;flex-wrap:wrap}
     .breadcrumb a{color:var(--azul);font-weight:700}.breadcrumb a:hover{text-decoration:underline}
@@ -187,7 +199,15 @@ if ($found) {
     .gallery-mapa iframe{width:100%;height:100%;border:none}
     .tag-tipo-det{position:absolute;top:12px;left:12px;background:#064e3b;color:#f9fafb;font-size:.78rem;font-weight:900;padding:5px 14px;border-radius:999px;z-index:10}
     .tag-mod-det{position:absolute;top:12px;right:12px;background:var(--laranja);color:#3b1f00;font-size:.78rem;font-weight:900;padding:5px 14px;border-radius:999px;z-index:10;box-shadow:0 3px 8px rgba(0,0,0,.18)}
-    .det-cidade{font-size:1rem;font-weight:900;color:#111827;margin-bottom:2px}
+    .det-cidade-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:2px}
+    .det-cidade{font-size:1rem;font-weight:900;color:#111827}
+    .det-actions-mobile{display:none;align-items:center;gap:6px;flex-shrink:0}
+    @media(max-width:900px){
+      .det-actions-mobile{display:flex}
+    }
+    .btn-det-action{background:none;border:1.5px solid #e2e8f0;border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1.1rem;transition:background .15s,border-color .15s;flex-shrink:0;padding:0}
+    .btn-det-action:hover{background:#f1f5f9;border-color:#cbd5e1}
+    .btn-det-action.is-fav{border-color:#e11d48;background:#fff1f2}
     .det-titulo{font-size:.80rem;font-weight:600;color:var(--muted);margin-bottom:4px}
     .det-endereco{font-size:.78rem;color:#6b7280;margin-bottom:14px}
     .preco-destaque{background:linear-gradient(135deg,#0f172a,#1d4ed8);border-radius:12px;padding:14px 18px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
@@ -229,6 +249,7 @@ if ($found) {
     .whats-det:hover{filter:brightness(1.06)}
     .link-caixa{display:flex;align-items:center;justify-content:center;gap:8px;background:#fff;border:2px solid var(--azul);color:var(--azul);padding:11px 20px;border-radius:999px;font-weight:900;font-size:.88rem;transition:background .2s}
     .link-caixa:hover{background:var(--azul-card)}
+    .btn-caixa-mobile-wrap{display:none;margin:16px 0}
     .info-list{display:flex;flex-direction:column;gap:8px}
     .info-row{display:flex;justify-content:space-between;align-items:flex-start;font-size:.84rem;padding:6px 0;border-bottom:1px solid #f1f5f9}
     .info-row:last-child{border-bottom:none}
@@ -282,6 +303,7 @@ if ($found) {
       .preco-destaque{flex-direction:column;align-items:flex-start;gap:8px}
       .preco-venda-det{font-size:1.3rem}
       .pagamento-grid{grid-template-columns:repeat(2,1fr)}
+      .btn-caixa-mobile-wrap{display:block!important}
       .areas-grid{grid-template-columns:repeat(3,1fr)}
       .panel-body{padding:14px 14px}
       .foto-wrap{height:240px}
@@ -407,7 +429,15 @@ document.addEventListener("DOMContentLoaded",function(){
             <span class="tag-mod-det" id="tag-mod"><?= esc($modalidade) ?></span>
           </div>
           <div class="panel-body">
-            <div class="det-cidade" id="det-cidade"><?= esc(strtoupper($cidade)) ?> · <?= esc($uf) ?></div>
+            <div class="det-cidade-row">
+              <div class="det-cidade" id="det-cidade"><?= esc(strtoupper($cidade)) ?> · <?= esc($uf) ?></div>
+              <div class="det-actions-mobile">
+                <button class="btn-det-action" id="btn-fav-mobile" onclick="toggleFavMobile()" title="Favoritar imóvel">🤍</button>
+                <button class="btn-det-action" id="btn-share-mobile" onclick="compartilharImovel()" title="Compartilhar imóvel">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                </button>
+              </div>
+            </div>
             <div class="det-titulo" id="det-titulo"><?= esc($bairro ?: $tipoTxt . ' em ' . $uf) ?></div>
             <div class="det-endereco" id="det-endereco"><?= esc($endereco) ?></div>
             <div class="preco-destaque">
@@ -443,6 +473,9 @@ document.addEventListener("DOMContentLoaded",function(){
             <div class="areas-grid" id="areas-grid"></div>
             <div class="sec-label" style="margin-top:14px">💳 Formas de pagamento aceitas</div>
             <div class="pagamento-grid" id="pagamento-grid"></div>
+            <div class="btn-caixa-mobile-wrap">
+              <a href="<?= esc($link) ?>" class="link-caixa" target="_blank" rel="noopener">🏦 Ver no portal da CAIXA ↗</a>
+            </div>
             <div id="regras-despesas" style="display:none;margin-top:16px">
               <div class="sec-label">🏛️ Regras para pagamento das despesas</div>
               <div id="regras-despesas-content" style="display:flex;flex-direction:column;gap:10px"></div>
@@ -672,7 +705,6 @@ function toggleGallery(mode){
   var fotoEl=document.querySelector('.foto-principal');
   var fallback=document.getElementById('foto-fallback');
   
-  var tagTipo=document.getElementById('tag-tipo');
   if(mode==='mapa'){
     btnMapa.classList.add('active');btnFoto.classList.remove('active');
     if(galleryMapa){
@@ -682,13 +714,11 @@ function toggleGallery(mode){
     }
     if(fotoEl)fotoEl.style.display='none';
     if(fallback)fallback.style.display='none';
-    if(tagTipo)tagTipo.style.display='none';
   } else {
     btnFoto.classList.add('active');btnMapa.classList.remove('active');
     if(galleryMapa)galleryMapa.style.display='none';
     if(fotoEl)fotoEl.style.display='block';
     else if(fallback)fallback.style.display='flex';
-    if(tagTipo)tagTipo.style.display='';
   }
 }
 
@@ -925,7 +955,8 @@ function montarPagina(item){
   // Nota: doc-edital e doc-matricula já têm hrefs do PHP (SSR); buscarDadosApi pode atualizá-los se scraper funcionar
   setHref('link-caixa-mobile',linkCaixa);setHref('doc-caixa',linkCaixa);setHref('link-caixa-btn',linkCaixa);
   /* WhatsApp com hdnimovel correto passado para todos os hooks */
-  var msgWa=encodeURIComponent('Olá! Tenho interesse no imóvel da CAIXA:\n'+tipoTxt+' em '+(item.cidade||'SP')+'\nEndereço: '+(item.endereco||item.bairro||'')+'\nPreço: '+fmtBRL(item.preco)+'\nNº: '+(item.num_imovel||hdn||'')+'\nPode me ajudar?');
+  var paginaUrl=window.location.origin+'/imovel.php?hdnimovel='+(item.num_imovel||hdn||'');
+  var msgWa=encodeURIComponent('Olá! Tenho interesse neste imóvel da CAIXA:\n'+tipoTxt+' em '+(item.cidade||'SP')+'\nEndereço: '+(item.endereco||item.bairro||'')+'\nPreço: '+fmtBRL(item.preco)+'\n\n'+paginaUrl);
   var waUrl='https://wa.me/<?= WA_NUMBER ?>?text='+msgWa;
   setHref('whats-link',waUrl);setHref('whats-fixo',waUrl);setHref('whats-link-mobile',waUrl);setHref('whats-barra',waUrl);
   var precoNum = (typeof item.preco === 'number') ? item.preco : parseFloat(String(item.preco).replace(/[R$\s]/g,'').replace(',','.')) || 0;
@@ -1066,5 +1097,55 @@ function rodarSim2(){
   }
   window.addEventListener('load',()=>{forcarModalidadeCorreta();setTimeout(forcarModalidadeCorreta,500);setTimeout(forcarModalidadeCorreta,1500);});
 </script>
+<script>
+(function(){
+  var HDN = '<?= esc($hdn) ?>';
+  var CHAVE_FAV = 'arremate_favs';
+
+  function getFavs(){ return JSON.parse(localStorage.getItem(CHAVE_FAV)||'[]'); }
+  function saveFavs(arr){ localStorage.setItem(CHAVE_FAV, JSON.stringify(arr)); }
+
+  function atualizarBtnFav(btn, isFav){
+    btn.textContent = isFav ? '❤️' : '🤍';
+    btn.classList.toggle('is-fav', isFav);
+    btn.title = isFav ? 'Remover dos favoritos' : 'Favoritar imóvel';
+  }
+
+  window.toggleFavMobile = function(){
+    var btn = document.getElementById('btn-fav-mobile');
+    if (!btn) return;
+    var favs = getFavs();
+    var idx  = favs.indexOf(HDN);
+    if (idx === -1) { favs.push(HDN); }
+    else            { favs.splice(idx, 1); }
+    saveFavs(favs);
+    atualizarBtnFav(btn, favs.indexOf(HDN) !== -1);
+  };
+
+  window.compartilharImovel = function(){
+    var url   = window.location.href;
+    var title = document.title;
+    if (navigator.share) {
+      navigator.share({ title: title, url: url }).catch(function(){});
+    } else {
+      navigator.clipboard.writeText(url).then(function(){
+        var btn = document.getElementById('btn-share-mobile');
+        if (btn) {
+          var orig = btn.innerHTML;
+          btn.innerHTML = '✅';
+          setTimeout(function(){ btn.innerHTML = orig; }, 2000);
+        }
+      });
+    }
+  };
+
+  // Inicializa estado do botão de favorito ao carregar
+  document.addEventListener('DOMContentLoaded', function(){
+    var btn = document.getElementById('btn-fav-mobile');
+    if (btn && HDN) atualizarBtnFav(btn, getFavs().indexOf(HDN) !== -1);
+  });
+})();
+</script>
+<?php include __DIR__ . '/cookie-banner.php'; ?>
 </body>
 </html>
