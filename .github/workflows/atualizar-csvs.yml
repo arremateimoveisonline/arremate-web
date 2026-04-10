@@ -14,6 +14,17 @@ jobs:
       - name: Checkout repositório
         uses: actions/checkout@v4
 
+      - name: Instalar Node.js e dependências
+        run: |
+          node --version
+          npm install --prefix . puppeteer-core 2>/dev/null || npm install puppeteer-core
+
+      - name: Instalar Chrome (necessário para Puppeteer resolver Radware)
+        run: |
+          # ubuntu-latest já vem com Chrome — confirma o caminho
+          which google-chrome || which chromium-browser || apt-get install -y chromium-browser
+          google-chrome --version 2>/dev/null || chromium-browser --version 2>/dev/null || true
+
       - name: Configurar SSH
         env:
           VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
@@ -23,51 +34,12 @@ jobs:
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H lcmcreativestudio.vps-kinghost.net >> ~/.ssh/known_hosts 2>/dev/null
 
-      - name: Baixar CSVs da CAIXA
+      - name: Baixar CSVs da CAIXA via Puppeteer
         run: |
           mkdir -p csvs
-          ESTADOS="AC AL AM AP BA CE DF ES GO MA MG MS MT PA PB PE PI PR RJ RN RO RR RS SC SE SP TO"
-          OK=0
-          FALHOU=0
-
-          for UF in $ESTADOS; do
-            URL="https://venda-imoveis.caixa.gov.br/listaweb/Lista_imoveis_${UF}.csv"
-            DEST="csvs/Lista_imoveis_${UF}.csv"
-            echo -n "CSV $UF... "
-
-            HTTP=$(curl -sSL --max-time 30 --retry 2 --retry-delay 3 \
-              -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36" \
-              -H "Accept: text/html,application/xhtml+xml,*/*;q=0.8" \
-              -H "Accept-Language: pt-BR,pt;q=0.9,en;q=0.8" \
-              -H "Referer: https://venda-imoveis.caixa.gov.br/" \
-              -w "%{http_code}" -o "$DEST" "$URL" 2>/dev/null || echo "000")
-
-            SIZE=$(wc -c < "$DEST" 2>/dev/null || echo 0)
-
-            if grep -qi "radware\|perfdrive\|shieldsquare\|Bot Manager\|hcaptcha" "$DEST" 2>/dev/null; then
-              echo "BLOQUEADO por Radware"
-              rm -f "$DEST"
-              FALHOU=$((FALHOU+1))
-            elif [ "$HTTP" != "200" ] || [ "$SIZE" -lt 500 ]; then
-              echo "FALHA (HTTP=$HTTP, size=$SIZE)"
-              rm -f "$DEST"
-              FALHOU=$((FALHOU+1))
-            else
-              LINHAS=$(wc -l < "$DEST")
-              echo "OK ($LINHAS linhas, ${SIZE} bytes)"
-              OK=$((OK+1))
-            fi
-
-            sleep 1
-          done
-
-          echo ""
-          echo "=== CSVs: $OK OK | $FALHOU falhou ==="
-
-          if [ "$OK" -lt 15 ]; then
-            echo "ERRO CRITICO: menos de 15 CSVs válidos — abortando"
-            exit 1
-          fi
+          CSV_DIR="$(pwd)/csvs" node caixa-csv-downloader.js
+        env:
+          CSV_DIR: ${{ github.workspace }}/csvs
 
       - name: Enviar CSVs para VPS e importar
         run: |
@@ -89,7 +61,6 @@ jobs:
 
       - name: Scraping de datas de leilão/licitação
         run: |
-          # Busca até 300 imóveis sem data (ordem aleatória para variar a cada dia)
           echo "Buscando imóveis sem data..."
           ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no \
             root@lcmcreativestudio.vps-kinghost.net \
@@ -109,7 +80,7 @@ jobs:
             exit 0
           fi
 
-          # Executa scraping (IDs passados como argumentos via xargs)
+          # Executa scraping dos detalhes
           xargs node scrape-datas-leilao.js < /tmp/hdns_sem_data.txt || true
 
           # Aplica as datas encontradas no banco via SSH
@@ -118,10 +89,8 @@ jobs:
             echo "Datas encontradas: $TOTAL_DATAS"
 
             if [ "$TOTAL_DATAS" -gt 0 ]; then
-              # Gera arquivo SQL com os UPDATEs usando script do repositório
               python3 gerar-sql-datas.py
 
-              # Envia o SQL para a VPS e aplica no banco
               scp -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no \
                 /tmp/update_datas.sql \
                 root@lcmcreativestudio.vps-kinghost.net:/tmp/update_datas.sql

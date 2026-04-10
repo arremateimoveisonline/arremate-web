@@ -9,9 +9,18 @@ const fs = require('fs');
 const path = require('path');
 
 const BASE_URL  = 'https://venda-imoveis.caixa.gov.br/';
-const CSV_DIR   = '/var/www/dados/csv';
+const CSV_DIR   = process.env.CSV_DIR || '/var/www/dados/csv';
 const DL_TMP    = '/tmp/arremate-csv-dl';
 const LOG_FILE  = '/var/log/arremate_scraper.log';
+
+/* Detecta o caminho do Chrome conforme o ambiente:
+ * - GitHub Actions (ubuntu-latest): google-chrome instalado
+ * - VPS: /snap/bin/chromium
+ * - Pode ser sobrescrito pela variável CHROME_PATH */
+const CHROME_PATH = process.env.CHROME_PATH ||
+  (require('fs').existsSync('/usr/bin/google-chrome') ? '/usr/bin/google-chrome' :
+   require('fs').existsSync('/usr/bin/chromium-browser') ? '/usr/bin/chromium-browser' :
+   '/snap/bin/chromium');
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
 
 const ALL_UFS = ['AC','AL','AM','AP','BA','CE','DF','ES','GO','MA','MG','MS','MT',
@@ -88,7 +97,7 @@ async function main() {
   log(`Estados: ${UFS.join(',')}`);
 
   const browser = await puppeteer.launch({
-    executablePath: '/snap/bin/chromium',
+    executablePath: CHROME_PATH,
     headless: 'new',
     args: [
       '--no-sandbox', '--disable-setuid-sandbox',
