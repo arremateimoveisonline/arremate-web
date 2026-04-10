@@ -1,0 +1,23 @@
+# Dependências Node
+node_modules/
+
+# Banco de dados local
+*.db
+*.db-shm
+*.db-wal
+*.db.bak*
+
+# CSVs locais (não versionamos os dados)
+/dados/
+csv_tmp/
+
+# Logs
+*.log
+
+# Ambiente PHP local
+.env
+config.local.php
+
+# OS
+.DS_Store
+Thumbs.db

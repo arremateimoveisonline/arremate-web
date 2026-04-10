@@ -1,0 +1,150 @@
+name: Atualizar CSVs CAIXA
+
+on:
+  schedule:
+    - cron: '15 12 * * *'  # 09:15 BRT (UTC-3) — após CAIXA atualizar
+  workflow_dispatch:        # permite rodar manualmente pelo GitHub
+
+jobs:
+  download-e-importar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar SSH
+        env:
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H lcmcreativestudio.vps-kinghost.net >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: Baixar CSVs da CAIXA
+        run: |
+          mkdir -p csvs
+          ESTADOS="AC AL AM AP BA CE DF ES GO MA MG MS MT PA PB PE PI PR RJ RN RO RR RS SC SE SP TO"
+          OK=0
+          FALHOU=0
+
+          for UF in $ESTADOS; do
+            URL="https://venda-imoveis.caixa.gov.br/listaweb/Lista_imoveis_${UF}.csv"
+            DEST="csvs/Lista_imoveis_${UF}.csv"
+            echo -n "CSV $UF... "
+
+            HTTP=$(curl -sSL --max-time 30 --retry 2 --retry-delay 3 \
+              -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36" \
+              -H "Accept: text/html,application/xhtml+xml,*/*;q=0.8" \
+              -H "Accept-Language: pt-BR,pt;q=0.9,en;q=0.8" \
+              -H "Referer: https://venda-imoveis.caixa.gov.br/" \
+              -w "%{http_code}" -o "$DEST" "$URL" 2>/dev/null || echo "000")
+
+            SIZE=$(wc -c < "$DEST" 2>/dev/null || echo 0)
+
+            if grep -qi "radware\|perfdrive\|shieldsquare\|Bot Manager\|hcaptcha" "$DEST" 2>/dev/null; then
+              echo "BLOQUEADO por Radware"
+              rm -f "$DEST"
+              FALHOU=$((FALHOU+1))
+            elif [ "$HTTP" != "200" ] || [ "$SIZE" -lt 500 ]; then
+              echo "FALHA (HTTP=$HTTP, size=$SIZE)"
+              rm -f "$DEST"
+              FALHOU=$((FALHOU+1))
+            else
+              LINHAS=$(wc -l < "$DEST")
+              echo "OK ($LINHAS linhas, ${SIZE} bytes)"
+              OK=$((OK+1))
+            fi
+
+            sleep 1
+          done
+
+          echo ""
+          echo "=== CSVs: $OK OK | $FALHOU falhou ==="
+
+          if [ "$OK" -lt 15 ]; then
+            echo "ERRO CRITICO: menos de 15 CSVs válidos — abortando"
+            exit 1
+          fi
+
+      - name: Enviar CSVs para VPS e importar
+        run: |
+          COUNT=$(ls csvs/*.csv 2>/dev/null | wc -l)
+          echo "Enviando $COUNT CSVs para a VPS..."
+
+          scp -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no \
+            csvs/*.csv \
+            root@lcmcreativestudio.vps-kinghost.net:/var/www/dados/csv/
+
+          ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no \
+            root@lcmcreativestudio.vps-kinghost.net \
+            "cd /var/www/arremate-br && \
+             echo '[GitHub Actions] Iniciando import' >> /var/log/arremate_cron.log && \
+             php scraper_caixa.php --import-only >> /var/log/arremate_cron.log 2>&1 && \
+             COUNT=\$(sqlite3 /var/www/dados/imoveis.db 'SELECT COUNT(*) FROM imoveis;' 2>/dev/null || echo 0) && \
+             echo \"[GitHub Actions] Import OK — \$COUNT imóveis\" >> /var/log/arremate_cron.log && \
+             echo \"Import OK: \$COUNT imóveis no banco\""
+
+      - name: Scraping de datas de leilão/licitação
+        run: |
+          # Busca até 300 imóveis sem data (ordem aleatória para variar a cada dia)
+          echo "Buscando imóveis sem data..."
+          ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no \
+            root@lcmcreativestudio.vps-kinghost.net \
+            "sqlite3 /var/www/dados/imoveis.db \
+              \"SELECT hdnimovel FROM imoveis \
+                WHERE (data_encerramento IS NULL OR data_encerramento='') \
+                  AND (modalidade_raw LIKE '%Leil%' OR modalidade_raw LIKE '%Licita%' \
+                    OR modalidade_raw LIKE '%Venda Online%') \
+                  AND modalidade_raw NOT LIKE '%Direta%' \
+                ORDER BY RANDOM() LIMIT 500;\"" > /tmp/hdns_sem_data.txt 2>/dev/null || true
+
+          COUNT_HDNS=$(grep -c . /tmp/hdns_sem_data.txt 2>/dev/null || echo 0)
+          echo "Imóveis para scraping: $COUNT_HDNS"
+
+          if [ "$COUNT_HDNS" -eq 0 ]; then
+            echo "Todos os imóveis já têm data — nenhum scraping necessário."
+            exit 0
+          fi
+
+          # Executa scraping (IDs passados como argumentos via xargs)
+          xargs node scrape-datas-leilao.js < /tmp/hdns_sem_data.txt || true
+
+          # Aplica as datas encontradas no banco via SSH
+          if [ -f /tmp/datas_leilao.json ]; then
+            TOTAL_DATAS=$(python3 -c "import json; print(len(json.load(open('/tmp/datas_leilao.json'))))" 2>/dev/null || echo 0)
+            echo "Datas encontradas: $TOTAL_DATAS"
+
+            if [ "$TOTAL_DATAS" -gt 0 ]; then
+              # Gera arquivo SQL com os UPDATEs
+              python3 - <<'PYEOF'
+import json, sys
+
+datas = json.load(open('/tmp/datas_leilao.json'))
+if not datas:
+    sys.exit(0)
+
+with open('/tmp/update_datas.sql', 'w') as f:
+    for hdn, data in datas.items():
+        hdn  = hdn.replace("'", "''")
+        data = data.replace("'", "''")
+        f.write(f"UPDATE imoveis SET data_encerramento='{data}', scraped_at=datetime('now') WHERE hdnimovel='{hdn}';\n")
+
+print(f"{len(datas)} updates gerados em /tmp/update_datas.sql")
+PYEOF
+
+              # Envia o SQL para a VPS e aplica no banco
+              scp -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no \
+                /tmp/update_datas.sql \
+                root@lcmcreativestudio.vps-kinghost.net:/tmp/update_datas.sql
+
+              ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no \
+                root@lcmcreativestudio.vps-kinghost.net \
+                "sqlite3 /var/www/dados/imoveis.db < /tmp/update_datas.sql && \
+                 rm /tmp/update_datas.sql && \
+                 echo \"[GitHub Actions] Datas atualizadas: $TOTAL_DATAS imóveis\" >> /var/log/arremate_cron.log && \
+                 echo 'Banco atualizado com datas de leilão.'"
+            fi
+          fi

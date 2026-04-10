@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <meta name="color-scheme" content="light">
+  <title>Arremate Imóveis Online | Resultados</title>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --azul:#0053a6;--azul-esc:#00366f;--laranja:#f39200;--azul-bg:#f1f7ff;
+      --azul-card:#e8f2ff;--borda:#cfe2ff;--texto:#1e293b;--muted:#64748b;
+      --radius:14px;--sombra:0 4px 18px rgba(0,83,166,.10);
+      --hdrH:84px;
+    }
+    @media(max-width:900px){:root{--hdrH:76px}}
+    html{scroll-behavior:smooth;color-scheme:light}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;background:var(--azul-bg);color:var(--texto);line-height:1.55;font-size:15px}
+    a{color:inherit;text-decoration:none}
+
+    /* HEADER */
+    .site-header{position:sticky;top:0;z-index:200;background:#01468d;color:#fff;box-shadow:0 3px 12px rgba(0,0,0,.25)}
+    .menu-chk{display:none!important;position:absolute;left:-9999px}
+    .hdr{max-width:1400px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 20px;min-height:84px}
+    .logo{display:flex;align-items:center;gap:12px;flex-shrink:0}
+    .logo-icon{width:70px;height:70px;flex-shrink:0;border-radius:14px;overflow:hidden}
+    .logo-icon-img{width:70px;height:70px;display:block;object-fit:contain;border-radius:14px}
+    .logo-txt{display:flex;flex-direction:column;min-width:0}
+    .logo-aio{font-size:1.38rem;font-weight:900;color:#fff;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 2px 6px rgba(0,0,0,.25)}
+    .logo-sub{font-size:.72rem;color:rgba(255,255,255,.88);line-height:1.2;margin-top:4px}
+    .logo-sub-full{display:inline}
+    .logo-sub-mobile{display:none}
+    .nav-links{display:flex;align-items:center;gap:10px;flex-wrap:nowrap;font-size:.82rem;margin-left:auto;flex-shrink:0}
+    .nav-links a{color:#fff;opacity:.9;font-weight:600;white-space:nowrap;transition:opacity .2s;text-decoration:none;padding:4px 2px}
+    .nav-links a:hover{opacity:1;text-decoration:underline;text-underline-offset:3px}
+    .btn-nav-cta{background:var(--laranja)!important;color:#3b1f00!important;padding:7px 14px!important;border-radius:999px!important;font-weight:900!important;opacity:1!important;box-shadow:0 3px 8px rgba(0,0,0,.22)}
+    .btn-nav-cta:hover{filter:brightness(1.08)}
+    .hamburger{display:none;align-items:center;justify-content:center;width:44px;height:44px;flex-shrink:0;background:rgba(255,255,255,.1);border:2px solid rgba(255,255,255,.4);border-radius:10px;cursor:pointer;color:#fff}
+    .hamburger svg{width:22px;height:22px;display:block}
+    .nav-mobile{display:none;flex-direction:column;width:100%;background:#dceeff;border-top:2px solid #a8cfee}
+    .menu-chk:checked~.nav-mobile{display:flex!important}
+    .nav-mobile a{display:block;padding:14px 20px;font-size:.97rem;font-weight:700;color:#0b1a33;background:#e8f3ff;border-bottom:1px solid #b8d8f5;text-decoration:none}
+    .nav-mobile a:hover{background:#cde5ff}
+    .nav-mob-cta{background:#e97500!important;color:#fff!important;font-weight:900!important}
+    .nav-mob-close{display:flex;align-items:center;padding:12px 20px;font-size:.9rem;font-weight:700;color:#01468d;background:#c8e0f8;border-bottom:2px solid #a8cfee;cursor:pointer}
+    @media(max-width:900px){
+      .hdr{padding:0 12px;min-height:76px}
+      .nav-links{display:none!important}
+      .hamburger{display:flex!important}
+      .logo-icon{width:54px;height:54px}
+      .logo-icon-img{width:54px;height:54px}
+      .logo-aio{font-size:1.13rem}
+      .logo-sub-full{display:none}
+      .logo-sub-mobile{display:block}
+      .logo-txt{max-width:calc(100vw - 112px)}
+    }
+    @media(min-width:901px){.nav-mobile{display:none!important}}
+
+    /* PAGE */
+    .page-wrap{max-width:1400px;margin:0 auto;padding:10px 16px 18px}
+    .page-title{font-size:1.28rem;font-weight:900;color:var(--azul-esc);margin-bottom:4px}
+    .page-sub{font-size:.9rem;color:var(--muted);margin-bottom:14px}
+
+    /* LAYOUT */
+    .layout{display:grid;grid-template-columns:260px minmax(0,1fr);gap:18px;align-items:stretch}
+    @media(min-width:901px){
+      body{height:100vh;overflow:hidden}
+      .page-wrap{height:calc(100vh - var(--hdrH));overflow:hidden;display:flex;flex-direction:column}
+      .layout{flex:1;overflow:hidden}
+      .sidebar{height:100%;overflow-y:auto}
+      .results-area{height:100%;overflow-y:auto}
+    }
+    @media(max-width:1024px){.layout{grid-template-columns:1fr}
+      .sidebar{display:none}
+      .sidebar.mobile-open{display:block}
+      .mobile-filter-toggle{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;background:var(--azul);color:#fff;border:none;border-radius:12px;padding:12px;font-weight:900;font-size:.9rem;cursor:pointer;margin-bottom:12px;font-family:inherit}
+      .mobile-filter-toggle:hover{filter:brightness(1.1)}
+    }
+    @media(min-width:1025px){.mobile-filter-toggle{display:none!important}}
+
+    /* SIDEBAR */
+    .sidebar{background:#fff;border:1px solid #d9e3f7;border-radius:16px;padding:14px 14px 12px;box-shadow:0 6px 20px rgba(15,23,42,.12)}
+    .sidebar-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+    .sidebar-title{font-size:.92rem;font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:#0f172a}
+    .btn-small{border:1px solid #e2e8f0;background:#f8fafc;color:#334155;border-radius:10px;padding:6px 10px;font-weight:800;font-size:.78rem;cursor:pointer}
+    .btn-small:hover{background:#eef2ff}
+    details.fsec{border-top:1px solid #edf2f7}
+    details.fsec:first-of-type{border-top:none}
+    details.fsec>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:.78rem;font-weight:900;color:#0f172a;text-transform:uppercase;letter-spacing:.06em;padding:8px 0}
+    details.fsec>summary::-webkit-details-marker{display:none}
+    .sum-left{display:flex;align-items:center;gap:8px}
+    .chev{font-size:.85rem;color:#64748b;transition:transform .2s}
+    details.fsec[open] .chev{transform:rotate(180deg)}
+    .fgroup{display:flex;flex-direction:column;gap:4px;margin:8px 0}
+    .fgroup label{font-size:.78rem;font-weight:700;color:#475569}
+    .fgroup input[type=text],.fgroup input[type=number],.fgroup input[type=date],.fgroup select{border:1px solid #cbd5e1;border-radius:10px;padding:9px 10px;font-size:.86rem;width:100%;background:#fff;color:#0f172a}
+    .fgroup input:focus,.fgroup select:focus{border-color:var(--azul);outline:none;box-shadow:0 0 0 2px rgba(0,83,166,.14)}
+    .range-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .aio-slider{margin:10px 0 4px;width:100%}
+    .aio-slider .track{position:relative;height:5px;border-radius:999px;background:#dde6f5;margin:14px 0 6px}
+    .aio-slider .fill{position:absolute;top:0;bottom:0;border-radius:999px;background:#1a4f8a;pointer-events:none}
+    .aio-slider input[type=range]{position:absolute;left:0;right:0;width:100%;top:50%;transform:translateY(-50%);background:transparent;pointer-events:none;-webkit-appearance:none;appearance:none;margin:0;height:5px}
+    .aio-slider input[type=range]::-webkit-slider-thumb{pointer-events:auto;-webkit-appearance:none;appearance:none;width:18px;height:18px;border-radius:50%;border:2.5px solid #1a4f8a;background:#fff;box-shadow:0 1px 5px rgba(0,0,0,.22);cursor:pointer}
+    .aio-slider input[type=range]::-moz-range-thumb{pointer-events:auto;width:18px;height:18px;border-radius:50%;border:2.5px solid #1a4f8a;background:#fff;box-shadow:0 1px 5px rgba(0,0,0,.22);cursor:pointer}
+    .aio-slider .slider-labels{display:flex;justify-content:space-between;font-size:.75rem;color:#94a3b8;margin-top:2px}
+    .chk-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:6px}
+    .chk-item{display:flex;align-items:center;gap:7px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:8px 10px;font-size:.8rem;cursor:pointer}
+    .chk-item:hover{background:#e5f0ff;border-color:#c3d4ff}
+    .chk-item input{width:15px;height:15px;accent-color:var(--azul);cursor:pointer}
+    .radio-col{display:flex;flex-direction:column;gap:8px;margin-top:6px}
+    .btn-aplicar{width:100%;background:var(--laranja);border:none;border-radius:12px;padding:9px 12px;font-weight:900;font-size:.86rem;cursor:pointer;color:#3b1f00;margin-top:8px}
+    .btn-aplicar:hover{filter:brightness(1.05)}
+    .btn-limpar{width:100%;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:12px;padding:8px 12px;font-weight:900;font-size:.82rem;cursor:pointer;color:#334155;margin-top:6px}
+    .btn-limpar:hover{background:#e2e8f0}
+
+    /* CIDADE */
+    .cidade-wrap{position:relative}
+    .cidade-dropdown{position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid var(--borda);border-radius:12px;box-shadow:0 10px 32px rgba(15,23,42,.18);z-index:500;max-height:260px;overflow-y:auto;margin-top:4px;display:none}
+    .cidade-dropdown.open{display:block}
+    .cidade-opt{padding:10px 12px;font-size:.86rem;cursor:pointer;color:#0f172a}
+    .cidade-opt:hover,.cidade-opt.selected{background:#e5f0ff;color:#0b1f4a;font-weight:800}
+    .cidade-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+    .chip{display:inline-flex;align-items:center;gap:5px;background:#e5f0ff;border:1px solid #c3d4ff;border-radius:999px;padding:3px 10px;font-size:.8rem;font-weight:900;color:#1e3a8a}
+    .chip button{border:none;background:transparent;cursor:pointer;font-size:1rem;color:#1e3a8a;line-height:1;padding:0}
+
+    /* RESULTS */
+    .results-area{background:transparent}
+    .results-header{margin:4px 0 12px}
+    .results-title{font-size:1.02rem;font-weight:900;color:#0f172a}
+    .results-count{font-size:.86rem;color:#64748b;margin-top:2px}
+
+    /* CARDS */
+    .imoveis-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+    @media(max-width:1200px){.imoveis-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(max-width:700px){.imoveis-grid{grid-template-columns:1fr}}
+    .imovel-card{background:#fff;border:1px solid var(--borda);border-radius:var(--radius);box-shadow:var(--sombra);display:flex;flex-direction:column;overflow:hidden;transition:box-shadow .15s,transform .15s;min-height:480px}
+    .imovel-card:hover{box-shadow:0 10px 34px rgba(15,23,42,.25);transform:translateY(-1px)}
+    .imovel-thumb{height:160px;position:relative;overflow:hidden;background:linear-gradient(135deg,#dbeafe,#eff6ff)}
+    .imovel-thumb-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+    .thumb-fallback{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:2.2rem;color:#cbd5e1}
+    .tag-tipo{position:absolute;top:10px;left:10px;background:#064e3b;color:#f9fafb;font-size:.72rem;font-weight:900;padding:4px 12px;border-radius:999px;z-index:10}
+    .tag-desc{position:absolute;top:10px;right:10px;background:var(--laranja);color:#3b1f00;font-size:.72rem;font-weight:900;padding:5px 14px;border-radius:999px;z-index:10;box-shadow:0 3px 8px rgba(0,0,0,.18)}
+    .tag-desc-direta{background:#16a34a!important;color:#fff!important}
+    .imovel-body{padding:12px 14px 10px;flex:1;display:flex;flex-direction:column;gap:4px}
+    .imovel-local{font-size:1rem;font-weight:700;color:#111827;margin-bottom:1px}
+    .imovel-titulo{font-size:.80rem;font-weight:700;color:var(--muted);margin-bottom:1px}
+    .imovel-endereco{font-size:.78rem;color:#6b7280;margin-bottom:6px;min-height:2.4em;line-height:1.2em;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+    .imovel-precos{background:linear-gradient(135deg,#0f172a,#1d4ed8);border-radius:8px;padding:7px 11px;margin-top:6px;display:flex;flex-direction:column;gap:1px}
+    .preco-av{color:#94a3b8;text-decoration:line-through;font-size:.7rem;display:block}
+    .preco-min{color:#f9fafb;font-weight:900;font-size:.9rem}
+    .preco-venda-row{display:flex;align-items:center;justify-content:space-between;gap:6px;flex-wrap:nowrap}
+    .preco-desc-badge{background:#f39200;color:#3b1f00;border-radius:999px;padding:3px 8px;font-size:.7rem;font-weight:900;white-space:nowrap;flex-shrink:0}
+    .imovel-chips{margin-top:6px;display:flex;flex-direction:column;gap:8px;font-size:.8rem;color:#4b5563}
+    .chips-condicoes{display:flex;flex-wrap:wrap;gap:6px 10px}
+    .badge-cond{padding:3px 10px;border-radius:999px;font-weight:800;font-size:.72rem}
+    .badge-fgts{background:#dcfce7;color:#166534}
+    .badge-fin{background:#dbeafe;color:#1d4ed8}
+    .badge-disputa{background:#fee2e2;color:#b91c1c}
+    .imovel-footer{padding:9px 14px 11px;border-top:1px solid #e5e7eb;background:#f8fafc;display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .status-ok{background:#d1fae5;color:#065f46;border-radius:999px;padding:4px 10px;font-weight:900;font-size:.72rem}
+    .status-atenc{background:#fef3c7;color:#92400e;border-radius:999px;padding:4px 10px;font-weight:900;font-size:.72rem}
+    .imovel-link{background:var(--laranja);color:#3b1f00;padding:8px 16px;border-radius:999px;font-weight:900;font-size:.86rem;text-decoration:none;box-shadow:0 3px 8px rgba(0,0,0,.2)}
+
+    /* CRECI / PLATAFORMA */
+    .imovel-creci{margin-top:6px;font-size:.78rem;color:#4b5563;display:flex;align-items:center;gap:6px}
+    .imovel-creci-text{cursor:pointer}
+    .imovel-creci-copy{width:16px;height:16px;border-radius:3px;border:1px solid #cbd5e1;display:flex;align-items:center;justify-content:center;font-size:.70rem;color:#4b5563;cursor:pointer;background:#f8fafc}
+    .imovel-creci-text.copied,.imovel-creci-copy.copied{color:#16a34a;border-color:#16a34a}
+    .badge-nacional{display:inline-flex;align-items:center;gap:5px;background:#ede9fe;color:#5b21b6;border-radius:999px;padding:3px 10px;font-size:.72rem;font-weight:800;margin-top:4px}
+
+    .loading-msg,.empty-msg{grid-column:1/-1;text-align:center;color:#64748b;padding:32px;font-size:.9rem}
+
+    /* TOAST */
+    .creci-toast{position:fixed;right:16px;bottom:16px;background:#fff;border:1px solid rgba(148,163,184,.35);box-shadow:0 10px 25px rgba(15,23,42,.18);padding:10px 14px;border-radius:10px;font-size:.82rem;color:#111827;display:flex;align-items:flex-start;gap:8px;opacity:0;transform:translateY(10px);pointer-events:none;transition:opacity .18s ease,transform .18s ease;z-index:9999}
+    .creci-toast.visible{opacity:1;transform:translateY(0)}
+    .creci-toast-icon{width:18px;height:18px;border-radius:999px;background:#dcfce7;color:#16a34a;display:flex;align-items:center;justify-content:center;font-size:.85rem;flex-shrink:0}
+
+    /* ══ FOOTER NOVO ══ */
+    .barra-contato{background:#0b1220;color:#e2e8f0;padding:40px 20px 0}
+    .barra-inner{max-width:1400px;margin:0 auto}
+    .footer-cols{display:grid;grid-template-columns:repeat(3,1fr);gap:32px;padding-bottom:32px;border-bottom:1px solid rgba(255,255,255,.08)}
+    @media(max-width:700px){.footer-cols{grid-template-columns:1fr;gap:24px}}
+    .footer-col h4{font-size:.78rem;font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:#fff;margin-bottom:14px}
+    .footer-col a,.footer-col p,.footer-col span{display:block;font-size:.84rem;color:#94a3b8;margin-bottom:8px;line-height:1.4;text-decoration:none}
+    .footer-col a:hover{color:#fff;text-decoration:underline}
+    .footer-social{display:flex;gap:12px;margin-top:8px}
+    .footer-social a{display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:8px;background:rgba(255,255,255,.08);font-size:1rem;margin:0;text-decoration:none}
+    .footer-social a:hover{background:rgba(255,255,255,.18)}
+    .footer-copy{padding:18px 0;font-size:.76rem;color:#475569;text-align:center;line-height:1.6}
+  </style>
+</head>
+<body>
+
+<header class="site-header">
+  <input type="checkbox" id="menu-toggle" class="menu-chk" aria-hidden="true">
+  <div class="hdr">
+    <a href="index.php" class="logo">
+      <div class="logo-icon">
+        <img src="https://cdn.tess.im/assets/uploads/0e90758d-2354-4677-b743-9724498c3976.jpg" class="logo-icon-img" alt="Arremate Imóveis Online" loading="eager">
+      </div>
+      <div class="logo-txt">
+        <div class="logo-aio">Arremate Imóveis Online</div>
+        <div class="logo-sub">
+          <span class="logo-sub-full">Onde a busca termina e a sua conquista começa.</span>
+          <span class="logo-sub-mobile">Onde a busca termina e a sua conquista começa.</span>
+        </div>
+      </div>
+    </a>
+    <nav class="nav-links">
+      <a href="index.php">Início</a>
+      <a href="index.php#para-morar">Para morar</a>
+      <a href="index.php#para-investir">Para investir</a>
+      <a href="index.php#oportunidades">Oportunidades</a>
+      <a href="favoritos.html">❤️ Favoritos</a>
+      <a href="index.php#simulador">Simule</a>
+      <a href="index.php#duvidas">Dúvidas</a>
+      <a href="index.php#contato" class="btn-nav-cta">💬 Especialista</a>
+    </nav>
+    <label for="menu-toggle" class="hamburger" aria-label="Abrir menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+        <line x1="3" y1="6" x2="21" y2="6"/>
+        <line x1="3" y1="12" x2="21" y2="12"/>
+        <line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </label>
+  </div>
+  <nav class="nav-mobile">
+    <label for="menu-toggle" class="nav-mob-close">✕ Fechar</label>
+    <a href="index.php" onclick="document.getElementById('menu-toggle').checked=false">🏠 Início</a>
+    <a href="index.php#para-morar" onclick="document.getElementById('menu-toggle').checked=false">🏠 Para morar</a>
+    <a href="index.php#para-investir" onclick="document.getElementById('menu-toggle').checked=false">📈 Para investir</a>
+    <a href="index.php#oportunidades" onclick="document.getElementById('menu-toggle').checked=false">🏡 Oportunidades</a>
+    <a href="favoritos.html" onclick="document.getElementById('menu-toggle').checked=false">❤️ Favoritos</a>
+    <a href="index.php#simulador" onclick="document.getElementById('menu-toggle').checked=false">📊 Simule</a>
+    <a href="index.php#duvidas" onclick="document.getElementById('menu-toggle').checked=false">❓ Dúvidas</a>
+    <a href="index.php#contato" class="nav-mob-cta" onclick="document.getElementById('menu-toggle').checked=false">💬 Especialista</a>
+  </nav>
+</header>
+
+<div class="page-wrap">
+  <div class="page-title">Resultados</div>
+  <div class="page-sub">Use os filtros para refinar. Sem cidade selecionada, aparecem imóveis CAIXA em todo o estado de São Paulo.</div>
+
+  <div class="layout">
+    <button class="mobile-filter-toggle" id="mobile-filter-btn" onclick="var sb=document.querySelector('.sidebar');if(sb.classList.contains('mobile-open')){sb.classList.remove('mobile-open');this.textContent='🔍 Ver filtros';}else{sb.classList.add('mobile-open');this.textContent='✕ Fechar filtros';}">🔍 Ver filtros</button>
+    <aside class="sidebar">
+      <div class="sidebar-top">
+        <div class="sidebar-title">Filtros</div>
+        <button class="btn-small" type="button" onclick="limparFiltros()">Limpar</button>
+      </div>
+
+      <details class="fsec" open>
+        <summary><span class="sum-left">📍 Localização</span><span class="chev">▾</span></summary>
+        <div class="fgroup">
+          <label>Estado</label>
+          <select id="filtro-uf" onchange="(function(sel){var chips=document.getElementById('cidade-chips');if(chips)chips.textContent='';var inp=document.getElementById('cidade-search');if(inp)inp.value='';if(window._cidadeSelecionadas)window._cidadeSelecionadas.length=0;var t=document.getElementById('results-title');if(t)t.textContent='Imóveis CAIXA · '+(sel.options[sel.selectedIndex]?sel.options[sel.selectedIndex].text:sel.value);window.carregarCidades(sel.value,[]);window.aplicarFiltros();})(this);" style="width:100%;padding:8px 10px;border:1px solid #d1d5db;border-radius:8px;font-size:.9rem;color:#374151;background:#fff;">
+            <option value="">Todos os estados</option>
+            <option value="AC">Acre</option><option value="AL">Alagoas</option><option value="AM">Amazonas</option><option value="AP">Amapá</option><option value="BA">Bahia</option><option value="CE">Ceará</option><option value="DF">Distrito Federal</option><option value="ES">Espírito Santo</option><option value="GO">Goiás</option><option value="MA">Maranhão</option><option value="MG">Minas Gerais</option><option value="MS">Mato Grosso do Sul</option><option value="MT">Mato Grosso</option><option value="PA">Pará</option><option value="PB">Paraíba</option><option value="PE">Pernambuco</option><option value="PI">Piauí</option><option value="PR">Paraná</option><option value="RJ">Rio de Janeiro</option><option value="RN">Rio Grande do Norte</option><option value="RO">Rondônia</option><option value="RR">Roraima</option><option value="RS">Rio Grande do Sul</option><option value="SC">Santa Catarina</option><option value="SE">Sergipe</option><option value="SP" selected>São Paulo</option><option value="TO">Tocantins</option>
+          </select>
+        </div>
+        <div class="fgroup">
+          <label>Cidades</label>
+          <div class="cidade-wrap">
+            <input type="text" id="cidade-search" placeholder="Digite para buscar e selecione" autocomplete="off" autocapitalize="none" spellcheck="false">
+            <div class="cidade-dropdown" id="cidade-dropdown"></div>
+          </div>
+          <div class="cidade-chips" id="cidade-chips"></div>
+        </div>
+      </details>
+
+      <details class="fsec" open>
+        <summary><span class="sum-left">💰 Preço de venda</span><span class="chev">▾</span></summary>
+        <div class="range-row">
+          <div class="fgroup"><label>Valor mínimo</label><input type="text" inputmode="numeric" id="preco_min" placeholder="R$ 0"></div>
+          <div class="fgroup"><label>Valor máximo</label><input type="text" inputmode="numeric" id="preco_max" placeholder="R$ 10.000.000"></div>
+        </div>
+        <div class="aio-slider">
+          <div class="track">
+            <div class="fill" id="slider-preco-fill"></div>
+            <input type="range" id="slider-preco-min" min="0" max="10000000" step="1000" value="0">
+            <input type="range" id="slider-preco-max" min="0" max="10000000" step="1000" value="10000000">
+          </div>
+          <div class="slider-labels">
+            <span id="slider-preco-label-min"></span>
+            <span id="slider-preco-label-max"></span>
+          </div>
+        </div>
+      </details>
+
+      <details class="fsec" open>
+        <summary><span class="sum-left">🏷️ Desconto</span><span class="chev">▾</span></summary>
+        <div class="range-row">
+          <div class="fgroup"><label>Mínimo</label><input type="text" inputmode="numeric" id="desc_min" placeholder="0%"></div>
+          <div class="fgroup"><label>Máximo</label><input type="text" inputmode="numeric" id="desc_max" placeholder="100%"></div>
+        </div>
+        <div class="aio-slider">
+          <div class="track">
+            <div class="fill" id="slider-desc-fill"></div>
+            <input type="range" id="slider-desc-min" min="0" max="100" step="1" value="0">
+            <input type="range" id="slider-desc-max" min="0" max="100" step="1" value="100">
+          </div>
+          <div class="slider-labels">
+            <span id="slider-desc-label-min"></span>
+            <span id="slider-desc-label-max"></span>
+          </div>
+        </div>
+      </details>
+
+      <details class="fsec" open>
+        <summary><span class="sum-left">📐 Área</span><span class="chev">▾</span></summary>
+        <div class="fgroup">
+          <label>Tipo de área</label>
+          <select id="area_tipo">
+            <option value="">Selecione o tipo</option>
+            <option value="Área Privativa">Área Privativa</option>
+            <option value="Área Total">Área Total</option>
+            <option value="Área do Terreno">Área do Terreno</option>
+          </select>
+        </div>
+        <div class="range-row">
+          <div class="fgroup"><label>Mínima (m²)</label><input type="number" id="area_min" min="0" step="1" value=""></div>
+          <div class="fgroup"><label>Máxima (m²)</label><input type="number" id="area_max" min="0" step="1"></div>
+        </div>
+      </details>
+
+      <details class="fsec" open>
+        <summary><span class="sum-left">🏢 Tipo de imóvel</span><span class="chev">▾</span></summary>
+        <div class="chk-grid">
+          <label class="chk-item"><input type="checkbox" value="apartamento" class="tipo_chk"> Apartamento</label>
+          <label class="chk-item"><input type="checkbox" value="casa" class="tipo_chk"> Casa</label>
+          <label class="chk-item"><input type="checkbox" value="comercial" class="tipo_chk"> Comercial</label>
+          <label class="chk-item"><input type="checkbox" value="gleba" class="tipo_chk"> Gleba</label>
+          <label class="chk-item"><input type="checkbox" value="loja" class="tipo_chk"> Loja</label>
+          <label class="chk-item"><input type="checkbox" value="lote" class="tipo_chk"> Lote</label>
+          <label class="chk-item"><input type="checkbox" value="predio" class="tipo_chk"> Prédio</label>
+          <label class="chk-item"><input type="checkbox" value="terreno" class="tipo_chk"> Terreno</label>
+        </div>
+      </details>
+
+      <details class="fsec" open>
+        <summary><span class="sum-left">📋 Modalidade</span><span class="chev">▾</span></summary>
+        <div class="chk-grid">
+          <label class="chk-item"><input type="checkbox" value="Leilão SFI" class="mod_chk"> Leilão SFI</label>
+          <label class="chk-item"><input type="checkbox" value="Licitação Aberta" class="mod_chk"> Licitação aberta</label>
+          <label class="chk-item"><input type="checkbox" value="Venda Online" class="mod_chk"> Venda Online</label>
+          <label class="chk-item"><input type="checkbox" value="Venda Direta Online" class="mod_chk"> Compra Direta</label>
+        </div>
+      </details>
+
+      <details class="fsec" open>
+        <summary><span class="sum-left">✅ Condições</span><span class="chev">▾</span></summary>
+        <div class="chk-grid">
+          <label class="chk-item"><input type="checkbox" id="c_fgts"> Aceita FGTS</label>
+          <label class="chk-item"><input type="checkbox" id="c_fin"> Financiamento</label>
+          <label class="chk-item"><input type="checkbox" id="c_disputa"> Em disputa</label>
+        </div>
+      </details>
+
+      <details class="fsec">
+        <summary><span class="sum-left">🏘️ Condomínio</span><span class="chev">▾</span></summary>
+        <div class="radio-col">
+          <label class="chk-item"><input type="radio" name="r_cond" value="limitada"> Limitada a 10%</label>
+          <label class="chk-item"><input type="radio" name="r_cond" value="comprador"> Arrematante paga</label>
+        </div>
+      </details>
+
+      <details class="fsec">
+        <summary><span class="sum-left">🧾 IPTU</span><span class="chev">▾</span></summary>
+        <div class="radio-col">
+          <label class="chk-item"><input type="radio" name="r_iptu" value="caixa"> Caixa paga</label>
+          <label class="chk-item"><input type="radio" name="r_iptu" value="comprador"> Arrematante paga</label>
+        </div>
+      </details>
+
+      <details class="fsec">
+        <summary><span class="sum-left">📅 Encerramento</span><span class="chev">▾</span></summary>
+        <div class="fgroup"><label>Encerra até</label><input type="date" id="adv_data"></div>
+      </details>
+
+      <details class="fsec" open>
+        <summary><span class="sum-left">🔍 Código</span><span class="chev">▾</span></summary>
+        <div class="fgroup"><label>Código do imóvel</label><input type="text" id="f_codigo" placeholder="Opcional"></div>
+      </details>
+
+      <button class="btn-aplicar" type="button" onclick="aplicarFiltros();var sb=document.querySelector('.sidebar');if(sb)sb.classList.remove('mobile-open');var mb=document.getElementById('mobile-filter-btn');if(mb)mb.textContent='🔍 Ver filtros';">Aplicar filtros</button>
+      <button class="btn-limpar" type="button" onclick="limparFiltros()">Limpar tudo</button>
+    </aside>
+
+    <main class="results-area">
+      <div class="results-header">
+        <div class="results-title" id="results-title">Imóveis CAIXA no estado de São Paulo</div>
+        <div class="results-count" id="results-count">Carregando...</div>
+      </div>
+      <div class="imoveis-grid" id="imoveis-grid-dinamico">
+        <p class="loading-msg">🔎 Buscando imóveis...</p>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- ══ FOOTER ══ -->
+<footer class="barra-contato">
+  <div class="barra-inner">
+    <div class="footer-cols">
+      <div class="footer-col">
+        <h4>Navegação</h4>
+        <a href="index.php">Início</a>
+        <a href="resultados.html">Buscar Imóveis</a>
+        <a href="favoritos.html">❤️ Favoritos</a>
+        <a href="index.php#simulador">Simulador de Financiamento</a>
+        <a href="https://www.creci-sp.gov.br/" target="_blank" rel="noopener">Localize o CRECI</a>
+      </div>
+      <div class="footer-col">
+        <h4>Suporte</h4>
+        <a href="index.php#duvidas">Central de Ajuda</a>
+        <a href="index.php#contato">Fale Conosco</a>
+        <a href="privacidade.html">Política de Privacidade</a>
+      </div>
+      <div class="footer-col">
+        <h4>Contato</h4>
+        <a href="mailto:contato@arremateimoveisonline.com.br">contato@arremateimoveisonline.com.br</a>
+        <span>&nbsp;</span>
+        <div class="footer-social">
+          <a href="#" title="Instagram" aria-label="Instagram">📸</a>
+          <a href="#" title="Facebook" aria-label="Facebook">📘</a>
+          <a href="https://wa.me/5511999999999" title="WhatsApp" target="_blank" rel="noopener">💬</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-copy">
+      © 2026 Arremate Imóveis Online - Todos os direitos reservados.<br>
+      <span style="color:#4b5563;font-size:13px">Este não é um site oficial da Caixa Econômica Federal.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ARREMATE IMÓVEIS ONLINE — resultados.html */
+(function () {
+  'use strict';
+
+  var WA_NUMBER = '5511999999999';
+  var cidadesLista = [];
+  var cidadeSelecionadas = [];
+  window._cidadeSelecionadas = cidadeSelecionadas;
+  var TODOS = [];
+
+  function norm(s) {
+    if (!s) return '';
+    return String(s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
+  }
+  function toNum(v) {
+    if (v===null||v===undefined||String(v).trim()==='') return null;
+    var s=String(v).replace(/[R$\s]/g,'').replace(/\./g,'').replace(',','.').replace(/[^0-9.]/g,'');
+    if(!s) return null; var n=parseFloat(s); return isNaN(n)?null:n;
+  }
+  function toPct(v) {
+    if (v===null||v===undefined||String(v).trim()==='') return null;
+    var n=parseFloat(String(v).replace('%','').replace(',','.')); return isNaN(n)?null:n;
+  }
+  function fmtBRL(valor) {
+    var n=parseInt(valor,10); if(isNaN(n)||n<=0) return 'R$ 0,00';
+    return (n/100).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+  }
+  function inferTipo(desc) {
+    var d=norm(desc);
+    if(d.indexOf('apartamento')!==-1) return 'Apartamento';
+    if(d.indexOf('casa')!==-1) return 'Casa';
+    if(d.indexOf('terreno')!==-1) return 'Terreno';
+    if(d.indexOf('gleba')!==-1) return 'Gleba';
+    if(d.indexOf('loja')!==-1) return 'Loja';
+    if(d.indexOf('predio')!==-1) return 'Prédio';
+    if(d.indexOf('sala')!==-1) return 'Sala';
+    if(d.indexOf('lote')!==-1) return 'Lote';
+    if(d.indexOf('comercial')!==-1) return 'Comercial';
+    return 'Imóvel';
+  }
+  function getHdnFromLink(link) {
+    try { var u=new URL(link,location.origin); return (u.searchParams.get('hdnimovel')||'').replace(/\D/g,''); }
+    catch(e) { var m=String(link||'').match(/hdnimovel=(\d+)/i); return m?m[1]:''; }
+  }
+  function labelModalidade(v) {
+    var m=norm(v||'');
+    if(m.indexOf('direta')!==-1) return 'Compra Direta';
+    if(m.indexOf('leilao')!==-1||m.indexOf('sfi')!==-1) return 'Leilão SFI';
+    if(m.indexOf('licitacao')!==-1) return 'Licitação Aberta';
+    if(m==='venda online') return 'Venda Online';
+    return v||'';
+  }
+  function aceitaFgts(item) {
+    var tipo=norm(item.descricao||'');
+    if(tipo.indexOf('terreno')!==-1||tipo.indexOf('lote')!==-1||tipo.indexOf('gleba')!==-1) return false;
+    if(item.fgts===1||item.fgts==='1') return true;
+    return norm((item.descricao||'')+' '+(item.modalidade||'')).indexOf('fgts')!==-1;
+  }
+  function aceitaFinanciamento(item) {
+    if(item.financiamento===1||item.financiamento==='1') return true;
+    var t=norm((item.descricao||'')+' '+(item.modalidade||''));
+    return t.indexOf('financi')!==-1||t.indexOf('sfh')!==-1;
+  }
+  function estaEmDisputa(item) {
+    var mn=norm(item.modalidade||'');
+    if(mn.indexOf('venda direta')!==-1||mn.indexOf('compra direta')!==-1) return false;
+    if(item.disputa===1||item.disputa==='1') return true;
+    var t=norm((item.descricao||'')+' '+(item.modalidade||''));
+    return t.indexOf('disputa')!==-1||mn==='venda online';
+  }
+  function buildWaLink(item) {
+    var id=item.num_imovel||item.hdnimovel||'';
+    var msg='Olá, vi o imóvel ID: '+id+' em '+(item.cidade||'')+'/'+(item.uf||'SP')+' no Arremate Imóveis Online e gostaria de informações.';
+    return 'https://wa.me/'+WA_NUMBER+'?text='+encodeURIComponent(msg);
+  }
+  function mostrarToastCreci() {
+    var antigo=document.getElementById('creci-toast');
+    if(antigo&&antigo.parentNode) antigo.parentNode.removeChild(antigo);
+    var toast=document.createElement('div'); toast.id='creci-toast'; toast.className='creci-toast';
+    var ic=document.createElement('div'); ic.className='creci-toast-icon'; ic.textContent='✓';
+    var tx=document.createElement('div'); tx.className='creci-toast-text';
+    tx.textContent='Número do CRECI copiado para a área de transferência';
+    toast.appendChild(ic); toast.appendChild(tx); document.body.appendChild(toast);
+    requestAnimationFrame(function(){toast.classList.add('visible');});
+    setTimeout(function(){toast.classList.remove('visible');setTimeout(function(){if(toast.parentNode)toast.parentNode.removeChild(toast);},250);},8000);
+  }
+  function buildCard(item) {
+    var tipo=inferTipo(item.descricao||'');
+    var pct=toPct(item.desconto);
+    var hdn=getHdnFromLink(item.link||'')||item.num_imovel||'';
+    var modLabel=labelModalidade(item.modalidade);
+    var isCD=norm(item.modalidade||'').indexOf('direta')!==-1;
+    var isVendaOnline=norm(item.modalidade||'').indexOf('venda online')!==-1;
+    var isLeilao=norm(item.modalidade||'').indexOf('leilao')!==-1||norm(item.modalidade||'').indexOf('sfi')!==-1;
+    var isSP=(item.uf||'').trim().toUpperCase()==='SP';
+    var card=document.createElement('div'); card.className='imovel-card';
+    var thumb=document.createElement('div'); thumb.className='imovel-thumb';
+    var fallback=document.createElement('span'); fallback.className='thumb-fallback'; fallback.textContent='🏡';
+    thumb.appendChild(fallback);
+    if(hdn){
+      var img=document.createElement('img');
+      img.className='imovel-thumb-img'; img.alt=tipo; img.loading='lazy'; img.decoding='async'; img.referrerPolicy='no-referrer';
+      img.src='caixa-foto.php?hdnimovel='+hdn;
+      img.addEventListener('load',function(){fallback.style.display='none';});
+      img.addEventListener('error',function(){try{img.remove();}catch(e){} fallback.style.display='flex';});
+      thumb.appendChild(img);
+    }
+    var tagTipo=document.createElement('span'); tagTipo.className='tag-tipo'; tagTipo.textContent=tipo; thumb.appendChild(tagTipo);
+    if(modLabel){var td=document.createElement('span'); td.className='tag-desc'+(isCD?' tag-desc-direta':''); td.textContent=modLabel; thumb.appendChild(td);}
+    var body=document.createElement('div'); body.className='imovel-body';
+    var local=document.createElement('div'); local.className='imovel-local'; local.textContent=(item.cidade||'').toUpperCase()+' · '+(item.uf||'SP');
+    var titulo=document.createElement('div'); titulo.className='imovel-titulo'; titulo.textContent=item.bairro?item.bairro.trim():tipo+' em '+(item.uf||'SP');
+    var endereco=document.createElement('div'); endereco.className='imovel-endereco'; if(item.endereco) endereco.textContent=String(item.endereco).trim();
+    var precos=document.createElement('div'); precos.className='imovel-precos';
+    if(item.avaliacao&&item.avaliacao>0){var av=document.createElement('span'); av.className='preco-av'; av.textContent='Avaliação: '+fmtBRL(item.avaliacao); precos.appendChild(av);}
+    var vr=document.createElement('div'); vr.className='preco-venda-row';
+    var pv=document.createElement('span'); pv.className='preco-min'; pv.textContent='Venda: '+fmtBRL(item.preco); vr.appendChild(pv);
+    if(pct!==null&&pct>0){var db=document.createElement('span'); db.className='preco-desc-badge'; db.textContent='-'+pct.toFixed(0)+'% OFF'; vr.appendChild(db);}
+    precos.appendChild(vr);
+    var chips=document.createElement('div'); chips.className='imovel-chips';
+    var cr=document.createElement('div'); cr.className='chips-condicoes';
+    if(item.fgts==1||item.fgts=='1'){var fg=document.createElement('span'); fg.className='badge-cond badge-fgts'; fg.textContent='✅ FGTS'; cr.appendChild(fg);}
+    if(item.financiamento==1||item.financiamento=='1'){var fn=document.createElement('span'); fn.className='badge-cond badge-fin'; fn.textContent='✅ Financiamento'; cr.appendChild(fn);}
+    var isCompraDir=norm(item.modalidade||'').indexOf('direta')!==-1;
+    if(!isCompraDir&&(item.disputa==1||item.disputa=='1'||norm(item.modalidade||'').indexOf('online')!==-1)){var dp=document.createElement('span'); dp.className='badge-cond badge-disputa'; dp.textContent='🔴 Em disputa'; cr.appendChild(dp);}
+    if(cr.childNodes.length) chips.appendChild(cr);
+    var aut=document.createElement('div'); aut.className='imovel-creci';
+    if(isSP){
+      var ct=document.createElement('span'); ct.className='imovel-creci-text'; ct.textContent='🏅 Imobiliária credenciada CRECI-SP 54306';
+      var ci=document.createElement('span'); ci.className='imovel-creci-copy'; ci.textContent='⧉'; ci.title='Copiar CRECI';
+      function copyCreci(){
+        function ok(){var old=ci.textContent;ci.textContent='✓';ct.classList.add('copied');ci.classList.add('copied');mostrarToastCreci();setTimeout(function(){ct.classList.remove('copied');ci.classList.remove('copied');ci.textContent=old||'⧉';},1500);}
+        if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText('54306').then(ok).catch(ok);}
+        else{try{var ta=document.createElement('textarea');ta.value='54306';ta.style.cssText='position:fixed;opacity:0';document.body.appendChild(ta);ta.focus();ta.select();document.execCommand('copy');document.body.removeChild(ta);}catch(e){}ok();}
+      }
+      ct.addEventListener('click',copyCreci); ci.addEventListener('click',copyCreci);
+      aut.appendChild(ct); aut.appendChild(ci);
+    } else {
+      var bn=document.createElement('span'); bn.className='badge-nacional'; bn.textContent='🌎 Plataforma nacional de leilões CAIXA'; aut.appendChild(bn);
+    }
+    var atribRow=(typeof buildChipsRow==='function')?buildChipsRow(item.descricao||''):null;
+    body.appendChild(local); body.appendChild(titulo); body.appendChild(endereco); body.appendChild(precos);
+    if(atribRow) body.appendChild(atribRow);
+    body.appendChild(chips); body.appendChild(aut);
+    var footer=document.createElement('div'); footer.className='imovel-footer';
+    var st=document.createElement('span');
+    if(pct!==null&&pct>=25){st.className='status-ok';st.textContent='Ótima oportunidade!';}
+    else if(pct!==null&&pct>0){st.className='status-atenc';st.textContent='Desconto '+pct.toFixed(0)+'%';}
+    else{st.className='status-atenc';st.textContent='Sem desconto listado';}
+    var wa=document.createElement('a'); wa.className='imovel-link';  wa.target='_blank'; wa.rel='noopener noreferrer'; var hdnBtn=getHdnFromLink(item.link||'')||item.num_imovel||''; wa.href=hdnBtn?'imovel.php?hdnimovel='+hdnBtn:(item.link||'#'); wa.textContent='🏠 Ver imóvel';
+    footer.appendChild(st); footer.appendChild(wa);
+    card.appendChild(thumb); card.appendChild(body); card.appendChild(footer);
+    return card;
+  }
+
+  function initSlider(cfg) {
+    var rMin=document.getElementById(cfg.rMinId),rMax=document.getElementById(cfg.rMaxId),fill=document.getElementById(cfg.fillId);
+    var lMin=document.getElementById(cfg.lMinId),lMax=document.getElementById(cfg.lMaxId),iMin=document.getElementById(cfg.iMinId),iMax=document.getElementById(cfg.iMaxId);
+    if(!rMin||!rMax||!fill) return;
+    function pct(v){return((v-cfg.min)/(cfg.max-cfg.min))*100;}
+    function paint(){var a=parseFloat(rMin.value),b=parseFloat(rMax.value);if(a>b){var t=a;a=b;b=t;}var ie=!iMin||!iMin.value.trim(),ix=!iMax||!iMax.value.trim();if(ie&&ix){fill.style.left='0%';fill.style.right='0%';if(lMin)lMin.textContent='';if(lMax)lMax.textContent='';return;}fill.style.left=pct(a)+'%';fill.style.right=(100-pct(b))+'%';if(lMin)lMin.textContent=cfg.fmt(a);if(lMax)lMax.textContent=cfg.fmt(b);}
+    function syncR(){var a=parseFloat(rMin.value),b=parseFloat(rMax.value);if(a>b){var t=a;a=b;b=t;rMin.value=a;rMax.value=b;}if(iMin)iMin.value=a<=cfg.min?'':a;if(iMax)iMax.value=b>=cfg.max?'':b;paint();}
+    function syncI(){var a=toNum((iMin&&iMin.value)||''),b=toNum((iMax&&iMax.value)||'');if(a===null)a=cfg.min;if(b===null)b=cfg.max;a=Math.max(cfg.min,Math.min(cfg.max,a));b=Math.max(cfg.min,Math.min(cfg.max,b));if(a>b){var t=a;a=b;b=t;}rMin.value=a;rMax.value=b;paint();}
+    rMin.addEventListener('input',syncR); rMax.addEventListener('input',syncR);
+    if(iMin)iMin.addEventListener('change',syncI); if(iMax)iMax.addEventListener('change',syncI);
+    paint();
+  }
+
+  function addCidadeChip(nome) {
+    if(!nome) return;
+    var el=document.getElementById('cidade-chips'); if(!el) return;
+    var k=norm(nome); if(cidadeSelecionadas.indexOf(k)!==-1) return;
+    cidadeSelecionadas.push(k);
+    var chip=document.createElement('span'); chip.className='chip'; chip.dataset.val=k; chip.textContent=nome+' ';
+    var btn=document.createElement('button'); btn.type='button'; btn.textContent='×';
+    btn.addEventListener('click',function(){var i=cidadeSelecionadas.indexOf(k);if(i!==-1)cidadeSelecionadas.splice(i,1);chip.remove();aplicarFiltros();});
+    chip.appendChild(btn); el.appendChild(chip);
+  }
+
+  function initCidadeDropdown(iniciais) {
+    var inp=document.getElementById('cidade-search'),dd=document.getElementById('cidade-dropdown');
+    if(!inp||!dd) return;
+    if(iniciais&&iniciais.length) iniciais.forEach(function(v){var real=cidadesLista.filter(function(c){return norm(c)===norm(v);})[0]||v; addCidadeChip(real);});
+    function renderDD(q){var query=norm(q||'');var list=query?cidadesLista.filter(function(c){return norm(c).indexOf(query)!==-1;}):cidadesLista.slice();dd.textContent='';if(!list.length){dd.classList.remove('open');return;}list.forEach(function(c){var opt=document.createElement('div');opt.className='cidade-opt';opt.textContent=c;if(cidadeSelecionadas.indexOf(norm(c))!==-1)opt.classList.add('selected');opt.addEventListener('mousedown',function(e){e.preventDefault();addCidadeChip(c);inp.value='';dd.classList.remove('open');setTimeout(function(){inp.focus();},0);aplicarFiltros();});dd.appendChild(opt);});dd.classList.add('open');}
+    inp.addEventListener('input',function(){renderDD(this.value);});
+    inp.addEventListener('focus',function(){renderDD(this.value);});
+    inp.addEventListener('click',function(){renderDD(this.value);});
+    inp.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();var q=norm(inp.value||'');if(!q)return;var match=cidadesLista.filter(function(c){return norm(c)===q;})[0]||cidadesLista.filter(function(c){return norm(c).indexOf(q)!==-1;})[0];if(match){addCidadeChip(match);inp.value='';dd.classList.remove('open');aplicarFiltros();}}});
+    document.addEventListener('click',function(e){if(!e.target.closest('.cidade-wrap'))dd.classList.remove('open');});
+  }
+
+  function getFiltros() {
+    function gv(id){var el=document.getElementById(id);return el?el.value:'';}
+    var ufEl=document.getElementById('filtro-uf');
+    var urlP=new URLSearchParams(window.location.search);
+    return {
+      uf: ufEl ? ufEl.value : '',
+      cidades: cidadeSelecionadas.slice(),
+      tipos: Array.prototype.map.call(document.querySelectorAll('.tipo_chk:checked'),function(e){return e.value;}).filter(Boolean),
+      modalidades: Array.prototype.map.call(document.querySelectorAll('.mod_chk:checked'),function(e){return e.value;}).filter(Boolean),
+      precoMin: toNum(gv('preco_min')), precoMax: toNum(gv('preco_max')),
+      descMin: toPct(gv('desc_min')), descMax: toPct(gv('desc_max')),
+      fgts: !!(document.getElementById('c_fgts')&&document.getElementById('c_fgts').checked),
+      fin:  !!(document.getElementById('c_fin') &&document.getElementById('c_fin').checked),
+      disputa: !!(document.getElementById('c_disputa')&&document.getElementById('c_disputa').checked),
+      codigo: gv('f_codigo').trim(),
+      r_cond: urlP.get('r_cond')||'',
+      r_iptu: urlP.get('r_iptu')||'',
+      data_ate: urlP.get('data_ate')||'',
+      area_tipo: urlP.get('area_tipo')||'',
+      area_min: urlP.get('area_min')||'',
+      area_max: urlP.get('area_max')||''
+    };
+  }
+
+  /* ── PAGINAÇÃO SERVER-SIDE ── */
+  var _page=1, _total=0, _loading=false, _order='preco_asc';
+  var PAGE_SIZE=30;
+
+  function buildUrl(page) {
+    var f=getFiltros();
+    var u='api.php?acao=buscar&limit='+PAGE_SIZE+'&offset='+((page-1)*PAGE_SIZE)+'&ordem='+_order;
+    if(f.uf) u+='&uf='+encodeURIComponent(f.uf);
+    if(f.cidades.length)    u+='&cidades='+encodeURIComponent(f.cidades.join(','));
+    if(f.tipos.length)      u+='&tipos='+encodeURIComponent(f.tipos.join(','));
+    if(f.modalidades.length)u+='&modalidades='+encodeURIComponent(f.modalidades.join(','));
+    if(f.precoMin!==null)   u+='&preco_min='+f.precoMin;
+    if(f.precoMax!==null)   u+='&preco_max='+f.precoMax;
+    if(f.descMin!==null&&f.descMin>0)   u+='&desc_min='+f.descMin;
+    if(f.descMax!==null&&f.descMax<100) u+='&desc_max='+f.descMax;
+    if(f.fgts)    u+='&fgts=1';
+    if(f.fin)     u+='&fin=1';
+    if(f.disputa) u+='&disputa=1';
+    if(f.codigo)  u+='&codigo='+encodeURIComponent(f.codigo);
+    if(f.r_cond)  u+='&r_cond='+encodeURIComponent(f.r_cond);
+    if(f.r_iptu)  u+='&r_iptu='+encodeURIComponent(f.r_iptu);
+    if(f.data_ate) u+='&data_ate='+encodeURIComponent(f.data_ate);
+    if(f.area_tipo) u+='&area_tipo='+encodeURIComponent(f.area_tipo);
+    if(f.area_min)  u+='&area_min='+encodeURIComponent(f.area_min);
+    if(f.area_max)  u+='&area_max='+encodeURIComponent(f.area_max);
+    return u;
+  }
+
+  function renderPaginacao(total, page) {
+    var old=document.getElementById('paginacao-wrap'); if(old) old.remove();
+    var grid=document.getElementById('imoveis-grid-dinamico'); if(!grid) return;
+    var totalPages=Math.ceil(total/PAGE_SIZE); if(totalPages<=1) return;
+    var wrap=document.createElement('div'); wrap.id='paginacao-wrap';
+    wrap.style.cssText='display:flex;justify-content:center;align-items:center;gap:6px;padding:24px 0;flex-wrap:wrap;grid-column:1/-1;';
+    function mkBtn(label,pg,disabled,active){
+      var b=document.createElement('button'); b.textContent=label;
+      var base='padding:6px 12px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;border:1px solid ';
+      b.style.cssText=disabled?base+'#d1d5db;background:#f9fafb;color:#9ca3af;cursor:default;':active?base+'#2563eb;background:#2563eb;color:#fff;':base+'#2563eb;background:#fff;color:#2563eb;';
+      if(!disabled) b.addEventListener('click',function(){doFetch(pg);window.scrollTo({top:0,behavior:'smooth'});});
+      return b;
+    }
+    wrap.appendChild(mkBtn('← Ant',page-1,page<=1,false));
+    var s=Math.max(1,page-2),e=Math.min(totalPages,page+2);
+    if(s>1){wrap.appendChild(mkBtn('1',1,false,false));if(s>2){var sp=document.createElement('span');sp.textContent='…';sp.style.padding='0 4px';wrap.appendChild(sp);}}
+    for(var i=s;i<=e;i++) wrap.appendChild(mkBtn(String(i),i,false,i===page));
+    if(e<totalPages){if(e<totalPages-1){var sp2=document.createElement('span');sp2.textContent='…';sp2.style.padding='0 4px';wrap.appendChild(sp2);}wrap.appendChild(mkBtn(String(totalPages),totalPages,false,false));}
+    wrap.appendChild(mkBtn('Próx →',page+1,page>=totalPages,false));
+    var info=document.createElement('div');
+    info.style.cssText='width:100%;text-align:center;color:#6b7280;font-size:12px;margin-top:6px;';
+    info.textContent='Página '+page+' de '+totalPages+' · '+total.toLocaleString('pt-BR')+' imóveis';
+    wrap.appendChild(info);
+    grid.appendChild(wrap);
+  }
+
+  function doFetch(page) {
+    var grid=document.getElementById('imoveis-grid-dinamico');
+    if(_loading) return;
+    _loading=true; _page=page||1;
+    if(grid) grid.innerHTML='<p class="loading-msg">🔎 Buscando imóveis...</p>';
+    fetch(buildUrl(_page))
+      .then(function(r){return r.json();})
+      .then(function(data){
+        _loading=false;
+        var grid=document.getElementById('imoveis-grid-dinamico');
+        if(data.erro){if(grid)grid.innerHTML='<p class="loading-msg" style="color:#b91c1c">⚠️ '+data.erro+'</p>';return;}
+        _total=data.total||0;
+        var cnt=document.getElementById('results-count');
+        if(cnt) cnt.textContent=_total.toLocaleString('pt-BR')+' imóvel(is) encontrado(s)';
+        var title=document.getElementById('results-title');
+        if(title) title.textContent='Imóveis CAIXA'+(data.imoveis&&data.imoveis[0]?' · '+data.imoveis[0].uf:'');
+        TODOS=(data.imoveis||[]).map(function(it){
+          return {num_imovel:it.hdnimovel||it.numero,uf:it.uf,cidade:it.cidade,bairro:it.bairro,endereco:it.endereco,descricao:it.descricao,modalidade:it.modalidade_raw||it.modalidade,link:it.link,preco:parseInt(it.preco,10)||0,avaliacao:parseInt(it.avaliacao,10)||0,desconto:String(it.desconto),fgts:it.fgts,financiamento:it.financiamento,disputa:it.disputa,condominio:it.condominio||'',iptu:it.iptu||'',data_encerramento:it.data_encerramento||''};
+        });
+        if(grid){grid.textContent='';TODOS.forEach(function(it){grid.appendChild(buildCard(it));});}
+        renderPaginacao(_total,_page);
+      })
+      .catch(function(e){
+        _loading=false;
+        var grid=document.getElementById('imoveis-grid-dinamico');
+        if(grid) grid.innerHTML='<p class="loading-msg" style="color:#b91c1c">Erro ao carregar imóveis.</p>';
+        console.error('Erro:',e);
+      });
+  }
+
+  /* ── CARREGAR CIDADES (global para o onchange do select funcionar) ── */
+  window.carregarCidades = function(uf, inicialCids) {
+    cidadesLista = [];
+    var url = 'api.php?acao=cidades' + (uf ? '&uf=' + encodeURIComponent(uf) : '');
+    fetch(url)
+      .then(function(r){return r.json();})
+      .then(function(d){
+        if(d.cidades){
+          var map={};
+          d.cidades.forEach(function(c){var k=norm(c.cidade);if(!map[k])map[k]=c.cidade;});
+          cidadesLista=Object.keys(map).map(function(k){return map[k];}).sort(function(a,b){return a.localeCompare(b,'pt-BR');});
+        }
+        initCidadeDropdown(inicialCids||[]);
+      })
+      .catch(function(){initCidadeDropdown(inicialCids||[]);});
+  };
+
+  window.aplicarFiltros = function(){ _page=1; _loading=false; doFetch(1); };
+  window.limparFiltros  = function(){
+    cidadeSelecionadas.length=0;
+    var chips=document.getElementById('cidade-chips'); if(chips) chips.textContent='';
+    var inp=document.getElementById('cidade-search'); if(inp) inp.value='';
+    ['f_codigo','preco_min','preco_max','desc_min','desc_max','area_min','area_max'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});
+    Array.prototype.forEach.call(document.querySelectorAll('.tipo_chk,.mod_chk,#c_fgts,#c_fin,#c_disputa'),function(e){e.checked=false;});
+    ['slider-preco-min','slider-preco-max','slider-desc-min','slider-desc-max'].forEach(function(id){var el=document.getElementById(id);if(!el)return;el.value=id.indexOf('max')!==-1?el.max:el.min;});
+    ['slider-preco-fill','slider-desc-fill'].forEach(function(id){var f=document.getElementById(id);if(f){f.style.left='0%';f.style.right='0%';}});
+    _page=1; _loading=false; doFetch(1);
+  };
+
+  /* ── ORDENAÇÃO ── */
+  function injetarOrdenacao() {
+    if(document.getElementById('sort-sel')) return;
+    var cnt=document.getElementById('results-count'); if(!cnt) return;
+    var wrap=document.createElement('div'); wrap.style.cssText='display:flex;align-items:center;gap:8px;margin-bottom:8px;';
+    var lbl=document.createElement('label'); lbl.textContent='Ordenar: '; lbl.style.cssText='font-size:13px;color:#6b7280;';
+    var sel=document.createElement('select'); sel.id='sort-sel'; sel.style.cssText='padding:5px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;cursor:pointer;';
+    [['preco_asc','↑ Menor preço'],['preco_desc','↓ Maior preço'],['desconto_desc','↓ Maiores descontos'],['data_asc','📅 Data próxima'],['data_desc','📅 Data distante']].forEach(function(o){
+      var opt=document.createElement('option'); opt.value=o[0]; opt.textContent=o[1]; sel.appendChild(opt);
+    });
+    sel.addEventListener('change',function(){_order=this.value;_page=1;_loading=false;doFetch(1);});
+    wrap.appendChild(lbl); wrap.appendChild(sel); cnt.parentNode.insertBefore(wrap,cnt);
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    initSlider({rMinId:'slider-preco-min',rMaxId:'slider-preco-max',fillId:'slider-preco-fill',lMinId:'slider-preco-label-min',lMaxId:'slider-preco-label-max',iMinId:'preco_min',iMaxId:'preco_max',min:0,max:10000000,fmt:function(v){return 'R$ '+Number(v).toLocaleString('pt-BR',{maximumFractionDigits:0});}});
+    initSlider({rMinId:'slider-desc-min',rMaxId:'slider-desc-max',fillId:'slider-desc-fill',lMinId:'slider-desc-label-min',lMaxId:'slider-desc-label-max',iMinId:'desc_min',iMaxId:'desc_max',min:0,max:100,fmt:function(v){return Math.round(v)+'%';}});
+    injetarOrdenacao();
+
+    var p=new URLSearchParams(location.search);
+    var inicialCidades=[];
+    var cp=(p.get('cidades')||'').split(',').map(function(x){return x.trim();}).filter(Boolean);
+    var c1=(p.get('cidade')||'').trim();
+    if(cp.length) inicialCidades=cp; else if(c1) inicialCidades=[c1];
+
+    ['preco_min','preco_max','desc_min','desc_max','area_min','area_max'].forEach(function(k){var v=p.get(k)||p.get(k+'_rapido');if(v){var el=document.getElementById(k);if(el)el.value=v;}});
+    var modUrl=(p.get('modalidades')||p.get('modalidade')||'').toLowerCase();
+    if(modUrl) document.querySelectorAll('.mod_chk').forEach(function(chk){if(modUrl.indexOf(norm(chk.value))!==-1)chk.checked=true;});
+    var tiposUrl=(p.get('tipos')||p.get('tipo')||'').toLowerCase();
+    if(tiposUrl) document.querySelectorAll('.tipo_chk').forEach(function(chk){if(tiposUrl.indexOf(chk.value)!==-1)chk.checked=true;});
+    if(p.get('fgts')==='1'){var ef=document.getElementById('c_fgts');if(ef)ef.checked=true;}
+    if(p.get('fin')==='1'){var ef2=document.getElementById('c_fin');if(ef2)ef2.checked=true;}
+    if(p.get('disputa')==='1'){var ef3=document.getElementById('c_disputa');if(ef3)ef3.checked=true;}
+    var codigo=p.get('codigo'); if(codigo){var ec=document.getElementById('f_codigo');if(ec)ec.value=codigo;}
+
+    /* Aplica UF da URL ao select antes de qualquer fetch */
+    var ufFromUrl = p.get('uf') || '';
+    var ufSelInit = document.getElementById('filtro-uf');
+    if (ufSelInit) {
+      if (ufFromUrl) ufSelInit.value = ufFromUrl;
+    }
+    var ufDef = ufSelInit ? ufSelInit.value : '';
+
+    /* Atualiza título com UF selecionada */
+    var titleEl = document.getElementById('results-title');
+    if (titleEl && ufDef) {
+      var nomeUf = ufSelInit.options[ufSelInit.selectedIndex] ? ufSelInit.options[ufSelInit.selectedIndex].text : ufDef;
+      titleEl.textContent = 'Imóveis CAIXA · ' + nomeUf;
+    }
+
+    /* Carrega cidades e imóveis */
+    window.carregarCidades(ufDef, inicialCidades);
+    doFetch(1);
+  });
+
+})();
+</script>
+<script src="imovel-chips.js"></script>
+</body>
+</html>

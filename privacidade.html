@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <meta name="color-scheme" content="light">
+  <title>Política de Privacidade | Arremate Imóveis Online</title>
+  <meta name="description" content="Política de privacidade do Arremate Imóveis Online. Saiba como coletamos, usamos e protegemos seus dados em conformidade com a LGPD.">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --azul:#0053a6;--azul-esc:#00366f;--laranja:#f39200;--azul-bg:#f1f7ff;
+      --azul-card:#e8f2ff;--borda:#cfe2ff;--texto:#1e293b;--muted:#64748b;
+      --radius:14px;--sombra:0 4px 18px rgba(0,83,166,.10);--hdrH:84px;
+    }
+    @media(max-width:900px){:root{--hdrH:76px}}
+    html{scroll-behavior:smooth;color-scheme:light}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;background:var(--azul-bg);color:var(--texto);line-height:1.55;font-size:15px}
+    a{color:inherit;text-decoration:none}
+
+    /* ── HEADER (idêntico ao favoritos.html) ── */
+    .site-header{position:sticky;top:0;z-index:200;background:#01468d;color:#fff;box-shadow:0 3px 12px rgba(0,0,0,.25)}
+    .menu-chk{display:none!important;position:absolute;left:-9999px}
+    .hdr{max-width:1400px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 20px;min-height:84px}
+    .logo{display:flex;align-items:center;gap:12px;flex-shrink:0;flex-grow:0}
+    .logo-icon{width:70px;height:70px;flex-shrink:0;border-radius:14px;overflow:hidden}
+    .logo-icon-img{width:70px;height:70px;display:block;object-fit:contain;border-radius:14px}
+    .logo-txt{display:flex;flex-direction:column;min-width:0}
+    .logo-aio{font-size:1.38rem;font-weight:900;color:#fff;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 2px 6px rgba(0,0,0,.25)}
+    .logo-sub{font-size:.72rem;color:rgba(255,255,255,.88);line-height:1.2;margin-top:4px;text-align:justify;text-align-last:justify}
+    .logo-sub-full{display:block;width:100%}.logo-sub-mobile{display:none}
+    .nav-links{display:flex;align-items:center;gap:10px;flex-wrap:nowrap;font-size:.82rem;margin-left:auto;flex-shrink:0}
+    .nav-links a{color:#fff;opacity:.9;font-weight:600;white-space:nowrap;transition:opacity .2s;text-decoration:none;padding:4px 2px}
+    .nav-links a:hover{opacity:1;text-decoration:underline;text-underline-offset:3px}
+    .btn-nav-cta{background:var(--laranja)!important;color:#3b1f00!important;padding:7px 14px!important;border-radius:999px!important;font-weight:900!important;opacity:1!important;box-shadow:0 3px 8px rgba(0,0,0,.22)}
+    .btn-nav-cta:hover{filter:brightness(1.08)}
+    .nav-links a.active{opacity:1;background:rgba(255,255,255,.18);border-radius:8px;padding:4px 10px;font-weight:900}
+    .nav-mobile a.active{background:#c0d8f8;color:var(--azul-esc);font-weight:900}
+    .hamburger{display:none;align-items:center;justify-content:center;width:44px;height:44px;flex-shrink:0;background:rgba(255,255,255,.1);border:2px solid rgba(255,255,255,.4);border-radius:10px;cursor:pointer;color:#fff}
+    .hamburger svg{width:22px;height:22px;display:block}
+    .nav-mobile{display:none;flex-direction:column;width:100%;background:#dceeff;border-top:2px solid #a8cfee}
+    .menu-chk:checked~.nav-mobile{display:flex!important}
+    .nav-mobile a{display:block;padding:14px 20px;font-size:.97rem;font-weight:700;color:#0b1a33;background:#e8f3ff;border-bottom:1px solid #b8d8f5;text-decoration:none;transition:background .15s}
+    .nav-mobile a:hover{background:#cde5ff}
+    .nav-mob-cta{background:#e97500!important;color:#fff!important;font-weight:900!important}
+    .nav-mob-close{display:flex;align-items:center;padding:12px 20px;font-size:.9rem;font-weight:700;color:#01468d;background:#c8e0f8;border-bottom:2px solid #a8cfee;cursor:pointer}
+    @media(max-width:900px){
+      .hdr{padding:0 12px;min-height:76px;gap:8px}
+      .nav-links{display:none!important}
+      .hamburger{display:flex!important}
+      .logo-icon{width:54px!important;height:54px!important}
+      .logo-icon-img{width:54px!important;height:54px!important}
+      .logo-aio{font-size:1.13rem}
+      .logo-sub-full{display:none}
+      .logo-sub-mobile{display:block}
+      .logo-txt{max-width:calc(100vw - 112px)}
+      .logo-sub{white-space:normal;font-size:.71rem;text-align:left;text-align-last:left}
+    }
+    @media(min-width:901px){.nav-mobile{display:none!important}}
+
+    /* ── CONTEÚDO ── */
+    .page-wrap{max-width:800px;margin:0 auto;padding:28px 16px 48px}
+
+    .btn-voltar{display:inline-flex;align-items:center;gap:6px;background:#fff;border:1.5px solid var(--borda);color:var(--azul);border-radius:999px;padding:7px 16px;font-size:.82rem;font-weight:800;margin-bottom:22px;transition:background .15s}
+    .btn-voltar:hover{background:var(--azul-card)}
+
+    .pp-card{background:#fff;border:1px solid var(--borda);border-radius:var(--radius);box-shadow:var(--sombra);padding:36px 40px}
+    @media(max-width:600px){.pp-card{padding:22px 16px}}
+
+    .pp-badge-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
+    .pp-badge{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:4px 12px;font-size:.76rem;font-weight:800}
+    .pp-badge-lgpd{background:#dbeafe;color:#1d4ed8}
+    .pp-badge-ind{background:#dcfce7;color:#166534}
+
+    .pp-card h1{font-size:1.42rem;font-weight:900;color:var(--azul-esc);margin-bottom:6px}
+    .pp-meta{font-size:.8rem;color:var(--muted);margin-bottom:28px;padding-bottom:16px;border-bottom:1px solid var(--borda)}
+
+    .pp-aviso{background:#fef3c7;border:1px solid #fcd34d;border-radius:10px;padding:14px 16px;margin-bottom:28px;font-size:.86rem;color:#92400e;line-height:1.6}
+
+    .pp-card h2{font-size:1rem;font-weight:900;color:var(--azul-esc);margin:28px 0 10px;padding-bottom:6px;border-bottom:2px solid #e0ecff;display:flex;align-items:center;gap:8px}
+    .pp-card p{margin-bottom:12px;color:#334155;font-size:.9rem;line-height:1.75}
+    .pp-card ul{margin:0 0 14px 20px;color:#334155;font-size:.9rem;line-height:1.75}
+    .pp-card ul li{margin-bottom:6px}
+    .pp-card strong{color:#1e293b}
+
+    .pp-destaque{background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px;padding:14px 16px;margin:18px 0;font-size:.88rem;color:#0369a1;line-height:1.7}
+
+    .pp-contato{background:#e8f2ff;border:1px solid var(--borda);border-radius:10px;padding:16px 20px;margin-top:32px}
+    .pp-contato strong{display:block;color:var(--azul-esc);font-size:.92rem;margin-bottom:8px}
+    .pp-contato a{color:var(--azul);font-weight:700}
+    .pp-contato p{font-size:.86rem;color:#334155;margin-bottom:6px}
+    .pp-contato p:last-child{margin-bottom:0}
+
+    /* ── FOOTER (idêntico ao favoritos.html) ── */
+    .barra-contato{background:#0b1220;color:#e2e8f0;padding:24px 20px 0}
+    .barra-inner{max-width:1400px;margin:0 auto}
+    .footer-cols{display:grid;grid-template-columns:repeat(3,1fr);gap:32px;padding-bottom:28px;border-bottom:1px solid rgba(255,255,255,.08)}
+    @media(max-width:700px){.footer-cols{grid-template-columns:1fr;gap:20px}}
+    .footer-col h4{font-size:.78rem;font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:#fff;margin-bottom:12px}
+    .footer-col a,.footer-col span{display:block;font-size:.84rem;color:#94a3b8;margin-bottom:8px;line-height:1.4}
+    .footer-col a:hover{color:#fff;text-decoration:underline}
+    .footer-social{display:flex;gap:12px;margin-top:8px}
+    .footer-social a{display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:8px;background:rgba(255,255,255,.08);font-size:1rem;margin:0}
+    .footer-social a:hover{background:rgba(255,255,255,.18)}
+    .footer-copy{padding:16px 0;font-size:.76rem;color:#475569;text-align:center;line-height:1.5}
+  </style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<header class="site-header">
+  <input type="checkbox" id="menu-toggle" class="menu-chk" aria-hidden="true">
+  <div class="hdr">
+    <a href="index.php" class="logo">
+      <div class="logo-icon">
+        <img src="https://cdn.tess.im/assets/uploads/0e90758d-2354-4677-b743-9724498c3976.jpg" class="logo-icon-img" alt="Arremate Imóveis Online" loading="eager">
+      </div>
+      <div class="logo-txt">
+        <div class="logo-aio">Arremate Imóveis Online</div>
+        <div class="logo-sub">
+          <span class="logo-sub-full">Onde a busca termina e a sua conquista começa.</span>
+          <span class="logo-sub-mobile">Onde a busca termina e a sua conquista começa.</span>
+        </div>
+      </div>
+    </a>
+    <nav class="nav-links">
+      <a href="index.php">Início</a>
+      <a href="resultados.html">Buscar Imóveis</a>
+      <a href="favoritos.html">❤️ Favoritos</a>
+      <a href="index.php#simulador">Simule</a>
+      <a href="index.php#duvidas">Dúvidas</a>
+      <a href="index.php#contato" class="btn-nav-cta">💬 Especialista</a>
+    </nav>
+    <label for="menu-toggle" class="hamburger" aria-label="Abrir menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+        <line x1="3" y1="6" x2="21" y2="6"/>
+        <line x1="3" y1="12" x2="21" y2="12"/>
+        <line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </label>
+  </div>
+  <nav class="nav-mobile">
+    <label for="menu-toggle" class="nav-mob-close">✕ Fechar</label>
+    <a href="index.php">🏠 Início</a>
+    <a href="resultados.html">🔍 Buscar Imóveis</a>
+    <a href="favoritos.html">❤️ Favoritos</a>
+    <a href="index.php#simulador">📊 Simule</a>
+    <a href="index.php#duvidas">❓ Dúvidas</a>
+    <a href="index.php#contato" class="btn-nav-cta">💬 Especialista</a>
+  </nav>
+</header>
+
+<!-- ── CONTEÚDO ── -->
+<div class="page-wrap">
+
+  <!-- Botão Voltar -->
+  <a href="resultados.html" class="btn-voltar">← Voltar para a Busca</a>
+
+  <div class="pp-card">
+    <div class="pp-badge-row">
+      <span class="pp-badge pp-badge-lgpd">✔ Conforme com a LGPD</span>
+      <span class="pp-badge pp-badge-ind">✔ Plataforma Independente</span>
+    </div>
+
+    <h1>🔒 Política de Privacidade</h1>
+    <div class="pp-meta">Última atualização: março de 2026 · Versão 2.0 (Nacional)</div>
+
+    <div class="pp-aviso">
+      <strong>⚠️ Aviso importante:</strong> O Arremate Imóveis Online é uma plataforma <strong>independente</strong> de assessoria especializada em leilões de imóveis da Caixa Econômica Federal. Não somos afiliados, patrocinados nem representamos oficialmente a Caixa Econômica Federal.
+    </div>
+
+    <!-- 1. Quem somos -->
+    <h2>🏢 1. Quem somos</h2>
+    <p>O <strong>Arremate Imóveis Online</strong> é uma solução de inteligência estratégica desenvolvida para facilitar a jornada do proponente, apoiando o conteúdo educativo de nossos canais oficiais no YouTube e Redes Sociais. Nossa missão é otimizar a visualização de dados públicos disponibilizados pela Caixa Econômica Federal, oferecendo ao cidadão uma interface intuitiva para que as melhores oportunidades de imóveis sejam identificadas com agilidade e clareza.</p>
+    <p>Reconhecemos a primazia da Caixa Econômica Federal em todo o processo de alienação de imóveis. O Arremate Imóveis Online foca estritamente na tecnologia de busca; o suporte operacional, a consultoria técnica e o acompanhamento jurídico da aquisição são realizados exclusivamente por imobiliárias e corretores parceiros devidamente credenciados junto à Caixa, garantindo total conformidade com as normas da instituição e segurança ao proponente.</p>
+    <p>Para imóveis localizados no Estado de São Paulo, a plataforma conta com a parceria estratégica de imobiliária credenciada junto à Caixa Econômica Federal (CRECI 043342), assegurando que o suporte ao comprador seja realizado por profissionais habilitados e reconhecidos pela instituição nesta região.</p>
+    <p>Além da plataforma de busca, o Arremate Imóveis Online apoia a produção de <strong>conteúdo educativo</strong> sobre o processo de aquisição de imóveis em leilão por meio de nossos canais oficiais no <strong>YouTube e Redes Sociais</strong>, contribuindo para que o cidadão tome decisões mais informadas e seguras.</p>
+
+    <!-- 2. Coleta de dados -->
+    <h2>📋 2. Dados que coletamos</h2>
+    <p>Coletamos apenas os dados estritamente necessários para prestar o serviço de assessoria. Em conformidade com a <strong>Lei Geral de Proteção de Dados — LGPD (Lei nº 13.709/2018)</strong>, os dados coletados são:</p>
+    <ul>
+      <li><strong>Nome e WhatsApp:</strong> fornecidos voluntariamente pelo usuário ao clicar em "Tenho Interesse" em um imóvel. Usados exclusivamente para contato de assessoria sobre o imóvel de interesse.</li>
+      <li><strong>Dados de navegação anonimizados:</strong> páginas visitadas e tempo de sessão, coletados via Google Analytics para melhoria da experiência. Nenhum dado pessoal é associado a essas métricas.</li>
+    </ul>
+    <p><strong>Não coletamos</strong> documentos pessoais, dados financeiros, senhas, CPF ou qualquer informação sensível conforme definido pela LGPD.</p>
+
+    <!-- 3. LocalStorage / Favoritos -->
+    <h2>💾 3. Armazenamento Local (Favoritos)</h2>
+    <p>A funcionalidade de <strong>Favoritos</strong> utiliza o <strong>localStorage</strong> do seu próprio navegador para salvar os IDs dos imóveis que você marcou. Essa tecnologia funciona exclusivamente no seu dispositivo:</p>
+    <ul>
+      <li>Nenhum dado de favoritos é enviado para nossos servidores.</li>
+      <li>As informações ficam salvas apenas localmente, no navegador que você está usando.</li>
+      <li>Você pode remover qualquer favorito individualmente ou limpar todos a qualquer momento pela própria página de Favoritos.</li>
+      <li>Limpar os dados do navegador apaga automaticamente todos os favoritos salvos.</li>
+    </ul>
+    <div class="pp-destaque">
+      💡 <strong>Em resumo:</strong> seus favoritos são seus. Eles existem apenas no seu dispositivo e você tem controle total sobre eles.
+    </div>
+
+    <!-- 4. Finalidade do uso -->
+    <h2>🎯 4. Para que usamos seus dados</h2>
+    <ul>
+      <li>Prestar assessoria personalizada sobre o imóvel de interesse informado pelo usuário.</li>
+      <li>Responder dúvidas enviadas via WhatsApp ou formulário de contato.</li>
+      <li>Melhorar a experiência de busca e os filtros da plataforma, com base em dados agregados e anônimos.</li>
+    </ul>
+
+    <!-- 5. Compartilhamento -->
+    <h2>🔐 5. Compartilhamento com terceiros</h2>
+    <p>Seus dados <strong>não são vendidos, alugados ou compartilhados com terceiros</strong> para fins comerciais. Os únicos casos em que dados podem ser compartilhados são:</p>
+    <ul>
+      <li>Com prestadores de serviço tecnológico (hospedagem e analytics), sob obrigação contratual de confidencialidade e sigilo.</li>
+      <li>Com autoridades públicas, quando exigido por lei ou ordem judicial.</li>
+    </ul>
+    <p>As informações sobre imóveis exibidas na plataforma são <strong>dados públicos</strong>, disponibilizados pela Caixa Econômica Federal em seu portal oficial de vendas e leilões.</p>
+
+    <!-- 6. Nossa natureza -->
+    <h2>🏦 6. Plataforma de assessoria — não somos a Caixa</h2>
+    <p>O Arremate Imóveis Online é uma plataforma tecnológica <strong>independente</strong>. Nosso serviço consiste em organizar, filtrar e apresentar as oportunidades de leilão e venda publicadas pela Caixa Econômica Federal, facilitando ao cidadão a identificação das melhores oportunidades disponíveis.</p>
+    <p>Para participar de um leilão ou concluir uma compra, o usuário deve acessar diretamente o portal oficial da Caixa ou o site do leiloeiro responsável pelo imóvel de interesse. Confirme sempre os valores, datas, condições de pagamento e documentação diretamente nas fontes oficiais antes de tomar qualquer decisão.</p>
+
+    <!-- 7. Cookies -->
+    <h2>🍪 7. Cookies</h2>
+    <p>Utilizamos apenas cookies essenciais para o funcionamento da plataforma e cookies analíticos anonimizados (Google Analytics). Você pode desativar cookies não essenciais nas configurações do seu navegador a qualquer momento, sem prejuízo ao uso da plataforma.</p>
+
+    <!-- 8. Direitos do titular -->
+    <h2>⚖️ 8. Seus direitos (LGPD — Art. 18)</h2>
+    <p>Como titular dos seus dados, você tem direito a:</p>
+    <ul>
+      <li>Confirmar a existência de tratamento dos seus dados pessoais.</li>
+      <li>Acessar, corrigir ou atualizar suas informações.</li>
+      <li>Solicitar a exclusão dos dados fornecidos voluntariamente.</li>
+      <li>Revogar o consentimento a qualquer momento.</li>
+      <li>Apresentar reclamação à <strong>Autoridade Nacional de Proteção de Dados (ANPD)</strong>.</li>
+    </ul>
+
+    <!-- 9. Segurança -->
+    <h2>🛡️ 9. Segurança dos dados</h2>
+    <p>Adotamos medidas técnicas adequadas para proteger os dados pessoais coletados, incluindo conexão criptografada via <strong>HTTPS</strong> e controle de acesso restrito aos sistemas internos. Em caso de incidente de segurança que afete seus dados, você será comunicado conforme exigido pela LGPD.</p>
+
+    <!-- 10. Alterações -->
+    <h2>🔄 10. Alterações desta política</h2>
+    <p>Esta política pode ser atualizada periodicamente para refletir mudanças na plataforma ou na legislação. A versão vigente estará sempre disponível nesta página, com a data da última revisão indicada no topo. Alterações relevantes serão comunicadas de forma destacada.</p>
+
+    <!-- Contato DPO -->
+    <div class="pp-contato">
+      <strong>📬 Encarregado de Dados (DPO)</strong>
+      <p>Para exercer seus direitos, esclarecer dúvidas sobre privacidade ou reportar incidentes:</p>
+      <p>E-mail: <a href="mailto:privacidade@arremateimoveisonline.com.br">privacidade@arremateimoveisonline.com.br</a></p>
+      <p>Respondemos em até <strong>15 dias úteis</strong> a partir do recebimento da solicitação.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ── FOOTER (idêntico ao favoritos.html) ── -->
+<footer class="barra-contato">
+  <div class="barra-inner">
+    <div class="footer-cols">
+      <div class="footer-col">
+        <h4>Navegação</h4>
+        <a href="index.php">Início</a>
+        <a href="resultados.html">Buscar Imóveis</a>
+        <a href="index.php#oportunidades">Oportunidades</a>
+        <a href="simulador-de-financiamento.php">Simulador de Financiamento</a>
+        <a href="favoritos.html">❤️ Favoritos</a>
+        <a href="blog.html">Blog</a>
+      </div>
+      <div class="footer-col">
+        <h4>Suporte</h4>
+        <a href="index.php#duvidas">Perguntas Frequentes</a>
+        <a href="index.php#contato">Fale Conosco</a>
+        <a href="privacidade.html">Política de Privacidade</a>
+        <span style="margin-top:10px;color:#cbd5e1">🏦 Imobiliária parceira credenciada</span>
+        <span style="color:#cbd5e1">para imóveis da Caixa em SP</span>
+        <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:0"><span style="color:#f39200;font-weight:700">CRECI-SP 043342</span><a href="https://wa.me/5512997651740" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;background:#22c55e;color:#fff;padding:2px 7px;border-radius:999px;font-weight:700;font-size:.65rem;text-decoration:none;box-shadow:0 1px 4px rgba(34,197,94,.3)"><svg viewBox="0 0 24 24" fill="currentColor" width="10" height="10"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg> WhatsApp</a></div>
+      </div>
+      <div class="footer-col">
+        <h4>Contato</h4>
+        <a href="mailto:contato@arremateimoveisonline.com.br">contato@arremateimoveisonline.com.br</a>
+        <span>&nbsp;</span>
+        <div class="footer-social"><span style="display:none">
+          <a href="#" title="Instagram" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg></a>
+          <a href="#" title="Facebook" aria-label="Facebook"><svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></a>        </span></div>
+      </div>
+    </div>
+  
+    </div>
+        <div class="footer-copy">
+      © 2026 Arremate Imóveis Online — A plataforma de busca de imóveis da CAIXA em todo o Brasil.<br>
+      <span style="color:#4b5563;font-size:13px">Este não é um site oficial da Caixa Econômica Federal. Plataforma independente de busca e comparação.</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
