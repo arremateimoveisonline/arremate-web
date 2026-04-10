@@ -69,6 +69,61 @@ jobs:
              echo \"[GitHub Actions] Import OK — \$COUNT imóveis\" >> /var/log/arremate_cron.log && \
              echo \"Import OK: \$COUNT imóveis no banco\""
 
+      - name: Notificação de atualização bem-sucedida
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+        run: |
+          COUNT=$(ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no \
+            root@lcmcreativestudio.vps-kinghost.net \
+            "sqlite3 /var/www/dados/imoveis.db 'SELECT COUNT(*) FROM imoveis;'" 2>/dev/null || echo 0)
+
+          DATA=$(date -u -d '-3 hours' '+%d/%m/%Y %H:%M' 2>/dev/null || date '+%d/%m/%Y %H:%M')
+
+          curl -s "https://ntfy.sh/${NTFY_TOPIC}" \
+            -H "Title: ✅ Arremate atualizado — ${DATA} BRT" \
+            -H "Priority: default" \
+            -H "Tags: white_check_mark" \
+            -d "🏠 ${COUNT} imóveis no banco atualizados com sucesso." || true
+
+      - name: Alerta diário de oportunidades SP
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+        run: |
+          # Busca top 5 em SP: Venda Online + Compra Direta, 40%+ desc, R$60k-120k
+          RESULTADO=$(ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no \
+            root@lcmcreativestudio.vps-kinghost.net \
+            "sqlite3 /var/www/dados/imoveis.db \
+              \"SELECT cidade, tipo, ROUND(preco/100.0,0), desconto, modalidade_raw, hdnimovel \
+                FROM imoveis \
+                WHERE uf='SP' \
+                  AND desconto >= 40 \
+                  AND preco BETWEEN 6000000 AND 12000000 \
+                  AND modalidade_raw LIKE '%Venda Online%' \
+                ORDER BY desconto DESC LIMIT 5;\"" 2>/dev/null)
+
+          MSG=""
+          while IFS='|' read -r cidade tipo preco desc modal hdn; do
+            [ -z "$cidade" ] && continue
+            # Ícone por modalidade
+            if echo "$modal" | grep -qi "Direta"; then
+              ICON="🏷️ Compra Direta"
+            else
+              ICON="⏰ Venda Online"
+            fi
+            PRECO_FMT=$(printf "R\$ %'.0f" "$preco" 2>/dev/null || echo "R\$ $preco")
+            DESC_INT=${desc%.*}
+            LINK="https://venda-imoveis.caixa.gov.br/sistema/detalhe-imovel.asp?hdnimovel=${hdn}"
+            MSG="${MSG}${ICON} | ${cidade} | ${tipo} | ${PRECO_FMT} (-${DESC_INT}%)\n${LINK}\n\n"
+          done <<< "$RESULTADO"
+
+          if [ -n "$MSG" ]; then
+            curl -s "https://ntfy.sh/${NTFY_TOPIC}" \
+              -H "Title: 🏠 Top oportunidades SP hoje (40%+ desc, R\$60k-120k)" \
+              -H "Priority: default" \
+              -H "Tags: moneybag" \
+              -d "$(printf '%b' "$MSG")" || true
+          fi
+
       - name: Scraping de datas de leilão/licitação
         run: |
           echo "Buscando imóveis sem data..."
