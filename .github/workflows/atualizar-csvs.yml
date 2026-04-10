@@ -30,7 +30,9 @@ jobs:
           VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
         run: |
           mkdir -p ~/.ssh
-          echo "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
+          # printf preserva quebras de linha e tr remove CRLF do Windows
+          printf '%s' "$VPS_SSH_KEY" | tr -d '\r' > ~/.ssh/id_ed25519
+          echo "" >> ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H lcmcreativestudio.vps-kinghost.net >> ~/.ssh/known_hosts 2>/dev/null
 
