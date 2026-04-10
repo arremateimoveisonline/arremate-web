@@ -91,8 +91,18 @@ function parseCentavos($s) {
 }
 
 function inferTipo($d) {
-    $d = mb_strtolower($d);
-    foreach (['apartamento','casa','terreno','gleba','loja','sala','lote','comercial'] as $t)
+    // Normaliza: minúsculo e remove acentos para comparação robusta
+    $d = mb_strtolower($d, 'UTF-8');
+    $d = strtr($d, [
+        'á'=>'a','à'=>'a','â'=>'a','ã'=>'a','ä'=>'a',
+        'é'=>'e','ê'=>'e','ë'=>'e','è'=>'e',
+        'í'=>'i','î'=>'i','ï'=>'i','ì'=>'i',
+        'ó'=>'o','ô'=>'o','õ'=>'o','ö'=>'o','ò'=>'o',
+        'ú'=>'u','û'=>'u','ü'=>'u','ù'=>'u',
+        'ç'=>'c','ñ'=>'n',
+    ]);
+    // Ordem importa: verificar 'predio' antes de 'comercial' pois prédio comercial existe
+    foreach (['apartamento','casa','terreno','gleba','loja','sala','lote','predio','comercial'] as $t)
         if (strpos($d, $t) !== false) return $t;
     return 'imovel';
 }
