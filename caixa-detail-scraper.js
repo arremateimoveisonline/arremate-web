@@ -39,8 +39,10 @@ const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML,
 
 /* ── CLI args ── */
 const args  = process.argv.slice(2);
-const LIMIT = parseInt(args[args.indexOf('--limit') + 1] || '300', 10);
-const UF    = args[args.indexOf('--uf') + 1] || null;
+const limitIdx = args.indexOf('--limit');
+const LIMIT = limitIdx !== -1 && args[limitIdx + 1] ? parseInt(args[limitIdx + 1], 10) : 300;
+const ufIdx = args.indexOf('--uf');
+const UF    = ufIdx !== -1 && args[ufIdx + 1] && !args[ufIdx + 1].startsWith('--') ? args[ufIdx + 1].toUpperCase() : null;
 const FORCE = args.includes('--force');
 
 /* ── Logging ── */
@@ -164,10 +166,30 @@ function isBlocked(html) {
 
 function esc(s) { return String(s || '').replace(/'/g, "''"); }
 
+/* ── Inicia/renova sessão do browser (resolve desafio Radware) ── */
+const BATCH_SIZE = 50; // renova sessão a cada N imóveis
+
+async function iniciarBrowser() {
+  const browser = await puppeteer.launch({
+    executablePath: CHROME_PATH,
+    headless: 'new',
+    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu', '--disable-extensions'],
+  });
+  const pg = await browser.newPage();
+  await pg.setUserAgent(UA);
+  await pg.setExtraHTTPHeaders({ 'Accept-Language': 'pt-BR,pt;q=0.9,en;q=0.8' });
+  try {
+    await pg.goto(BASE_URL, { waitUntil: 'networkidle2', timeout: 30000 });
+  } catch(e) { log(`(aviso homepage: ${e.message})`); }
+  await new Promise(r => setTimeout(r, 4000));
+  log('Sessão CAIXA pronta.');
+  return browser;
+}
+
 /* ── Main ── */
 async function main() {
   log('=== DETAIL SCRAPER (Puppeteer) ===');
-  log(`DB: ${DB_PATH} | Limite: ${LIMIT} | UF: ${UF || 'todos'} | Force: ${FORCE}`);
+  log(`DB: ${DB_PATH} | Limite: ${LIMIT} | UF: ${UF || 'todos'} | Force: ${FORCE} | Batch: ${BATCH_SIZE}`);
 
   // Busca imóveis sem data de encerramento (ou todos se --force)
   const ufFilter = UF ? `AND uf = '${UF}'` : '';
@@ -178,28 +200,24 @@ async function main() {
   if (rows.length === 0) { log('Nenhum imóvel pendente.'); return; }
   log(`${rows.length} imóveis para processar.`);
 
-  // Inicia browser
-  const browser = await puppeteer.launch({
-    executablePath: CHROME_PATH,
-    headless: 'new',
-    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu', '--disable-extensions'],
-  });
-
-  // Aba principal resolve o desafio Radware
-  const main_page = await browser.newPage();
-  await main_page.setUserAgent(UA);
-  await main_page.setExtraHTTPHeaders({ 'Accept-Language': 'pt-BR,pt;q=0.9,en;q=0.8' });
-  log('Iniciando sessão CAIXA...');
-  try {
-    await main_page.goto(BASE_URL, { waitUntil: 'networkidle2', timeout: 30000 });
-  } catch(e) { log(`(aviso homepage: ${e.message})`); }
-  await new Promise(r => setTimeout(r, 4000));
-  log('Sessão pronta.');
-
   let ok = 0, bloqueados = 0, erros = 0;
   const now = new Date().toISOString().replace('T', ' ').slice(0, 19);
 
+  let browser = null;
+  let blockedConsec = 0; // bloqueios consecutivos
+
   for (let i = 0; i < rows.length; i++) {
+    // Inicia/renova browser a cada BATCH_SIZE imóveis
+    if (i % BATCH_SIZE === 0) {
+      if (browser) {
+        log(`Renovando sessão (batch ${Math.floor(i/BATCH_SIZE)})...`);
+        await browser.close().catch(() => {});
+        await new Promise(r => setTimeout(r, 3000));
+      }
+      browser = await iniciarBrowser();
+      blockedConsec = 0;
+    }
+
     const hdn = rows[i].trim();
     if (!hdn) continue;
 
@@ -211,13 +229,10 @@ async function main() {
     try {
       await tab.setUserAgent(UA);
       await tab.setExtraHTTPHeaders({ 'Accept-Language': 'pt-BR,pt;q=0.9,en;q=0.8' });
-
-      // Navega direto para a página do imóvel — herda cookies da sessão da aba principal
       await tab.goto(url, { waitUntil: 'domcontentloaded', timeout: 20000 });
       html = await tab.content();
-
     } catch(e) {
-      log(`  ✗ ERRO goto: ${e.message}`);
+      log(`  ✗ ERRO goto: ${e.message.split('\n')[0]}`);
       erros++;
     } finally {
       await tab.close().catch(() => {});
@@ -225,18 +240,28 @@ async function main() {
 
     if (!html || html.length < 500) {
       log(`  ✗ HTML vazio ou pequeno`);
-      erros++;
+      erros++; blockedConsec++;
       await new Promise(r => setTimeout(r, 2000));
       continue;
     }
 
     if (isBlocked(html)) {
       log(`  ✗ BLOQUEADO`);
-      bloqueados++;
-      await new Promise(r => setTimeout(r, 3000));
+      bloqueados++; blockedConsec++;
+      // Se 5 consecutivos bloqueados, força renovação imediata
+      if (blockedConsec >= 5) {
+        log('  5 bloqueios consecutivos — renovando sessão...');
+        await browser.close().catch(() => {});
+        await new Promise(r => setTimeout(r, 5000));
+        browser = await iniciarBrowser();
+        blockedConsec = 0;
+      } else {
+        await new Promise(r => setTimeout(r, 3000));
+      }
       continue;
     }
 
+    blockedConsec = 0;
     const d = extrairCampos(html);
     log(`  data_enc=${d.data_encerramento || '—'} | d1=${d.data_leilao_1 || '—'} | fgts=${d.fgts} | fin=${d.financiamento} | cond=${d.condominio} | iptu=${d.iptu}`);
 
@@ -255,11 +280,10 @@ async function main() {
     if (sqlExec(sql)) ok++;
     else erros++;
 
-    // Rate limit: 2s entre requisições
     await new Promise(r => setTimeout(r, 2000));
   }
 
-  await browser.close();
+  if (browser) await browser.close().catch(() => {});
 
   log(`=== FIM: OK=${ok} | Bloqueados=${bloqueados} | Erros=${erros} ===`);
 
