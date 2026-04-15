@@ -357,7 +357,7 @@ label{display:flex;align-items:center;gap:5px}
         <div class="form-section-title">📋 Financiamento</div>
 
         <div class="fg">
-          <label>Prazo do financiamento <span class="sim-tip"><span class="sim-tip-icon">i</span><span class="sim-tip-box">Quanto maior o prazo, menor a parcela mensal. O prazo máximo para financiamento CAIXA é de 35 anos (420 meses).</span></span></label>
+          <label>Prazo do financiamento <span class="sim-tip"><span class="sim-tip-icon">i</span><span class="sim-tip-box">Número de meses para quitar o financiamento. O prazo máximo na CAIXA é de 35 anos (420 meses).</span></span></label>
           <div class="slider-wrap">
             <div class="slider-label">
               <span>5 anos</span>
@@ -370,7 +370,7 @@ label{display:flex;align-items:center;gap:5px}
         </div>
 
         <div class="fg">
-          <label>Sistema de amortização <span class="sim-tip"><span class="sim-tip-icon">i</span><span class="sim-tip-box">PRICE: parcelas fixas, mais previsibilidade no orçamento. SAC: parcelas decrescentes, valor total pago menor. Para imóveis da CAIXA, o SAC costuma ser mais vantajoso a longo prazo.</span></span></label>
+          <label>Sistema de amortização <span class="sim-tip"><span class="sim-tip-icon">i</span><span class="sim-tip-box">PRICE: parcelas fixas, ideal para quem prefere previsibilidade no orçamento. SAC: parcelas que diminuem ao longo do tempo.</span></span></label>
           <div class="radio-group" id="sis_group">
             <label class="radio-opt selected" id="opt_price">
               <input type="radio" name="sim_sis" value="PRICE" checked onchange="selecionarRadio('sis_group',this);calcDebounced()">
@@ -391,7 +391,7 @@ label{display:flex;align-items:center;gap:5px}
 
         <div class="frow">
           <div class="fg">
-            <label for="sim_juros">Taxa de juros (% a.a.) <span class="sim-tip"><span class="sim-tip-icon">i</span><span class="sim-tip-box">A taxa varia conforme relacionamento com a CAIXA, uso do FGTS e perfil do cliente. A média atual para financiamentos habitacionais é de 10,5% a.a.</span></span></label>
+            <label for="sim_juros">Taxa de juros (% a.a.) <span class="sim-tip"><span class="sim-tip-icon">i</span><span class="sim-tip-box">Taxa anual aplicada ao financiamento, definida pela CAIXA conforme seu perfil e relacionamento com o banco.</span></span></label>
             <input type="number" id="sim_juros" inputmode="decimal" value="10.5" min="0" max="30" step="0.1" autocomplete="off" oninput="calcDebounced()">
             <div class="helper">Taxa média CAIXA: ~10,5% a.a. (varia conforme perfil e modalidade)</div>
           </div>
