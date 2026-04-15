@@ -33,8 +33,8 @@ $ano = date('Y');
  --radius:14px;
  --sombra:0 4px 18px rgba(0,83,166,.10);
 }
-html{scroll-behavior:smooth;color-scheme:light}
-body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--azul-bg)!important;color:var(--texto);line-height:1.55;font-size:15px}
+html{scroll-behavior:smooth;color-scheme:light;overflow-x:hidden}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--azul-bg)!important;color:var(--texto);line-height:1.55;font-size:15px;overflow-x:hidden}
 a{color:inherit;text-decoration:none}
 [id]{scroll-margin-top:80px}
 input,select,textarea,button{color-scheme:light}
@@ -58,7 +58,13 @@ input,select,textarea{background-color:#fff;color:#0f172a}
 .filter-card-title{font-size:1rem;font-weight:900;color:var(--azul-esc);margin-bottom:14px}
 .filter-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px}
 .fgroup{display:flex;flex-direction:column;gap:4px}
-.fgroup label{font-size:.74rem;font-weight:700;color:#475569}
+.fgroup label{font-size:.74rem;font-weight:700;color:#475569;display:flex;align-items:center;gap:5px}
+.sim-tip{position:relative;display:inline-flex;align-items:center;cursor:pointer}
+.sim-tip-icon{width:14px;height:14px;border-radius:50%;background:#0053a6;color:#fff;font-size:.6rem;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1}
+.sim-tip-box{display:none;position:absolute;left:0;top:calc(100% + 6px);background:#1e293b;color:#f1f5f9;font-size:.73rem;font-weight:400;line-height:1.45;padding:9px 12px;border-radius:8px;width:260px;z-index:300;box-shadow:0 6px 18px rgba(0,0,0,.28);pointer-events:none}
+.sim-tip-box::before{content:'';position:absolute;top:-5px;left:10px;border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:5px solid #1e293b}
+.sim-tip.open .sim-tip-box,.sim-tip:hover .sim-tip-box{display:block}
+@media(max-width:600px){.sim-tip-box{width:200px}}
 .fgroup select,.fgroup input[type=text],.fgroup input[type=number],.fgroup input[type=date]{border:1px solid #cbd5e1;border-radius:999px;padding:9px 14px;font-size:.84rem;outline:none;background:#fff;width:100%;font-family:inherit}
 .fgroup select:focus,.fgroup input:focus{border-color:var(--azul);box-shadow:0 0 0 2px rgba(0,83,166,.15)}
 .filter-actions{grid-column:1/-1;display:flex;gap:10px;flex-wrap:wrap;margin-top:4px}
@@ -68,8 +74,8 @@ input,select,textarea{background-color:#fff;color:#0f172a}
 /* BOTÕES */
 .btn-primary{background:linear-gradient(120deg,var(--laranja),#ffb347);border:none;border-radius:999px;padding:10px 22px;font-weight:900;font-size:.87rem;color:#3b2200;cursor:pointer;display:inline-flex;align-items:center;gap:7px;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,.18);font-family:inherit}
 .btn-primary:hover{filter:brightness(1.05)}
-.btn-ghost{background:rgba(0,83,166,.08);border:1.5px solid rgba(0,83,166,.3);border-radius:999px;padding:9px 18px;font-weight:900;font-size:.84rem;color:var(--azul-esc);cursor:pointer;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;font-family:inherit}
-.btn-ghost:hover{background:rgba(0,83,166,.15)}
+.btn-ghost{background:#dce8ff;border:1.5px solid #93b4e8;border-radius:999px;padding:9px 18px;font-weight:900;font-size:.84rem;color:#1e40af;cursor:pointer;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;font-family:inherit}
+.btn-ghost:hover{background:#c7daff;border-color:#6b9fdc}
 
 /* SEÇÕES */
 .sec-outer{width:100%}
@@ -89,22 +95,23 @@ input,select,textarea{background-color:#fff;color:#0f172a}
 
 /* IMÓVEIS */
 .imoveis-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
-.imovel-card{background:#fff;border:1px solid var(--borda);border-radius:var(--radius);box-shadow:var(--sombra);display:flex;flex-direction:column;overflow:hidden;position:relative;transition:box-shadow .15s,transform .15s;min-height:480px}
+.imovel-card{background:#fff;border:1px solid var(--borda);border-radius:var(--radius);box-shadow:var(--sombra);display:flex;flex-direction:column;overflow:hidden;transition:box-shadow .15s,transform .15s;min-height:480px}
 .imovel-card:hover{box-shadow:0 10px 34px rgba(15,23,42,.25);transform:translateY(-1px)}
-.imovel-thumb{height:160px;position:relative;overflow:hidden;background:linear-gradient(135deg,#dbeafe,#eff6ff);flex-shrink:0}
+.imovel-thumb{height:160px;position:relative;overflow:hidden;background:linear-gradient(135deg,#dbeafe,#eff6ff)}
 .imovel-thumb-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
 .thumb-fallback{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:2.2rem;color:#cbd5e1}
 .tag-tipo{position:absolute;top:10px;left:10px;background:#064e3b;color:#f9fafb;font-size:.72rem;font-weight:900;padding:4px 12px;border-radius:999px;z-index:10}
 .tag-desc{position:absolute;top:10px;right:10px;background:var(--laranja);color:#3b1f00;font-size:.72rem;font-weight:900;padding:5px 14px;border-radius:999px;z-index:10;box-shadow:0 3px 8px rgba(0,0,0,.18)}
-.imovel-body{padding:12px 14px 10px;flex:1;display:flex;flex-direction:column;gap:4px;min-height:0}
-.imovel-local{font-size:1rem;font-weight:700;color:#111827;margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.imovel-titulo{font-size:.80rem;font-weight:700;color:var(--muted);margin-bottom:1px}
-.imovel-endereco{font-size:.78rem;color:#6b7280;margin-bottom:6px;min-height:2.4em;line-height:1.2em;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.imovel-precos{background:linear-gradient(135deg,#0f172a,#1d4ed8);border-radius:8px;padding:7px 11px;margin-top:6px;display:flex;flex-direction:column;gap:1px}
-.preco-av{color:#94a3b8;text-decoration:line-through;font-size:.7rem;display:block}
-.preco-min{color:#f9fafb;font-weight:900;font-size:.9rem}
+.tag-desc-direta{background:#16a34a!important;color:#fff!important}
+.imovel-body{padding:12px 14px 10px;flex:1;display:flex;flex-direction:column;gap:0}
+.imovel-local{font-size:1rem;font-weight:700;color:#111827;margin-bottom:0}
+.imovel-titulo{font-size:.80rem;font-weight:700;color:var(--muted);margin-bottom:0}
+.imovel-endereco{font-size:.78rem;color:#6b7280;margin-bottom:2px;min-height:2.4em;line-height:1.2em;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.imovel-precos{background:linear-gradient(135deg,#0f172a,#1d4ed8);border-radius:8px;padding:7px 11px;margin-top:3px;display:flex;flex-direction:column;gap:1px}
+.preco-av{color:#94a3b8;text-decoration:line-through;font-size:.84rem;display:block}
+.preco-min{color:#f9fafb;font-weight:900;font-size:1.08rem}
 .preco-venda-row{display:flex;align-items:center;justify-content:space-between;gap:6px;flex-wrap:nowrap}
-.preco-desc-badge{background:#f39200;color:#3b1f00;border-radius:999px;padding:3px 8px;font-size:.7rem;font-weight:900;white-space:nowrap;flex-shrink:0}
+.preco-desc-badge{background:#f39200;color:#3b1f00;border-radius:999px;padding:4px 10px;font-size:.84rem;font-weight:900;white-space:nowrap;flex-shrink:0}
 .imovel-chips{margin-top:6px;display:flex;flex-direction:column;gap:8px;font-size:.8rem;color:#4b5563}
 .chips-condicoes{display:flex;flex-wrap:wrap;gap:6px 10px}
 .badge-cond{padding:3px 10px;border-radius:999px;font-weight:800;font-size:.72rem}
@@ -119,6 +126,7 @@ input,select,textarea{background-color:#fff;color:#0f172a}
 .imovel-creci-text{cursor:pointer}
 .imovel-creci-copy{width:16px;height:16px;border-radius:3px;border:1px solid #cbd5e1;display:flex;align-items:center;justify-content:center;font-size:.70rem;color:#4b5563;cursor:pointer;background:#f8fafc}
 .imovel-creci-text.copied,.imovel-creci-copy.copied{color:#16a34a;border-color:#16a34a}
+.badge-nacional{display:inline-flex;align-items:center;gap:5px;background:#ede9fe;color:#5b21b6;border-radius:999px;padding:3px 10px;font-size:.72rem;font-weight:800;margin-top:4px}
 .creci-toast{position:fixed;right:16px;bottom:16px;background:#fff;border:1px solid rgba(148,163,184,.35);box-shadow:0 10px 25px rgba(15,23,42,.18);padding:10px 14px;border-radius:10px;font-size:.82rem;color:#111827;display:flex;align-items:flex-start;gap:8px;opacity:0;transform:translateY(10px);pointer-events:none;transition:opacity .18s ease,transform .18s ease;z-index:9999}
 .creci-toast.visible{opacity:1;transform:translateY(0)}
 .creci-toast-icon{width:18px;height:18px;border-radius:999px;background:#dcfce7;color:#16a34a;display:flex;align-items:center;justify-content:center;font-size:.85rem;flex-shrink:0}
@@ -176,9 +184,9 @@ input,select,textarea{background-color:#fff;color:#0f172a}
 .add-btn{display:inline-flex;align-items:center;gap:5px;background:rgba(0,83,166,.07);border:1px solid rgba(0,83,166,.2);border-radius:999px;padding:6px 13px;font-size:.78rem;font-weight:900;color:var(--azul-esc);cursor:pointer;margin-top:8px;font-family:inherit}
 .add-btn:hover{background:rgba(0,83,166,.14)}
 .modal-footer{background:#fff;border-top:1px solid #e2e8f0;padding:12px 18px;display:flex;gap:10px;border-radius:0 0 16px 16px;position:sticky;bottom:0}
-.btn-limpar{flex:1;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:12px;padding:11px;font-weight:900;font-size:.88rem;cursor:pointer;color:#111827;font-family:inherit}
+.btn-limpar{flex:1;background:#dce8ff;border:1px solid #93b4e8;border-radius:12px;padding:11px;font-weight:900;font-size:.88rem;cursor:pointer;color:#1e40af;font-family:inherit}
 .btn-aplicar{flex:1.4;background:var(--laranja);border:1px solid #e08000;border-radius:12px;padding:11px;font-weight:900;font-size:.88rem;cursor:pointer;color:#3b1f00;display:flex;align-items:center;justify-content:center;gap:8px;font-family:inherit}
-.btn-limpar:hover{filter:brightness(.97)}
+.btn-limpar:hover{background:#c7daff;border-color:#6b9fdc}
 .btn-aplicar:hover{filter:brightness(1.04)}
 
 /* ABAS OPORTUNIDADES */
@@ -191,7 +199,7 @@ input,select,textarea{background-color:#fff;color:#0f172a}
 
 /* HEADER */
 .menu-chk{display:none!important;position:absolute;left:-9999px}
-.site-header{position:sticky;top:0;z-index:200;background:#01468d;box-shadow:0 2px 10px rgba(0,0,0,.25)}
+.site-header{position:sticky;top:0;z-index:200;background:#01468d;color:#fff;box-shadow:0 3px 12px rgba(0,0,0,.25)}
 .hdr{max-width:1400px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 20px;min-height:84px}
 .logo{display:flex;align-items:center;gap:12px;flex-shrink:0;flex-grow:0}
 .logo-icon{width:70px;height:70px;flex-shrink:0;border-radius:14px;overflow:hidden}
@@ -208,8 +216,9 @@ input,select,textarea{background-color:#fff;color:#0f172a}
 .btn-nav-cta:hover{filter:brightness(1.08)}
 .nav-links a.active{opacity:1;background:rgba(255,255,255,.18);border-radius:8px;padding:4px 10px;font-weight:900}
 .nav-mobile a.active{background:#c0d8f8;color:var(--azul-esc);font-weight:900}
-.hamburger{display:none;align-items:center;justify-content:center;width:44px;height:44px;flex-shrink:0;background:rgba(255,255,255,.1);border:2px solid rgba(255,255,255,.4);border-radius:10px;cursor:pointer;color:#fff}
-.hamburger svg{width:22px;height:22px;display:block}
+.hamburger{display:none;align-items:center;justify-content:center;width:44px;height:44px;flex-shrink:0;background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.3);border-radius:10px;cursor:pointer;color:#fff;transition:background .15s}
+.hamburger svg{width:20px;height:20px;display:block}
+    .hamburger:hover,.hamburger:focus-visible{background:rgba(255,255,255,.22);outline:none}
 .nav-mobile{display:none;flex-direction:column;width:100%;background:#dceeff;border-top:2px solid #a8cfee}
 .menu-chk:checked~.nav-mobile{display:flex!important}
 .nav-mobile a{display:block;padding:14px 20px;font-size:.97rem;font-weight:700;color:#0b1a33;background:#e8f3ff;border-bottom:1px solid #b8d8f5;text-decoration:none;transition:background .15s}
@@ -221,16 +230,17 @@ input,select,textarea{background-color:#fff;color:#0f172a}
 @media(max-width:1200px){.imoveis-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:1080px){.steps-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:900px){
-  .hdr{padding:0 12px;min-height:76px;gap:8px}
+  .hdr{padding:0 8px 0 6px;min-height:80px;gap:6px}
   .nav-links{display:none!important}
-  .hamburger{display:flex!important}
-  .logo-icon{width:54px!important;height:54px!important}
-  .logo-icon-img{width:54px!important;height:54px!important}
-  .logo-aio{font-size:1.13rem}
+  .hamburger{display:flex}
+  .logo-icon{width:48px;height:48px}
+  .logo-icon-img{width:48px;height:48px}
+  .logo-aio{font-size:1.2rem}
+  .logo{flex-shrink:1;min-width:0;gap:5px}
   .logo-txt{max-width:calc(100vw - 112px)}
   .logo-sub-full{display:none}
   .logo-sub-mobile{display:block}
-  .logo-sub{white-space:normal;font-size:.71rem;text-align:left;text-align-last:left}
+  .logo-sub{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:.71rem;text-align:left;text-align-last:left}
   .hero-inner{grid-template-columns:1fr}
   .hero-stats{grid-template-columns:repeat(2,1fr)}
   .sim-wrap{grid-template-columns:1fr}
@@ -296,7 +306,8 @@ input,select,textarea{background-color:#fff;color:#0f172a}
       </div>
     </a>
     <nav class="nav-links" id="navDesktop">
-      <a href="index.php#oportunidades" class="active">Oportunidades</a>
+      <a href="index.php" class="active">Início</a>
+      <a href="index.php#oportunidades">Oportunidades</a>
       <a href="resultados.html">Buscar Imóveis</a>
       <a href="favoritos.html">❤️ Favoritos</a>
       <a href="simulador-de-financiamento.php">Simulador</a>
@@ -313,7 +324,7 @@ input,select,textarea{background-color:#fff;color:#0f172a}
   </div>
   <nav class="nav-mobile">
     <label for="menu-toggle" class="nav-mob-close">✕ Fechar</label>
-    <a href="index.php#busque-imoveis" onclick="document.getElementById('menu-toggle').checked=false">🔎 Buscar imóvel</a>
+    <a href="index.php" class="active" onclick="document.getElementById('menu-toggle').checked=false">🏠 Início</a>
     <a href="index.php#oportunidades" onclick="document.getElementById('menu-toggle').checked=false">🏡 Oportunidades</a>
     <a href="resultados.html" onclick="document.getElementById('menu-toggle').checked=false">🔍 Buscar Imóveis</a>
     <a href="favoritos.html" onclick="document.getElementById('menu-toggle').checked=false">❤️ Favoritos</a>
@@ -335,9 +346,9 @@ input,select,textarea{background-color:#fff;color:#0f172a}
         <span class="badge">🏦 Imobiliária parceira <span style="color:var(--laranja);font-weight:900">CRECI-SP 043342</span></span>
       </div>
       <div class="hero-stats">
-        <div class="hero-stat"><strong>30.000+ imóveis</strong>cadastrados nas principais regiões do Brasil</div>
-        <div class="hero-stat"><strong>Até 90% OFF</strong>desconto real sobre o valor de avaliação</div>
-        <div class="hero-stat"><strong>Atualização diária</strong>dados direto do portal oficial da CAIXA</div>
+        <div class="hero-stat"><strong style="color:var(--laranja)">30.000+ imóveis</strong>cadastrados nas principais regiões do Brasil</div>
+        <div class="hero-stat"><strong style="color:var(--laranja)">Até 90% OFF</strong>desconto real sobre o valor de avaliação</div>
+        <div class="hero-stat"><strong style="color:var(--laranja)">Atualização diária</strong>dados direto do portal oficial da CAIXA</div>
       </div>
     </div>
 
@@ -515,12 +526,12 @@ input,select,textarea{background-color:#fff;color:#0f172a}
         <div class="sim-title">Preencha os dados</div>
         <div class="sim-grid">
           <div class="fgroup">
-            <label>Valor do imóvel (R$)</label>
-            <input type="text" inputmode="numeric" id="sim_val" placeholder="Ex.: 300.000" autocomplete="off">
+            <label>Valor do imóvel (R$) <span class="sim-tip" id="tip-val-idx"><span class="sim-tip-icon">i</span><span class="sim-tip-box">Informe o Valor de Avaliação do edital se desejar liberar a cota máxima de crédito. Esse valor é a base para reduzir sua entrada e aumentar o financiamento.</span></span></label>
+            <input type="text" inputmode="numeric" id="sim_val" placeholder="Ex.: R$ 300.000,00" autocomplete="off" oninput="mascaraMoeda(this)">
           </div>
           <div class="fgroup">
-            <label>Entrada (R$)</label>
-            <input type="text" inputmode="numeric" id="sim_ent" placeholder="Ex.: 60.000" autocomplete="off">
+            <label>Entrada (R$) <span class="sim-tip" id="tip-ent-idx"><span class="sim-tip-icon">i</span><span class="sim-tip-box">Para imóveis de leilão, o uso do Valor de Avaliação permite reduzir a entrada para 5%. Caso utilize o valor de venda, a entrada padrão sobe para 20%.</span></span></label>
+            <input type="text" inputmode="numeric" id="sim_ent" placeholder="Ex.: R$ 60.000,00" autocomplete="off" oninput="mascaraMoeda(this)">
           </div>
           <div class="fgroup">
             <label>Prazo (meses)</label>
@@ -538,8 +549,8 @@ input,select,textarea{background-color:#fff;color:#0f172a}
             </select>
           </div>
           <div class="fgroup">
-            <label>Renda mensal bruta (opcional)</label>
-            <input type="text" inputmode="numeric" id="sim_renda" placeholder="Ex.: 8.000" autocomplete="off">
+            <label>Renda mensal bruta (opcional) <span class="sim-tip" id="tip-renda-idx"><span class="sim-tip-icon">i</span><span class="sim-tip-box">A CAIXA limita o comprometimento a 30% da renda bruta familiar. Some as rendas de todos os compradores para aumentar sua capacidade de financiamento.</span></span></label>
+            <input type="text" inputmode="numeric" id="sim_renda" placeholder="Ex.: R$ 8.000,00" autocomplete="off" oninput="mascaraMoeda(this)">
           </div>
         </div>
         <button class="btn-primary" id="btnSimular" type="button" onclick="rodarSimulador()">📊 Simular</button>
@@ -548,7 +559,7 @@ input,select,textarea{background-color:#fff;color:#0f172a}
       <div class="sim-box">
         <div class="sim-title">Resultado estimado</div>
         <div class="sim-result" id="sim_result">Preencha os dados ao lado e clique em <strong>Simular</strong>.</div>
-        <p class="sim-note">Gostou de algum imóvel em SP? Nossa imobiliária parceira credenciada (CRECI-SP 043342) pode orientar sobre financiamento, FGTS e todo o processo de compra junto à CAIXA.</p>
+        <p class="sim-note">Gostou de algum <strong>imóvel em SP</strong>? Nossa <strong>imobiliária parceira credenciada (CRECI-SP 043342)</strong> pode orientar sobre financiamento, FGTS e todo o processo de compra junto à CAIXA.</p>
       </div>
     </div>
   </div>
@@ -581,7 +592,7 @@ input,select,textarea{background-color:#fff;color:#0f172a}
         <a href="index.php#oportunidades">Oportunidades</a>
         <a href="simulador-de-financiamento.php">Simulador de Financiamento</a>
         <a href="favoritos.html">❤️ Favoritos</a>
-        <a href="blog.html">Blog</a>
+        <a href="blog.html">Blog do Arremate</a>
       </div>
       <div class="footer-col">
         <h4>Suporte</h4>
@@ -613,7 +624,7 @@ input,select,textarea{background-color:#fff;color:#0f172a}
 <div class="overlay" id="modalOverlay" onclick="if(event.target===this)fecharModal()">
   <div class="modal">
     <div class="modal-hdr">
-      <div class="modal-hdr-title">⚙️ Filtros Avançados</div>
+      <div class="modal-hdr-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg> Filtros Avançados</div>
       <button class="modal-close" type="button" onclick="fecharModal()">✕</button>
     </div>
     <div class="modal-body">
@@ -701,8 +712,8 @@ input,select,textarea{background-color:#fff;color:#0f172a}
       <div class="mpanel">
         <div class="mpanel-title">🏷️ Desconto sobre avaliação</div>
         <div class="range-row">
-          <div class="fgroup"><label>Mínimo (%)</label><input type="text" id="desc_min" inputmode="decimal" autocomplete="off" placeholder="Ex.: 10"></div>
-          <div class="fgroup"><label>Máximo (%)</label><input type="text" id="desc_max" inputmode="decimal" autocomplete="off" placeholder="Ex.: 30"></div>
+          <div class="fgroup"><label>Mínimo (%)</label><input type="text" id="desc_min" inputmode="numeric" autocomplete="off" placeholder="0%" oninput="mascaraPct(this)" onblur="mascaraPctBlur(this)" onfocus="mascaraPctFocus(this)"></div>
+          <div class="fgroup"><label>Máximo (%)</label><input type="text" id="desc_max" inputmode="numeric" autocomplete="off" placeholder="100%" oninput="mascaraPct(this)" onblur="mascaraPctBlur(this)" onfocus="mascaraPctFocus(this)"></div>
         </div>
       </div>
       <div class="mpanel">
@@ -735,8 +746,8 @@ input,select,textarea{background-color:#fff;color:#0f172a}
           </select>
         </div>
         <div class="range-row">
-          <div class="fgroup"><label>Mínima (m²)</label><input type="text" id="area_min" inputmode="decimal" autocomplete="off" placeholder="Ex.: 45,5"></div>
-          <div class="fgroup"><label>Máxima (m²)</label><input type="text" id="area_max" inputmode="decimal" autocomplete="off" placeholder="Ex.: 120"></div>
+          <div class="fgroup"><label>Mínima (m²)</label><input type="text" id="area_min" inputmode="numeric" autocomplete="off" placeholder="0 m²" oninput="mascaraM2(this)" onblur="mascaraM2Blur(this)" onfocus="mascaraM2Focus(this)"></div>
+          <div class="fgroup"><label>Máxima (m²)</label><input type="text" id="area_max" inputmode="numeric" autocomplete="off" placeholder="0 m²" oninput="mascaraM2(this)" onblur="mascaraM2Blur(this)" onfocus="mascaraM2Focus(this)"></div>
         </div>
       </div>
     </div>
@@ -772,23 +783,25 @@ function norm(v) {
 }
 window.norm = norm;
 
-/** Formata número para BRL */
+/** Formata número para BRL com 2 casas decimais */
 function brl(v) {
-  return Number(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 });
+  return Number(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
-/** Remove formatação e retorna float */
+/** Remove formatação BR e retorna float (suporta "350.000,97") */
 function limpaNumeroBR(valor) {
   if (!valor) return 0;
-  var digitos = String(valor).replace(/[^\d]/g, '');
-  return digitos ? parseFloat(digitos) : 0;
+  var s = String(valor).replace(/[R$\s]/g, '').replace(/\./g, '').replace(',', '.');
+  return parseFloat(s) || 0;
 }
 
-/** Formata inteiro com separador de milhar BR */
+/** Formata número com separador de milhar BR e 2 decimais (ex: 22.306,97) */
 function formataMilharBR(numero) {
-  var n = parseInt(numero, 10);
+  var n = parseFloat(numero);
   if (isNaN(n)) return '';
-  return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  var parts = n.toFixed(2).split('.');
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  return parts.join(',');
 }
 
 /** Converte preço BR string para número float */
@@ -885,6 +898,16 @@ function toPct(v) {
   var n = parseFloat(String(v).replace('%', '').replace(',', '.'));
   return isNaN(n) ? null : n;
 }
+function mascaraPct(el){var r=el.value.replace(/[^\d]/g,'');el.value=r?parseInt(r,10):'';}
+function mascaraPctBlur(el){var r=el.value.replace(/[^\d]/g,'');el.value=r?parseInt(r,10)+'%':'';}
+function mascaraPctFocus(el){el.value=el.value.replace(/[^\d]/g,'');}
+function mascaraM2(el){var r=el.value.replace(/[^\d]/g,'');el.value=r?parseInt(r,10):'';}
+function mascaraM2Blur(el){var r=el.value.replace(/[^\d]/g,'');el.value=r?parseInt(r,10)+' m²':'';}
+function mascaraM2Focus(el){el.value=el.value.replace(/[^\d]/g,'');}
+function mascaraMoeda(el){var r=el.value.replace(/\D/g,'');if(!r){el.value='';return;}el.value='R$ '+formataMilharBR(parseInt(r,10)/100);}
+function mascaraJuros(el){el.value=el.value.replace(/[^\d,.]/g,'');}
+function mascaraJurosBlur(el){var r=el.value.replace(/[^\d,.]/g,'').replace(',','.');var n=parseFloat(r);el.value=isNaN(n)?'':(n.toFixed(1).replace('.',',')+' % a.a.');}
+function mascaraJurosFocus(el){el.value=el.value.replace(/[^\d,.]/g,'').replace(',','.');}
 
 /* ── 4. CONDIÇÕES DO IMÓVEL ── */
 
@@ -1481,8 +1504,8 @@ function aplicarFiltros() {
 
   var dmin = document.getElementById('desc_min');
   var dmax = document.getElementById('desc_max');
-  if (dmin && dmin.value.trim()) qs.set('desc_min', dmin.value.trim());
-  if (dmax && dmax.value.trim()) qs.set('desc_max', dmax.value.trim());
+  if (dmin && dmin.value.trim()) qs.set('desc_min', dmin.value.replace(/[^\d]/g,''));
+  if (dmax && dmax.value.trim()) qs.set('desc_max', dmax.value.replace(/[^\d]/g,''));
 
   var tipos = [];
   document.querySelectorAll('.tipo_chk:checked').forEach(function (t) { tipos.push(t.value); });
@@ -1511,11 +1534,11 @@ function aplicarFiltros() {
   var amin = document.getElementById('area_min');
   var amax = document.getElementById('area_max');
   if (at && at.value) qs.set('area_tipo', at.value);
-  if (amin && amin.value.trim()) qs.set('area_min', amin.value.trim());
-  if (amax && amax.value.trim()) qs.set('area_max', amax.value.trim());
+  if (amin && amin.value.trim()) qs.set('area_min', amin.value.replace(/[^\d]/g,''));
+  if (amax && amax.value.trim()) qs.set('area_max', amax.value.replace(/[^\d]/g,''));
 
   fecharModal();
-  window.location.href = 'resultados.html?' + qs.toString();
+  window.open('resultados.html?' + qs.toString(), '_blank', 'noopener,noreferrer');
 }
 
 /* ── 13. BUSCAR (barra principal do hero) ── */
@@ -1586,20 +1609,18 @@ function buscar() {
   if (rCond) qs.set('r_cond', rCond.value);
   if (rIptu) qs.set('r_iptu', rIptu.value);
 
-  window.location.href = 'resultados.html?' + qs.toString();
+  window.open('resultados.html?' + qs.toString(), '_blank', 'noopener,noreferrer');
 }
 
 /* ── 14. SIMULADOR ── */
 
 function aplicarMascarasSimulador() {
-  ['sim_val', 'sim_ent', 'sim_renda'].forEach(function (id) {
-    var el = document.getElementById(id);
-    if (!el) return;
-    el.addEventListener('input', function () {
-      var n = limpaNumeroBR(this.value);
-      this.value = n ? formataMilharBR(n) : '';
-    });
-  });
+  /* Tooltip do campo Entrada */
+  var tip = document.getElementById('tip-ent-idx');
+  if (tip) {
+    tip.addEventListener('click', function(e){ e.stopPropagation(); tip.classList.toggle('open'); });
+    document.addEventListener('click', function(){ tip.classList.remove('open'); });
+  }
 }
 document.addEventListener('DOMContentLoaded', aplicarMascarasSimulador);
 
@@ -1645,7 +1666,7 @@ function rodarSimulador() {
   var val   = limpaNumeroBR(document.getElementById('sim_val').value)   || 0;
   var ent   = limpaNumeroBR(document.getElementById('sim_ent').value)   || 0;
   var prazo = parseInt(document.getElementById('sim_prazo').value)       || 0;
-  var jaa   = parseFloat(document.getElementById('sim_juros').value)     || 0;
+  var jaa   = parseFloat(document.getElementById('sim_juros').value) || 0;
   var sis   = document.getElementById('sim_sis').value;
   var renda = limpaNumeroBR(document.getElementById('sim_renda').value) || 0;
   var el    = document.getElementById('sim_result');
@@ -1837,5 +1858,7 @@ function toggleFavorito(hdnimovel, element) {
     localStorage.setItem("arremate_favs", JSON.stringify(favoritos));
 }
 </script>
+<?php include __DIR__ . '/cookie-banner.php'; ?>
+<script src="logo-fit.js"></script>
 </body>
 </html>

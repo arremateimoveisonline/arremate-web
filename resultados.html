@@ -66,24 +66,45 @@
     /* PAGE */
     .page-wrap{max-width:1400px;margin:0 auto;padding:10px 16px 18px}
     .page-title{font-size:1.28rem;font-weight:900;color:var(--azul-esc);margin-bottom:4px}
-    .page-sub{font-size:.9rem;color:var(--muted);margin-bottom:14px}
+    .page-sub{font-size:.9rem;color:var(--azul-esc);font-weight:700;margin-bottom:14px}
 
     /* LAYOUT */
-    .layout{display:grid;grid-template-columns:260px minmax(0,1fr);gap:18px;align-items:stretch}
+    .layout{display:grid;grid-template-columns:280px minmax(0,1fr);gap:18px;align-items:stretch}
     @media(min-width:901px){
+      html{overflow-y:scroll}
       body{height:100vh;overflow:hidden}
       .page-wrap{height:calc(100vh - var(--hdrH));overflow:hidden;display:flex;flex-direction:column}
       .layout{flex:1;overflow:hidden}
       .sidebar{height:100%;overflow-y:auto}
       .results-area{height:100%;overflow-y:auto}
     }
-    @media(max-width:1024px){.layout{grid-template-columns:1fr}
-      .sidebar{display:none}
-      .sidebar.mobile-open{display:block}
+    @media(max-width:1024px){
+      .layout{grid-template-columns:1fr}
+      .sidebar{display:none!important}
+      .sidebar.mobile-open{display:flex!important;position:fixed!important;inset:0!important;top:var(--hdrH,72px)!important;z-index:400!important;border-radius:0!important;border:none!important;overflow:hidden!important;width:100%!important;height:calc(100vh - var(--hdrH,72px))!important}
+      .mob-filter-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:399;touch-action:none}
+      .mob-filter-backdrop.open{display:block}
       .mobile-filter-toggle{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;background:var(--azul);color:#fff;border:none;border-radius:12px;padding:12px;font-weight:900;font-size:.9rem;cursor:pointer;margin-bottom:12px;font-family:inherit}
       .mobile-filter-toggle:hover{filter:brightness(1.1)}
+      .btn-fechar-filtro{display:flex!important}
+      .sidebar-top .btn-small{display:none}
+      /* visual mobile */
+      .sidebar{background:#f7fbff}
+      .sidebar-top{background:#fff;border-bottom:1px solid #e2e8f0;padding:14px 18px;border-radius:0}
+      .sidebar-scroll{padding:16px 18px;display:flex;flex-direction:column;gap:14px}
+      .sidebar-scroll>details.fsec{background:#fff;border:1px solid var(--borda);border-radius:12px;padding:0 14px;border-top:none}
+      .sidebar-scroll>details.fsec>summary{padding:12px 0}
+      .sidebar-actions{display:flex!important;flex-direction:row;gap:10px;padding:12px 18px}
+      .sidebar-title{font-size:1rem;color:#111827;text-transform:none;letter-spacing:0}
+      .btn-aplicar{width:auto;flex:1.4;padding:11px;font-size:.88rem;margin-top:0}
+      .btn-limpar{width:auto;flex:1;padding:11px;font-size:.88rem;margin-top:0;background:#dce8ff;border-color:#93b4e8;color:#1e40af}
+      .btn-limpar:hover{background:#c7daff;border-color:#6b9fdc}
     }
-    @media(min-width:1025px){.mobile-filter-toggle{display:none!important}}
+    @media(min-width:1025px){
+      .mobile-filter-toggle{display:none!important}
+      .mob-filter-backdrop{display:none!important}
+      .btn-fechar-filtro{display:none!important}
+    }
 
     /* SIDEBAR */
     .sidebar{background:#fff;border:1px solid #d9e3f7;border-radius:16px;box-shadow:0 6px 20px rgba(15,23,42,.12);display:flex;flex-direction:column;overflow:hidden}
@@ -91,6 +112,8 @@
     .sidebar-scroll{flex:1;overflow-y:auto;overflow-x:hidden;padding:0 14px;min-height:0}
     .sidebar-actions{flex-shrink:0;padding:10px 14px 14px;border-top:1px solid #e2e8f0;background:#fff}
     .sidebar-title{font-size:.92rem;font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:#0f172a}
+    .btn-fechar-filtro{display:none;align-items:center;justify-content:center;border:none;background:#f1f5f9;cursor:pointer;font-size:1.1rem;padding:8px 10px;border-radius:8px;color:#111827;line-height:1;font-family:inherit;min-width:36px;min-height:36px;flex-shrink:0}
+    .btn-fechar-filtro:hover{background:#e2e8f0}
     .btn-small{border:1px solid #e2e8f0;background:#f8fafc;color:#334155;border-radius:10px;padding:6px 10px;font-weight:800;font-size:.78rem;cursor:pointer}
     .btn-small:hover{background:#eef2ff}
     details.fsec{border-top:1px solid #edf2f7}
@@ -112,10 +135,13 @@
     .aio-slider input[type=range]::-webkit-slider-thumb{pointer-events:auto;-webkit-appearance:none;appearance:none;width:18px;height:18px;border-radius:50%;border:2.5px solid #1a4f8a;background:#fff;box-shadow:0 1px 5px rgba(0,0,0,.22);cursor:pointer}
     .aio-slider input[type=range]::-moz-range-thumb{pointer-events:auto;width:18px;height:18px;border-radius:50%;border:2.5px solid #1a4f8a;background:#fff;box-shadow:0 1px 5px rgba(0,0,0,.22);cursor:pointer}
     .aio-slider .slider-labels{display:flex;justify-content:space-between;font-size:.75rem;color:#94a3b8;margin-top:2px}
-    .chk-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:6px}
-    .chk-item{display:flex;align-items:center;gap:7px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:8px 10px;font-size:.8rem;cursor:pointer}
+    .chk-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;margin-top:6px}
+    .chk-grid-1col{display:flex;flex-direction:column;gap:5px;margin-top:6px}
+    .chk-item{display:flex;align-items:center;gap:5px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:7px 6px;font-size:.8rem;cursor:pointer;min-width:0;white-space:nowrap;overflow:hidden}
+    .chk-item span{overflow:hidden;text-overflow:ellipsis}
+    .chk-grid-1col .chk-item{white-space:nowrap;overflow:visible}
     .chk-item:hover{background:#e5f0ff;border-color:#c3d4ff}
-    .chk-item input{width:15px;height:15px;accent-color:var(--azul);cursor:pointer}
+    .chk-item input{width:15px;height:15px;flex-shrink:0;accent-color:var(--azul);cursor:pointer}
     .radio-col{display:flex;flex-direction:column;gap:8px;margin-top:6px}
     .btn-aplicar{width:100%;background:var(--laranja);border:none;border-radius:12px;padding:9px 12px;font-weight:900;font-size:.86rem;cursor:pointer;color:#3b1f00;margin-top:8px}
     .btn-aplicar:hover{filter:brightness(1.05)}
@@ -134,9 +160,11 @@
 
     /* RESULTS */
     .results-area{background:transparent}
-    .results-header{margin:4px 0 12px}
+    .results-header{margin:4px 0 12px;background:#fff;border:1px solid var(--borda);border-radius:12px;padding:10px 14px;box-shadow:0 2px 8px rgba(15,23,42,.07)}
+    .results-header-row{display:flex;align-items:center;justify-content:space-between;gap:8px}
     .results-title{font-size:1.02rem;font-weight:900;color:#0f172a}
-    .results-count{font-size:.86rem;color:#64748b;margin-top:2px}
+    .results-count{font-size:.86rem;color:#64748b;font-weight:700;margin-top:2px;padding-top:4px;border-top:1px solid #f1f5f9}
+    #sort-container{display:flex;align-items:center;gap:6px;flex-shrink:0}
 
     /* CARDS */
     .imoveis-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
@@ -150,11 +178,11 @@
     .tag-tipo{position:absolute;top:10px;left:10px;background:#064e3b;color:#f9fafb;font-size:.72rem;font-weight:900;padding:4px 12px;border-radius:999px;z-index:10}
     .tag-desc{position:absolute;top:10px;right:10px;background:var(--laranja);color:#3b1f00;font-size:.72rem;font-weight:900;padding:5px 14px;border-radius:999px;z-index:10;box-shadow:0 3px 8px rgba(0,0,0,.18)}
     .tag-desc-direta{background:#16a34a!important;color:#fff!important}
-    .imovel-body{padding:12px 14px 10px;flex:1;display:flex;flex-direction:column;gap:4px}
-    .imovel-local{font-size:1rem;font-weight:700;color:#111827;margin-bottom:1px}
-    .imovel-titulo{font-size:.80rem;font-weight:700;color:var(--muted);margin-bottom:1px}
-    .imovel-endereco{font-size:.78rem;color:#6b7280;margin-bottom:6px;min-height:2.4em;line-height:1.2em;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-    .imovel-precos{background:linear-gradient(135deg,#0f172a,#1d4ed8);border-radius:8px;padding:7px 11px;margin-top:6px;display:flex;flex-direction:column;gap:1px}
+    .imovel-body{padding:12px 14px 10px;flex:1;display:flex;flex-direction:column;gap:0}
+    .imovel-local{font-size:1rem;font-weight:700;color:#111827;margin-bottom:0}
+    .imovel-titulo{font-size:.80rem;font-weight:700;color:var(--muted);margin-bottom:0}
+    .imovel-endereco{font-size:.78rem;color:#6b7280;margin-bottom:2px;min-height:2.4em;line-height:1.2em;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+    .imovel-precos{background:linear-gradient(135deg,#0f172a,#1d4ed8);border-radius:8px;padding:7px 11px;margin-top:3px;display:flex;flex-direction:column;gap:1px}
     .preco-av{color:#94a3b8;text-decoration:line-through;font-size:.84rem;display:block}
     .preco-min{color:#f9fafb;font-weight:900;font-size:1.08rem}
     .preco-venda-row{display:flex;align-items:center;justify-content:space-between;gap:6px;flex-wrap:nowrap}
@@ -224,7 +252,7 @@
         </div>
       </div>
     </a>
-    <nav class="nav-links">
+    <nav class="nav-links" id="navDesktop">
       <a href="index.php">Início</a>
       <a href="index.php#oportunidades">Oportunidades</a>
       <a href="resultados.html" class="active">Buscar Imóveis</a>
@@ -253,16 +281,17 @@
   </nav>
 </header>
 
+<div class="mob-filter-backdrop" id="mob-filter-backdrop" onclick="fecharFiltrosMob()"></div>
 <div class="page-wrap">
-  <div class="page-title">Resultados</div>
-  <div class="page-sub" id="page-sub">Use os filtros para refinar. Sem cidade selecionada, aparecem imóveis CAIXA em todo o estado de São Paulo.</div>
 
   <div class="layout">
-    <button class="mobile-filter-toggle" id="mobile-filter-btn" onclick="var sb=document.querySelector('.sidebar');if(sb.classList.contains('mobile-open')){sb.classList.remove('mobile-open');this.textContent='🔍 Ver filtros';}else{sb.classList.add('mobile-open');this.textContent='✕ Fechar filtros';}">🔍 Ver filtros</button>
+    <button class="mobile-filter-toggle" id="mobile-filter-btn" onclick="toggleFiltrosMob(this)">🔍 Ver filtros</button>
     <aside class="sidebar">
       <div class="sidebar-top">
-        <div class="sidebar-title">Filtros</div>
-        <button class="btn-small" type="button" onclick="limparFiltros()">Limpar</button>
+        <div class="sidebar-title">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>Filtros
+        </div>
+        <button class="btn-fechar-filtro" type="button" onclick="fecharFiltrosMob()" title="Fechar filtros">✕</button>
       </div>
 
       <div class="sidebar-scroll">
@@ -288,34 +317,34 @@
       <details class="fsec" open>
         <summary><span class="sum-left">🏢 Tipo de imóvel</span><span class="chev">▾</span></summary>
         <div class="chk-grid">
-          <label class="chk-item"><input type="checkbox" value="apartamento" class="tipo_chk"> Apartamento</label>
-          <label class="chk-item"><input type="checkbox" value="casa" class="tipo_chk"> Casa</label>
-          <label class="chk-item"><input type="checkbox" value="terreno" class="tipo_chk"> Terreno</label>
-          <label class="chk-item"><input type="checkbox" value="lote" class="tipo_chk"> Lote</label>
-          <label class="chk-item"><input type="checkbox" value="predio" class="tipo_chk"> Prédio</label>
-          <label class="chk-item"><input type="checkbox" value="comercial" class="tipo_chk"> Comercial</label>
-          <label class="chk-item"><input type="checkbox" value="sala" class="tipo_chk"> Sala</label>
-          <label class="chk-item"><input type="checkbox" value="loja" class="tipo_chk"> Loja</label>
-          <label class="chk-item"><input type="checkbox" value="gleba" class="tipo_chk"> Gleba</label>
+          <label class="chk-item"><input type="checkbox" value="apartamento" class="tipo_chk"><span>Apartamento</span></label>
+          <label class="chk-item"><input type="checkbox" value="casa" class="tipo_chk"><span>Casa</span></label>
+          <label class="chk-item"><input type="checkbox" value="terreno" class="tipo_chk"><span>Terreno</span></label>
+          <label class="chk-item"><input type="checkbox" value="lote" class="tipo_chk"><span>Lote</span></label>
+          <label class="chk-item"><input type="checkbox" value="predio" class="tipo_chk"><span>Prédio</span></label>
+          <label class="chk-item"><input type="checkbox" value="comercial" class="tipo_chk"><span>Comercial</span></label>
+          <label class="chk-item"><input type="checkbox" value="sala" class="tipo_chk"><span>Sala</span></label>
+          <label class="chk-item"><input type="checkbox" value="loja" class="tipo_chk"><span>Loja</span></label>
+          <label class="chk-item"><input type="checkbox" value="gleba" class="tipo_chk"><span>Gleba</span></label>
         </div>
       </details>
 
       <details class="fsec" open>
         <summary><span class="sum-left">📋 Modalidade</span><span class="chev">▾</span></summary>
-        <div class="chk-grid">
-          <label class="chk-item"><input type="checkbox" value="Leilão SFI" class="mod_chk"> Leilão SFI</label>
-          <label class="chk-item"><input type="checkbox" value="Licitação Aberta" class="mod_chk"> Licitação Aberta</label>
-          <label class="chk-item"><input type="checkbox" value="Venda Online" class="mod_chk"> Venda Online</label>
-          <label class="chk-item"><input type="checkbox" value="Venda Direta Online" class="mod_chk"> Compra Direta</label>
+        <div class="chk-grid-1col">
+          <label class="chk-item"><input type="checkbox" value="Leilão SFI" class="mod_chk"><span>Leilão SFI</span></label>
+          <label class="chk-item"><input type="checkbox" value="Licitação Aberta" class="mod_chk"><span>Licitação Aberta</span></label>
+          <label class="chk-item"><input type="checkbox" value="Venda Online" class="mod_chk"><span>Venda Online</span></label>
+          <label class="chk-item"><input type="checkbox" value="Venda Direta Online" class="mod_chk"><span>Compra Direta</span></label>
         </div>
       </details>
 
       <details class="fsec" open>
         <summary><span class="sum-left">✅ Condições</span><span class="chev">▾</span></summary>
-        <div class="chk-grid">
-          <label class="chk-item"><input type="checkbox" id="c_fgts"> Aceita FGTS</label>
-          <label class="chk-item"><input type="checkbox" id="c_fin"> Financiamento</label>
-          <label class="chk-item"><input type="checkbox" id="c_disputa"> Em disputa</label>
+        <div class="chk-grid-1col">
+          <label class="chk-item"><input type="checkbox" id="c_fgts"><span>Aceita FGTS</span></label>
+          <label class="chk-item"><input type="checkbox" id="c_fin"><span>Financiamento</span></label>
+          <label class="chk-item"><input type="checkbox" id="c_disputa"><span>Em disputa</span></label>
         </div>
       </details>
 
@@ -341,8 +370,8 @@
       <details class="fsec" open>
         <summary><span class="sum-left">🏷️ Desconto</span><span class="chev">▾</span></summary>
         <div class="range-row">
-          <div class="fgroup"><label>Mínimo</label><input type="text" inputmode="numeric" id="desc_min" placeholder="0%" oninput="mascaraPct(this)"></div>
-          <div class="fgroup"><label>Máximo</label><input type="text" inputmode="numeric" id="desc_max" placeholder="100%" oninput="mascaraPct(this)"></div>
+          <div class="fgroup"><label>Mínimo</label><input type="text" inputmode="numeric" id="desc_min" placeholder="0%" oninput="mascaraPct(this)" onblur="mascaraPctBlur(this)" onfocus="mascaraPctFocus(this)"></div>
+          <div class="fgroup"><label>Máximo</label><input type="text" inputmode="numeric" id="desc_max" placeholder="100%" oninput="mascaraPct(this)" onblur="mascaraPctBlur(this)" onfocus="mascaraPctFocus(this)"></div>
         </div>
         <div class="aio-slider">
           <div class="track">
@@ -390,8 +419,8 @@
           </select>
         </div>
         <div class="range-row">
-          <div class="fgroup"><label>Mínima (m²)</label><input type="number" id="area_min" min="0" step="1" value=""></div>
-          <div class="fgroup"><label>Máxima (m²)</label><input type="number" id="area_max" min="0" step="1"></div>
+          <div class="fgroup"><label>Mínima (m²)</label><input type="text" inputmode="numeric" id="area_min" placeholder="0 m²" oninput="mascaraM2(this)" onblur="mascaraM2Blur(this)" onfocus="mascaraM2Focus(this)"></div>
+          <div class="fgroup"><label>Máxima (m²)</label><input type="text" inputmode="numeric" id="area_max" placeholder="0 m²" oninput="mascaraM2(this)" onblur="mascaraM2Blur(this)" onfocus="mascaraM2Focus(this)"></div>
         </div>
       </details>
 
@@ -410,7 +439,10 @@
 
     <main class="results-area">
       <div class="results-header">
-        <div class="results-title" id="results-title">Imóveis CAIXA no estado de São Paulo</div>
+        <div class="results-header-row">
+          <div class="page-sub" id="page-sub" style="margin-bottom:0;color:#0f172a;font-size:1.02rem"></div>
+          <div id="sort-container"></div>
+        </div>
         <div class="results-count" id="results-count">Carregando...</div>
       </div>
       <div class="imoveis-grid" id="imoveis-grid-dinamico">
@@ -472,7 +504,29 @@ function mascaraPct(el){
   var raw=el.value.replace(/[^\d]/g,'');
   if(!raw){el.value='';return;}
   var n=Math.min(100,parseInt(raw,10));
+  el.value=n;
+}
+function mascaraPctBlur(el){
+  var raw=el.value.replace(/[^\d]/g,'');
+  if(!raw){el.value='';return;}
+  var n=Math.min(100,parseInt(raw,10));
   el.value=n+'%';
+}
+function mascaraPctFocus(el){
+  el.value=el.value.replace(/[^\d]/g,'');
+}
+function mascaraM2(el){
+  var raw=el.value.replace(/[^\d]/g,'');
+  if(!raw){el.value='';return;}
+  el.value=parseInt(raw,10);
+}
+function mascaraM2Blur(el){
+  var raw=el.value.replace(/[^\d]/g,'');
+  if(!raw){el.value='';return;}
+  el.value=parseInt(raw,10)+' m²';
+}
+function mascaraM2Focus(el){
+  el.value=el.value.replace(/[^\d]/g,'');
 }
 
 /* ARREMATE IMÓVEIS ONLINE — resultados.html */
@@ -818,9 +872,7 @@ function mascaraPct(el){
         if(data.erro){if(grid)grid.innerHTML='<p class="loading-msg" style="color:#b91c1c">⚠️ '+data.erro+'</p>';return;}
         _total=data.total||0;
         var cnt=document.getElementById('results-count');
-        if(cnt) cnt.textContent=_total.toLocaleString('pt-BR')+' imóvel(is) encontrado(s)';
-        var title=document.getElementById('results-title');
-        if(title) title.textContent='Imóveis CAIXA'+(data.imoveis&&data.imoveis[0]?' · '+data.imoveis[0].uf:'');
+        if(cnt) cnt.textContent=(_total===1?'1 imóvel encontrado':_total.toLocaleString('pt-BR')+' imóveis encontrados');
         atualizarSubtitulo(_total);
         TODOS=(data.imoveis||[]).map(function(it){
           return {num_imovel:it.hdnimovel||it.numero,uf:it.uf,cidade:it.cidade,bairro:it.bairro,endereco:it.endereco,descricao:it.descricao,modalidade:it.modalidade_raw||it.modalidade,link:it.link,preco:parseInt(it.preco,10)||0,avaliacao:parseInt(it.avaliacao,10)||0,desconto:String(it.desconto),fgts:it.fgts,financiamento:it.financiamento,disputa:it.disputa,condominio:it.condominio||'',iptu:it.iptu||'',data_encerramento:it.data_encerramento||''};
@@ -915,27 +967,21 @@ function mascaraPct(el){
     }
 
     /* ── Localização ── */
-    // Converte "SAO PAULO" → "São Paulo" (title case para nome de cidade)
-    function titleCase(str) {
-      var minusculas = ['de','da','do','das','dos','e','a','o'];
-      return str.toLowerCase().split(' ').map(function(w, i) {
-        if (i > 0 && minusculas.indexOf(w) !== -1) return w;
-        return w.charAt(0).toUpperCase() + w.slice(1);
-      }).join(' ');
+    function cidadeDisplay(key) {
+      var found = cidadesLista.filter(function(c){ return norm(c)===key; })[0];
+      if (found) return found;
+      return key.replace(/(^|\s)\S/g, function(a){ return a.toUpperCase(); });
     }
-
     var locStr;
     if (cidades.length > 0 && nomeUf) {
-      var cidadesFmt = cidades.map(titleCase);
-      var cidStr = cidadesFmt.length <= 3
-        ? cidadesFmt.join(', ')
-        : cidadesFmt.slice(0, 2).join(', ') + ' e mais ' + (cidades.length - 2);
-      locStr = 'em ' + cidStr + ' — ' + nomeUf;
+      var cidStr = cidades.length <= 3
+        ? cidades.map(cidadeDisplay).join(', ')
+        : cidades.slice(0, 2).map(cidadeDisplay).join(', ') + ' e mais ' + (cidades.length - 2);
+      locStr = 'em ' + cidStr + ' — ' + uf;
     } else if (cidades.length > 0) {
-      var cidadesFmt2 = cidades.map(titleCase);
-      var cidStr2 = cidadesFmt2.length <= 3
-        ? cidadesFmt2.join(', ')
-        : cidadesFmt2.slice(0, 2).join(', ') + ' e mais ' + (cidades.length - 2);
+      var cidStr2 = cidades.length <= 3
+        ? cidades.map(cidadeDisplay).join(', ')
+        : cidades.slice(0, 2).map(cidadeDisplay).join(', ') + ' e mais ' + (cidades.length - 2);
       locStr = 'em ' + cidStr2;
     } else if (nomeUf) {
       locStr = 'em todo o estado de ' + nomeUf;
@@ -973,7 +1019,33 @@ function mascaraPct(el){
     if (subEl) subEl.textContent = gerarSubtitulo(total);
   }
 
-  window.aplicarFiltros = function(){ _page=1; _loading=false; atualizarSubtitulo(); doFetch(1); };
+  window.aplicarFiltros = function(){ _page=1; _loading=false; atualizarSubtitulo(); doFetch(1); fecharFiltrosMob(); };
+  window.toggleFiltrosMob = function(btn){
+    var sidebar=document.querySelector('.sidebar');
+    if(!sidebar) return;
+    var backdrop=document.getElementById('mob-filter-backdrop');
+    var aberto=sidebar.classList.contains('mobile-open');
+    if(aberto){
+      sidebar.classList.remove('mobile-open');
+      if(backdrop) backdrop.classList.remove('open');
+      document.body.style.overflow='';
+      if(btn) btn.textContent='🔍 Ver filtros';
+    } else {
+      sidebar.classList.add('mobile-open');
+      if(backdrop) backdrop.classList.add('open');
+      document.body.style.overflow='hidden';
+      if(btn) btn.textContent='✕ Fechar filtros';
+    }
+  };
+  window.fecharFiltrosMob = function(){
+    var sidebar=document.querySelector('.sidebar');
+    if(sidebar) sidebar.classList.remove('mobile-open');
+    var backdrop=document.getElementById('mob-filter-backdrop');
+    if(backdrop) backdrop.classList.remove('open');
+    document.body.style.overflow='';
+    var btn=document.getElementById('mobile-filter-btn');
+    if(btn) btn.textContent='🔍 Ver filtros';
+  };
   window.limparFiltros  = function(){
     cidadeSelecionadas.length=0;
     var chips=document.getElementById('cidade-chips'); if(chips) chips.textContent='';
@@ -988,15 +1060,14 @@ function mascaraPct(el){
   /* ── ORDENAÇÃO ── */
   function injetarOrdenacao() {
     if(document.getElementById('sort-sel')) return;
-    var cnt=document.getElementById('results-count'); if(!cnt) return;
-    var wrap=document.createElement('div'); wrap.style.cssText='display:flex;align-items:center;gap:8px;margin-bottom:8px;';
-    var lbl=document.createElement('label'); lbl.textContent='Ordenar: '; lbl.style.cssText='font-size:13px;color:#6b7280;';
+    var container=document.getElementById('sort-container'); if(!container) return;
+    var lbl=document.createElement('label'); lbl.textContent='Ordenar: '; lbl.style.cssText='font-size:13px;color:#6b7280;white-space:nowrap;';
     var sel=document.createElement('select'); sel.id='sort-sel'; sel.style.cssText='padding:5px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;cursor:pointer;';
     [['preco_asc','↑ Menor preço'],['preco_desc','↓ Maior preço'],['desconto_desc','↓ Maiores descontos'],['data_asc','📅 Data próxima'],['data_desc','📅 Data distante']].forEach(function(o){
       var opt=document.createElement('option'); opt.value=o[0]; opt.textContent=o[1]; sel.appendChild(opt);
     });
     sel.addEventListener('change',function(){_order=this.value;_page=1;_loading=false;doFetch(1);});
-    wrap.appendChild(lbl); wrap.appendChild(sel); cnt.parentNode.insertBefore(wrap,cnt);
+    container.appendChild(lbl); container.appendChild(sel);
   }
 
   document.addEventListener('DOMContentLoaded', function() {
@@ -1029,13 +1100,8 @@ function mascaraPct(el){
     }
     var ufDef = ufSelInit ? ufSelInit.value : '';
 
-    /* Atualiza título com UF selecionada */
-    var titleEl = document.getElementById('results-title');
     var nomeUf  = (ufSelInit && ufSelInit.selectedIndex >= 0 && ufSelInit.options[ufSelInit.selectedIndex])
                   ? ufSelInit.options[ufSelInit.selectedIndex].text : ufDef;
-    if (titleEl) {
-      titleEl.textContent = ufDef ? 'Imóveis CAIXA · ' + nomeUf : 'Imóveis CAIXA em todo o Brasil';
-    }
     /* Subtítulo dinâmico — gerado após filtros carregados da URL */
 
     /* Carrega cidades e imóveis — se há cidades iniciais, aguarda antes de buscar */
@@ -1051,5 +1117,6 @@ function mascaraPct(el){
 })();
 </script>
 <script src="imovel-chips.js"></script>
+<script src="logo-fit.js"></script>
 </body>
 </html>
