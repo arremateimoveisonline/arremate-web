@@ -358,6 +358,31 @@ if ($count < 1000) {
     exit(3);
 }
 
+// Preserva dados do detail scraper: copia do banco antigo para o novo antes de substituir
+if (file_exists(DB_PATH)) {
+    try {
+        $dbOld = DB_PATH;
+        $db->exec("ATTACH DATABASE " . $db->quote($dbOld) . " AS old");
+        $copied = $db->exec("
+            UPDATE imoveis SET
+                data_leilao_1       = COALESCE((SELECT o.data_leilao_1 FROM old.imoveis o WHERE o.hdnimovel = imoveis.hdnimovel AND o.data_leilao_1 != ''), ''),
+                data_encerramento   = COALESCE((SELECT o.data_encerramento FROM old.imoveis o WHERE o.hdnimovel = imoveis.hdnimovel AND o.data_encerramento != ''), ''),
+                foto_url            = COALESCE((SELECT o.foto_url FROM old.imoveis o WHERE o.hdnimovel = imoveis.hdnimovel AND o.foto_url != ''), ''),
+                condominio          = COALESCE((SELECT o.condominio FROM old.imoveis o WHERE o.hdnimovel = imoveis.hdnimovel AND o.condominio != ''), ''),
+                iptu                = COALESCE((SELECT o.iptu FROM old.imoveis o WHERE o.hdnimovel = imoveis.hdnimovel AND o.iptu != ''), ''),
+                caixa_paga_excedente = COALESCE((SELECT o.caixa_paga_excedente FROM old.imoveis o WHERE o.hdnimovel = imoveis.hdnimovel AND o.scraped_at != ''), 0),
+                fgts                = COALESCE((SELECT o.fgts FROM old.imoveis o WHERE o.hdnimovel = imoveis.hdnimovel AND o.scraped_at != ''), imoveis.fgts),
+                financiamento       = COALESCE((SELECT o.financiamento FROM old.imoveis o WHERE o.hdnimovel = imoveis.hdnimovel AND o.scraped_at != ''), imoveis.financiamento),
+                scraped_at          = COALESCE((SELECT o.scraped_at FROM old.imoveis o WHERE o.hdnimovel = imoveis.hdnimovel AND o.scraped_at != ''), '')
+            WHERE EXISTS (SELECT 1 FROM old.imoveis o WHERE o.hdnimovel = imoveis.hdnimovel AND o.scraped_at != '')
+        ");
+        $db->exec("DETACH DATABASE old");
+        logMsg("🔄 Dados de detalhe preservados de {$copied} imóveis scraped anteriormente");
+    } catch (Exception $e) {
+        logMsg("⚠️ Não foi possível preservar dados anteriores: " . $e->getMessage());
+    }
+}
+
 // Tudo OK — substitui banco atual
 rename($dbTmp, DB_PATH);
 logMsg("✅ Banco atualizado: {$count} imóveis");
