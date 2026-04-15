@@ -681,6 +681,7 @@ window.corrigirModalidade = function(m) {
 };
 
 function norm(v){return String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();}
+function fmtData(raw){if(!raw||!/^\d{4}-\d{2}-\d{2}/.test(raw))return raw||'';var dp=raw.split(/[T ]/);var pts=dp[0].split('-');var s=pts[2]+'/'+pts[1]+'/'+pts[0];if(dp[1])s+=' às '+dp[1].substring(0,5);return s;}
 function fmtBRL(v){if(v===null||v===undefined||v==='')return '';var n=parseFloat(String(v).replace(/[^0-9.,]/g,'').replace(',','.'));if(isNaN(n))return '';return n.toLocaleString('pt-BR',{style:'currency',currency:'BRL',minimumFractionDigits:2});}
 function parsePrecoNum(v){if(!v)return 0;var s=String(v).replace(/[R$\s\.]/g,'').replace(',','.');return parseFloat(s)||0;}
 function limpaNumeroBR(v){var s=String(v||'').replace(/[R$\s]/g,'').replace(/\./g,'').replace(',','.');return parseFloat(s)||0;}
@@ -963,16 +964,6 @@ function montarPagina(item){
   var infoList=document.getElementById('info-list');
   var infoItems=[{l:'Nº do imóvel',v:item.num_imovel||hdn||'—'},{l:'Cidade',v:(item.cidade||'—')+' · '+(item.uf||'SP')},{l:'Modalidade',v:modLabel||'—'}];
   var modC2=canonModalidade(item.modalidade||'');
-
-  // Helper: formata 'YYYY-MM-DD HH:MM:SS' → 'DD/MM/YYYY às HH:MM'
-  function fmtData(raw) {
-    if (!raw || !/^\d{4}-\d{2}-\d{2}/.test(raw)) return raw || '';
-    var dp = raw.split(/[T ]/);
-    var parts = dp[0].split('-');
-    var s = parts[2]+'/'+parts[1]+'/'+parts[0];
-    if (dp[1]) s += ' às ' + dp[1].substring(0,5);
-    return s;
-  }
 
   // Datas de leilão — SFI tem 2 datas; demais modalidades têm apenas encerramento
   var dataLeil1 = item.data_leilao_1 || '';
