@@ -34,6 +34,11 @@ const FILES = [
   'simulador-de-financiamento.php',
   'simulador-de-imovel-caixa.php',
   'api.php',
+  'cookie-banner.php',
+  'fgts-batch-scraper.php',
+  'logo-fit.js',
+  'caixa-detail-scraper.js',
+  'caixa-csv-downloader.js',
 ];
 
 function sshExec(conn, cmd) {
