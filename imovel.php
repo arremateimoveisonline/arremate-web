@@ -245,7 +245,7 @@ if ($found) {
     .btn-simular{width:100%;background:linear-gradient(120deg,var(--laranja),#ffb347);border:none;border-radius:999px;padding:10px;font-weight:900;font-size:.9rem;color:#3b1f00;cursor:pointer;margin-top:10px;font-family:inherit}
     .btn-simular:hover{filter:brightness(1.05)}
     .sim-resultado{background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px;padding:12px 14px;font-size:.84rem;line-height:1.8;margin-top:10px;display:none}
-    .sim-nota{font-size:.72rem;color:var(--muted);margin-top:8px;line-height:1.4}
+    .sim-nota{font-size:.73rem;color:var(--muted);text-align:center;margin-top:10px;line-height:1.5;padding:0 4px}
     .sidebar-det{display:flex;flex-direction:column;gap:16px}
     .creci-card{background:linear-gradient(135deg,#0b1a33,#01468d);color:#fff;border-radius:10px;padding:10px 14px}
     .creci-card-title{font-size:.7rem;font-weight:900;text-transform:uppercase;letter-spacing:.08em;opacity:.8;margin-bottom:3px}
@@ -561,7 +561,7 @@ document.addEventListener("DOMContentLoaded",function(){
             </div>
             <button class="btn-simular" onclick="rodarSim2()">📊 Simular</button>
             <div class="sim-resultado" id="sim-resultado2"></div>
-            <p class="sim-nota">Estimativa sem seguros e taxas.</p>
+            <p class="sim-nota">📋 Simulação estimada para referência. Não inclui seguros, taxas administrativas nem aprovação de crédito pelo banco. Para condições reais, consulte uma agência CAIXA ou correspondente bancário.</p>
           </div>
         </div>
 

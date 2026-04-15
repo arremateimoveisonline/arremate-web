@@ -137,7 +137,7 @@ input,select,textarea{background-color:#fff;color:#0f172a}
 .sim-title{font-weight:900;font-size:.98rem;margin-bottom:14px;color:#111827}
 .sim-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px;margin-bottom:14px}
 .sim-result{background:linear-gradient(135deg,#eff6ff,#f0f9ff);border:1px solid #bfdbfe;border-radius:12px;padding:14px;font-size:.86rem;line-height:1.8}
-.sim-note{font-size:.74rem;color:var(--muted);margin-top:10px;line-height:1.45}
+.sim-note{font-size:.73rem;color:var(--muted);text-align:center;margin-top:10px;line-height:1.5;padding:0 4px}
 
 /* Ajuste de vão entre seções */
 #oportunidades .sec-inner{padding-bottom:0!important}
@@ -554,7 +554,7 @@ input,select,textarea{background-color:#fff;color:#0f172a}
           </div>
         </div>
         <button class="btn-primary" id="btnSimular" type="button" onclick="rodarSimulador()">📊 Simular</button>
-        <p class="sim-note">Valores estimados. Não incluem seguros obrigatórios, taxas administrativas ou condições específicas do imóvel. Consulte a CAIXA para simulação oficial.</p>
+        <p class="sim-note">📋 Simulação estimada para referência. Não inclui seguros, taxas administrativas nem aprovação de crédito pelo banco. Para condições reais, consulte uma agência CAIXA ou correspondente bancário.</p>
       </div>
       <div class="sim-box">
         <div class="sim-title">Resultado estimado</div>
