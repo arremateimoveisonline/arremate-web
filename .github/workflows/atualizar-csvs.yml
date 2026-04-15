@@ -138,6 +138,22 @@ jobs:
             sleep 1  # intervalo entre notificações
           done <<< "$RESULTADO"
 
+      - name: Enriquecimento FGTS em lote
+        run: |
+          echo "Iniciando batch FGTS..."
+          ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no \
+            root@lcmcreativestudio.vps-kinghost.net \
+            "cd /var/www/arremate-br && \
+             PENDENTES=\$(sqlite3 /var/www/dados/imoveis.db \
+               \"SELECT COUNT(*) FROM imoveis WHERE scraped_at IS NULL OR scraped_at='';\" 2>/dev/null || echo 0) && \
+             echo \"[GitHub Actions] FGTS batch — \$PENDENTES imóveis pendentes\" >> /var/log/arremate_cron.log && \
+             if [ \"\$PENDENTES\" -gt 0 ]; then \
+               php fgts-batch-scraper.php --batch=80 >> /var/log/arremate_fgts_batch.log 2>&1 && \
+               echo \"[GitHub Actions] FGTS batch concluído\" >> /var/log/arremate_cron.log; \
+             else \
+               echo \"[GitHub Actions] FGTS: banco já enriquecido — nenhum pendente\" >> /var/log/arremate_cron.log; \
+             fi"
+
       - name: Scraping de datas de leilão/licitação
         run: |
           echo "Buscando imóveis sem data..."

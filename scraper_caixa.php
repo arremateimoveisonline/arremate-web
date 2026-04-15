@@ -243,9 +243,10 @@ $db->exec("CREATE TABLE imoveis(
     hdnimovel TEXT, numero TEXT, uf TEXT, cidade TEXT, bairro TEXT, endereco TEXT,
     preco INTEGER DEFAULT 0, avaliacao INTEGER DEFAULT 0, desconto REAL DEFAULT 0,
     financiamento INTEGER DEFAULT 0, fgts INTEGER DEFAULT 0, disputa INTEGER DEFAULT 0,
+    caixa_paga_excedente INTEGER DEFAULT 0,
     tipo TEXT DEFAULT '', modalidade TEXT DEFAULT '', modalidade_raw TEXT DEFAULT '',
     descricao TEXT DEFAULT '', condominio TEXT DEFAULT '', iptu TEXT DEFAULT '',
-    link TEXT DEFAULT '', data_encerramento TEXT DEFAULT '',
+    link TEXT DEFAULT '', data_leilao_1 TEXT DEFAULT '', data_encerramento TEXT DEFAULT '',
     foto_url TEXT DEFAULT '', scraped_at TEXT DEFAULT ''
 )");
 foreach (['uf','cidade','preco','tipo','desconto','modalidade','hdnimovel','fgts','financiamento'] as $idx)
@@ -263,34 +264,73 @@ $db->beginTransaction();
 foreach ($csvValidos as $uf => $csv) {
     $fh = @fopen($csv, 'r');
     if (!$fh) { logMsg("  Não abre: {$csv}"); continue; }
+
+    // Mapa padrão de colunas (fallback se cabeçalho não encontrado)
+    $colMap = [
+        'num'=>0,'uf'=>1,'cidade'=>2,'bairro'=>3,'endereco'=>4,
+        'preco'=>5,'avaliacao'=>6,'desconto'=>7,'financiamento'=>8,
+        'descricao'=>9,'modalidade'=>10,'link'=>11,
+    ];
+
     $ln = 0;
+    $headerLido = false;
     while (($line = fgets($fh)) !== false) {
         $ln++;
         $line = trim($line);
-        if ($line === '' || $ln <= 2) continue;
+        if ($line === '') continue;
+
+        // Linha 1: título/metadado — ignora
+        if ($ln === 1) continue;
+
+        // Linha 2: cabeçalho das colunas — lê e mapeia dinamicamente
+        if ($ln === 2 && !$headerLido) {
+            if (!mb_check_encoding($line, 'UTF-8'))
+                $line = @mb_convert_encoding($line, 'UTF-8', 'ISO-8859-1');
+            $headers = str_getcsv($line, ';');
+            foreach ($headers as $i => $h) {
+                $hNorm = mb_strtolower(trim($h));
+                if (strpos($hNorm, 'financiamento') !== false) $colMap['financiamento'] = $i;
+                elseif (strpos($hNorm, 'avalia')       !== false) $colMap['avaliacao']    = $i;
+                elseif (strpos($hNorm, 'desconto')     !== false) $colMap['desconto']     = $i;
+                elseif (strpos($hNorm, 'modalidade')   !== false) $colMap['modalidade']   = $i;
+                elseif (strpos($hNorm, 'descri')       !== false) $colMap['descricao']    = $i;
+                elseif (strpos($hNorm, 'bairro')       !== false) $colMap['bairro']       = $i;
+                elseif (strpos($hNorm, 'endere')       !== false) $colMap['endereco']     = $i;
+                elseif (strpos($hNorm, 'cidade')       !== false) $colMap['cidade']       = $i;
+                elseif ($hNorm === 'uf')                          $colMap['uf']           = $i;
+                elseif (strpos($hNorm, 'link')         !== false) $colMap['link']         = $i;
+                elseif (strpos($hNorm, 'pre')          !== false && strpos($hNorm, 'venda') !== false) $colMap['preco'] = $i;
+                elseif (strpos($hNorm, 'n')            === 0 && strpos($hNorm, 'im') !== false) $colMap['num'] = $i;
+            }
+            $headerLido = true;
+            continue;
+        }
+
         if (!mb_check_encoding($line, 'UTF-8'))
             $line = @mb_convert_encoding($line, 'UTF-8', 'ISO-8859-1');
         $r = str_getcsv($line, ';');
         if (count($r) < 8) { $skip++; continue; }
-        $num = trim($r[0]);
-        $ufR = strtoupper(trim($r[1]));
-        $ci  = mb_strtoupper(trim($r[2]));
-        $ba  = trim($r[3] ?? '');
-        $en  = trim($r[4] ?? '');
-        $pr  = parseCentavos($r[5] ?? '0');
-        $av  = parseCentavos($r[6] ?? '0');
-        $de  = round((float) str_replace(',', '.', trim($r[7] ?? '0')), 2);
-        $finRaw = mb_strtolower(trim($r[8] ?? ''));
+        $num = trim($r[$colMap['num']] ?? '');
+        $ufR = strtoupper(trim($r[$colMap['uf']] ?? ''));
+        $ci  = mb_strtoupper(trim($r[$colMap['cidade']] ?? ''));
+        $ba  = trim($r[$colMap['bairro']] ?? '');
+        $en  = trim($r[$colMap['endereco']] ?? '');
+        $pr  = parseCentavos($r[$colMap['preco']] ?? '0');
+        $av  = parseCentavos($r[$colMap['avaliacao']] ?? '0');
+        $de  = round((float) str_replace(',', '.', trim($r[$colMap['desconto']] ?? '0')), 2);
+        $finRaw = mb_strtolower(trim($r[$colMap['financiamento']] ?? ''));
         $fi  = ($finRaw === 'sim') ? 1 : 0;
-        $ds  = trim($r[9]  ?? '');
-        $mo  = trim($r[10] ?? '');
-        $li  = trim($r[11] ?? '');
+        $ds  = trim($r[$colMap['descricao']]  ?? '');
+        $mo  = trim($r[$colMap['modalidade']] ?? '');
+        $li  = trim($r[$colMap['link']]       ?? '');
         if (!preg_match('/^\d/', str_replace(' ', '', $num))) { $skip++; continue; }
         if ($pr === 0 && $av === 0) { $skip++; continue; }
         $hdn  = hdnFrom($li) ?: preg_replace('/\D/', '', $num);
         $tipo = inferTipo($ds);
-        // FGTS não se aplica a terrenos, glebas ou lotes — nunca setar 1 nesses tipos
-        $fg   = ($fi && !in_array($tipo, ['terreno','gleba','lote'])) ? 1 : 0;
+        // FGTS é INDEPENDENTE de financiamento — jamais derivado do CSV.
+        // Valor real vem SOMENTE da página de detalhe da Caixa (frase "Permite utilização de FGTS"),
+        // preenchido pelo caixa-scrape-detalhe.php (sob demanda) ou fgts-batch-scraper.php (em lote).
+        $fg   = 0;
         $ins->execute([
             ':h'  => $hdn, ':n' => $num, ':uf' => $ufR, ':ci' => $ci,
             ':ba' => $ba,  ':en' => $en,

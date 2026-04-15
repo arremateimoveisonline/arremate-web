@@ -20,7 +20,7 @@
       --hdrH:84px;
     }
     @media(max-width:900px){:root{--hdrH:76px}}
-    html{scroll-behavior:smooth;color-scheme:light}
+    html{scroll-behavior:smooth;color-scheme:light;overflow-x:hidden}
     body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;background:var(--azul-bg);color:var(--texto);line-height:1.55;font-size:15px}
     a{color:inherit;text-decoration:none}
 
@@ -43,8 +43,9 @@
     .btn-nav-cta:hover{filter:brightness(1.08)}
     .nav-links a.active{opacity:1;background:rgba(255,255,255,.18);border-radius:8px;padding:4px 10px;font-weight:900}
     .nav-mobile a.active{background:#c0d8f8;color:var(--azul-esc);font-weight:900}
-    .hamburger{display:none;align-items:center;justify-content:center;width:44px;height:44px;flex-shrink:0;background:rgba(255,255,255,.1);border:2px solid rgba(255,255,255,.4);border-radius:10px;cursor:pointer;color:#fff}
-    .hamburger svg{width:22px;height:22px;display:block}
+    .hamburger{display:none;align-items:center;justify-content:center;width:44px;height:44px;flex-shrink:0;background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.3);border-radius:10px;cursor:pointer;color:#fff;transition:background .15s}
+    .hamburger svg{width:20px;height:20px;display:block}
+    .hamburger:hover,.hamburger:focus-visible{background:rgba(255,255,255,.22);outline:none}
     .nav-mobile{display:none;flex-direction:column;width:100%;background:#dceeff;border-top:2px solid #a8cfee}
     .menu-chk:checked~.nav-mobile{display:flex!important}
     .nav-mobile a{display:block;padding:14px 20px;font-size:.97rem;font-weight:700;color:#0b1a33;background:#e8f3ff;border-bottom:1px solid #b8d8f5;text-decoration:none;transition:background .15s}
@@ -52,28 +53,29 @@
     .nav-mob-cta{background:#e97500!important;color:#fff!important;font-weight:900!important}
     .nav-mob-close{display:flex;align-items:center;padding:12px 20px;font-size:.9rem;font-weight:700;color:#01468d;background:#c8e0f8;border-bottom:2px solid #a8cfee;cursor:pointer}
     @media(max-width:900px){
-      .hdr{padding:0 12px;min-height:76px;gap:8px}
+      .hdr{padding:0 8px 0 6px;min-height:76px;gap:6px}
       .nav-links{display:none!important}
-      .hamburger{display:flex!important}
-      .logo-icon{width:54px!important;height:54px!important}
-      .logo-icon-img{width:54px!important;height:54px!important}
-      .logo-aio{font-size:1.13rem}
+      .hamburger{display:flex}
+      .logo-icon{width:44px;height:44px}
+      .logo-icon-img{width:44px;height:44px}
+      .logo-aio{font-size:1.2rem}
       .logo-sub-full{display:none}
       .logo-sub-mobile{display:block}
+      .logo{flex-shrink:1;min-width:0;gap:5px}
       .logo-txt{max-width:calc(100vw - 112px)}
-      .logo-sub{white-space:normal;font-size:.71rem;text-align:left;text-align-last:left}
+      .logo-sub{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:.71rem;text-align:left;text-align-last:left}
     }
     @media(min-width:901px){.nav-mobile{display:none!important}}
 
     /* BLOG HERO */
-    .blog-hero{background:linear-gradient(135deg,#01468d 0%,#0053a6 50%,#0369c7 100%);color:#fff;padding:56px 20px 48px;text-align:center}
+    .blog-hero{background:linear-gradient(135deg,#01468d 0%,#0053a6 50%,#0369c7 100%);color:#fff;padding:22px 20px 20px;text-align:center}
     .blog-hero-inner{max-width:760px;margin:0 auto}
-    .blog-hero h1{font-size:2rem;font-weight:900;line-height:1.2;margin-bottom:14px;text-shadow:0 2px 10px rgba(0,0,0,.22)}
-    .blog-hero p{font-size:1.05rem;color:rgba(255,255,255,.88);max-width:600px;margin:0 auto;line-height:1.6}
+    .blog-hero h1{font-size:1.55rem;font-weight:900;line-height:1.2;margin-bottom:8px;text-shadow:0 2px 10px rgba(0,0,0,.22)}
+    .blog-hero p{font-size:.88rem;color:rgba(255,255,255,.88);max-width:600px;margin:0 auto;line-height:1.5}
     @media(max-width:600px){
-      .blog-hero{padding:38px 16px 34px}
-      .blog-hero h1{font-size:1.45rem}
-      .blog-hero p{font-size:.93rem}
+      .blog-hero{padding:18px 16px 16px}
+      .blog-hero h1{font-size:1.2rem}
+      .blog-hero p{font-size:.82rem}
     }
 
     /* BLOG MAIN */
@@ -126,11 +128,13 @@
       </div>
     </a>
     <nav class="nav-links">
+      <a href="index.php">Início</a>
+      <a href="index.php#oportunidades">Oportunidades</a>
       <a href="resultados.html">Buscar Imóveis</a>
       <a href="favoritos.html">❤️ Favoritos</a>
       <a href="simulador-de-financiamento.php">Simulador</a>
       <a href="index.php#duvidas">Dúvidas</a>
-      <a href="blog.html" style="opacity:1;font-weight:900">Blog</a>
+      <a href="blog.html" class="active">Blog</a>
     </nav>
     <label for="menu-toggle" class="hamburger" aria-label="Abrir menu">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
@@ -142,11 +146,13 @@
   </div>
   <nav class="nav-mobile">
     <label for="menu-toggle" class="nav-mob-close">✕ Fechar</label>
+    <a href="index.php" onclick="document.getElementById('menu-toggle').checked=false">🏠 Início</a>
+    <a href="index.php#oportunidades" onclick="document.getElementById('menu-toggle').checked=false">🏡 Oportunidades</a>
     <a href="resultados.html" onclick="document.getElementById('menu-toggle').checked=false">🔍 Buscar Imóveis</a>
     <a href="favoritos.html" onclick="document.getElementById('menu-toggle').checked=false">❤️ Favoritos</a>
     <a href="simulador-de-financiamento.php" onclick="document.getElementById('menu-toggle').checked=false">📊 Simulador</a>
     <a href="index.php#duvidas" onclick="document.getElementById('menu-toggle').checked=false">❓ Dúvidas</a>
-    <a href="blog.html" onclick="document.getElementById('menu-toggle').checked=false" style="opacity:1;font-weight:900;background:#d8ecff">📝 Blog</a>
+    <a href="blog.html" onclick="document.getElementById('menu-toggle').checked=false" class="active">📝 Blog</a>
   </nav>
 </header>
 
@@ -175,7 +181,7 @@
       <span class="blog-cat-badge">Modalidades</span>
       <h2 class="blog-card-title"><a href="blog-leilao-licitacao-venda-direta.html" style="color:inherit;text-decoration:none">Leilão, licitação ou venda direta? Entenda as diferenças</a></h2>
       <p class="blog-card-excerpt">Os imóveis da CAIXA são ofertados em diferentes modalidades e cada uma tem regras, prazos e condições distintas. Saiba qual delas oferece mais vantagens para o seu perfil e como participar de cada uma com segurança.</p>
-      <a href="blog-como-comprar-imovel-caixa.html" class="blog-card-cta">Ler artigo →</a>
+      <a href="blog-leilao-licitacao-venda-direta.html" class="blog-card-cta">Ler artigo →</a>
     </article>
 
     <!-- Artigo 3 -->
@@ -184,7 +190,7 @@
       <span class="blog-cat-badge">Financiamento</span>
       <h2 class="blog-card-title"><a href="blog-fgts-imovel-caixa.html" style="color:inherit;text-decoration:none">Como usar o FGTS para comprar imóvel da CAIXA</a></h2>
       <p class="blog-card-excerpt">O FGTS pode ser usado como entrada ou para amortizar o financiamento de imóveis da CAIXA, mas existem regras específicas. Veja os requisitos, limites de uso e como consultar o saldo disponível antes de fechar negócio.</p>
-      <a href="blog-como-comprar-imovel-caixa.html" class="blog-card-cta">Ler artigo →</a>
+      <a href="blog-fgts-imovel-caixa.html" class="blog-card-cta">Ler artigo →</a>
     </article>
 
     <!-- Artigo 4 -->
@@ -193,7 +199,7 @@
       <span class="blog-cat-badge">Análise</span>
       <h2 class="blog-card-title"><a href="blog-imovel-ocupado-caixa.html" style="color:inherit;text-decoration:none">Imóvel ocupado da CAIXA: vale a pena? Veja os riscos</a></h2>
       <p class="blog-card-excerpt">Muitos imóveis da CAIXA ainda estão ocupados por antigos proprietários ou inquilinos. Antes de comprar, é fundamental entender os riscos jurídicos, os custos de desocupação e o tempo estimado para tomar posse do bem.</p>
-      <a href="blog-como-comprar-imovel-caixa.html" class="blog-card-cta">Ler artigo →</a>
+      <a href="blog-imovel-ocupado-caixa.html" class="blog-card-cta">Ler artigo →</a>
     </article>
 
     <!-- Artigo 5 -->
@@ -202,7 +208,7 @@
       <span class="blog-cat-badge">Dicas</span>
       <h2 class="blog-card-title"><a href="blog-filtrar-maior-desconto.html" style="color:inherit;text-decoration:none">Como filtrar imóveis da CAIXA com maior desconto</a></h2>
       <p class="blog-card-excerpt">Saiba como usar os filtros de busca para encontrar imóveis com os maiores percentuais de desconto sobre o valor de avaliação. Com a estratégia certa, é possível encontrar oportunidades com 40%, 50% ou até mais de desconto.</p>
-      <a href="blog-como-comprar-imovel-caixa.html" class="blog-card-cta">Ler artigo →</a>
+      <a href="blog-filtrar-maior-desconto.html" class="blog-card-cta">Ler artigo →</a>
     </article>
 
     <!-- Artigo 6 -->
@@ -211,7 +217,7 @@
       <span class="blog-cat-badge">Encargos</span>
       <h2 class="blog-card-title"><a href="blog-iptu-condominio-caixa.html" style="color:inherit;text-decoration:none">IPTU e condomínio em imóveis da CAIXA: quem paga?</a></h2>
       <p class="blog-card-excerpt">Uma das dúvidas mais comuns de quem arrematou ou está prestes a comprar um imóvel da CAIXA é sobre os débitos existentes. Entenda quem é responsável pelo IPTU atrasado, taxas de condomínio e outras dívidas vinculadas ao imóvel.</p>
-      <a href="blog-como-comprar-imovel-caixa.html" class="blog-card-cta">Ler artigo →</a>
+      <a href="blog-iptu-condominio-caixa.html" class="blog-card-cta">Ler artigo →</a>
     </article>
 
   </div>
@@ -227,7 +233,7 @@
         <a href="index.php#oportunidades">Oportunidades</a>
         <a href="simulador-de-financiamento.php">Simulador de Financiamento</a>
         <a href="favoritos.html">❤️ Favoritos</a>
-        <a href="blog.html">Blog</a>
+        <a href="blog.html">Blog do Arremate</a>
       </div>
       <div class="footer-col">
         <h4>Suporte</h4>
@@ -256,5 +262,6 @@
   </div>
 </footer>
 
+<script src="logo-fit.js"></script>
 </body>
 </html>

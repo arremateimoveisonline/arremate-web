@@ -95,8 +95,8 @@ input,select,textarea{background-color:#fff;color:#0f172a}
 
 /* IMÓVEIS */
 .imoveis-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
-.imovel-card{background:#fff;border:1px solid var(--borda);border-radius:var(--radius);box-shadow:var(--sombra);display:flex;flex-direction:column;overflow:hidden;transition:box-shadow .15s,transform .15s;min-height:480px}
-.imovel-card:hover{box-shadow:0 10px 34px rgba(15,23,42,.25);transform:translateY(-1px)}
+.imovel-card{background:#fff;border:1px solid var(--borda);border-radius:var(--radius);box-shadow:var(--sombra);display:flex;flex-direction:column;overflow:hidden;transition:box-shadow .15s,transform .15s;min-height:480px;cursor:pointer}
+.imovel-card:hover{box-shadow:0 12px 40px rgba(0,83,166,.18);border-color:#93c5fd;transform:translateY(-2px)}
 .imovel-thumb{height:160px;position:relative;overflow:hidden;background:linear-gradient(135deg,#dbeafe,#eff6ff)}
 .imovel-thumb-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
 .thumb-fallback{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:2.2rem;color:#cbd5e1}
@@ -1154,19 +1154,20 @@ function buildCard(item) {
   body.appendChild(endereco);
   body.appendChild(precos);
   /* Data do leilão */
-  if (item.data_encerramento) {
-    var dataEnc = item.data_encerramento;
-    var dataFmt = dataEnc;
-    if (/^\d{4}-\d{2}-\d{2}/.test(dataEnc)) {
-      var dp = dataEnc.split(/[T ]/);
-      var parts = dp[0].split('-');
-      dataFmt = parts[2] + '/' + parts[1] + '/' + parts[0];
-      if (dp[1]) dataFmt += ' às ' + dp[1].substring(0, 5);
+  function fmtDataIdx(raw){if(!raw||!/^\d{4}-\d{2}-\d{2}/.test(raw))return raw||'';var dp=raw.split(/[T ]/);var pts=dp[0].split('-');var s=pts[2]+'/'+pts[1]+'/'+pts[0];if(dp[1])s+=' às '+dp[1].substring(0,5);return s;}
+  var modIdx = (item.modalidade||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  var isSfiIdx = modIdx.indexOf('leilao sfi') !== -1;
+  var isCompDirIdx = modIdx.indexOf('direta') !== -1;
+  if (!isCompDirIdx) {
+    if (isSfiIdx && (item.data_leilao_1 || item.data_encerramento)) {
+      if (item.data_leilao_1) { var r1=document.createElement('div'); r1.style.cssText='font-size:.75rem;color:#1d4ed8;font-weight:700;margin:6px 0 0 0'; r1.textContent='🔨 1º Leilão: '+fmtDataIdx(item.data_leilao_1); precos.appendChild(r1); }
+      if (item.data_encerramento) { var r2=document.createElement('div'); r2.style.cssText='font-size:.75rem;color:#1e3a8a;font-weight:700;margin:2px 0 0 0'; r2.textContent='🔨 2º Leilão: '+fmtDataIdx(item.data_encerramento); precos.appendChild(r2); }
+    } else if (item.data_encerramento) {
+      var dataRow = document.createElement('div');
+      dataRow.style.cssText = 'font-size:.75rem;color:#64748b;font-weight:600;margin:6px 0 0 0';
+      dataRow.textContent = '📅 ' + fmtDataIdx(item.data_encerramento);
+      precos.appendChild(dataRow);
     }
-    var dataRow = document.createElement('div');
-    dataRow.style.cssText = 'font-size:.75rem;color:#64748b;font-weight:600;margin:6px 0 0 0';
-    dataRow.textContent = '📅 ' + dataFmt;
-    precos.appendChild(dataRow);
   }
   if (atribRow) body.appendChild(atribRow);
   body.appendChild(chips);
@@ -1250,6 +1251,13 @@ function buildCard(item) {
   card.appendChild(thumb);
   card.appendChild(body);
   card.appendChild(footer);
+
+  /* Card inteiro clicável */
+  var cardUrl = hdnFinal ? 'imovel.php?hdnimovel=' + hdnFinal : (item.link || '#');
+  card.addEventListener('click', function(e) {
+    if (e.target.closest('.btn-card-action,.imovel-link')) return;
+    window.open(cardUrl, '_blank', 'noopener,noreferrer');
+  });
 
   return card;
 }
@@ -1382,7 +1390,7 @@ window.parseCSV = parseCSVCaixa;
             preco:it.preco/100, avaliacao:it.avaliacao/100,
             desconto:String(it.desconto),
             fgts:it.fgts, financiamento:it.financiamento, disputa:it.disputa,
-            data_encerramento:it.data_encerramento
+            data_encerramento:it.data_encerramento, data_leilao_1:it.data_leilao_1||''
           };
         });
         renderizar(items);
@@ -1818,7 +1826,7 @@ function rodarSimulador() {
           return {num_imovel:it.hdnimovel,uf:it.uf,cidade:it.cidade,bairro:it.bairro,
             endereco:it.endereco,descricao:it.descricao,modalidade:it.modalidade_raw||it.modalidade,
             link:it.link,preco:it.preco/100,avaliacao:it.avaliacao/100,desconto:String(it.desconto),
-            fgts:it.fgts,financiamento:it.financiamento,disputa:it.disputa,data_encerramento:it.data_encerramento};
+            fgts:it.fgts,financiamento:it.financiamento,disputa:it.disputa,data_encerramento:it.data_encerramento,data_leilao_1:it.data_leilao_1||''};
         });
         items = filtrar(items, filtros);
         grid.innerHTML = '';

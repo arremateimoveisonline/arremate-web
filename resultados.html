@@ -170,8 +170,8 @@
     .imoveis-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
     @media(max-width:1200px){.imoveis-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
     @media(max-width:700px){.imoveis-grid{grid-template-columns:1fr}}
-    .imovel-card{background:#fff;border:1px solid var(--borda);border-radius:var(--radius);box-shadow:var(--sombra);display:flex;flex-direction:column;overflow:hidden;transition:box-shadow .15s,transform .15s;min-height:480px}
-    .imovel-card:hover{box-shadow:0 10px 34px rgba(15,23,42,.25);transform:translateY(-1px)}
+    .imovel-card{background:#fff;border:1px solid var(--borda);border-radius:var(--radius);box-shadow:var(--sombra);display:flex;flex-direction:column;overflow:hidden;transition:box-shadow .15s,transform .15s;min-height:480px;cursor:pointer}
+    .imovel-card:hover{box-shadow:0 12px 40px rgba(0,83,166,.18);border-color:#93c5fd;transform:translateY(-2px)}
     .imovel-thumb{height:160px;position:relative;overflow:hidden;background:linear-gradient(135deg,#dbeafe,#eff6ff)}
     .imovel-thumb-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
     .thumb-fallback{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:2.2rem;color:#cbd5e1}
@@ -715,23 +715,23 @@ function mascaraM2Focus(el){
     /* Data — label e cor variam por modalidade. Compra Direta não exibe data. */
     var mod=norm(item.modalidade||'');
     var isCompraDir2=mod.indexOf('direta')!==-1;
-    if(item.data_encerramento && !isCompraDir2){
-      var dataEnc=item.data_encerramento;var dataFmt=dataEnc;
-      if(/^\d{4}-\d{2}-\d{2}/.test(dataEnc)){var dp2=dataEnc.split(/[T ]/);var pts=dp2[0].split('-');dataFmt=pts[2]+'/'+pts[1]+'/'+pts[0];if(dp2[1])dataFmt+=' às '+dp2[1].substring(0,5);}
-      var dataLabel,dataColor;
-      if(mod.indexOf('venda online')!==-1){
-        dataLabel='⏰ Encerra em: '; dataColor='#b45309';
-      } else if(mod.indexOf('leilao sfi')!==-1||mod.indexOf('leilão sfi')!==-1){
-        dataLabel='🔨 Leilão em: '; dataColor='#1d4ed8';
-      } else if(mod.indexOf('licitacao')!==-1||mod.indexOf('licitação')!==-1){
-        dataLabel='📋 Licitação em: '; dataColor='#065f46';
-      } else {
-        dataLabel='📅 '; dataColor='#64748b';
+    var isSfi=mod.indexOf('leilao sfi')!==-1||mod.indexOf('leilão sfi')!==-1;
+    function fmtDataCard(raw){if(!raw||!/^\d{4}-\d{2}-\d{2}/.test(raw))return raw||'';var dp=raw.split(/[T ]/);var pts=dp[0].split('-');var s=pts[2]+'/'+pts[1]+'/'+pts[0];if(dp[1])s+=' às '+dp[1].substring(0,5);return s;}
+    if(!isCompraDir2){
+      if(isSfi && (item.data_leilao_1 || item.data_encerramento)){
+        // SFI: exibe 1º e 2º Leilão em linhas separadas
+        if(item.data_leilao_1){var r1=document.createElement('div');r1.style.cssText='font-size:.75rem;font-weight:700;margin:6px 0 0 0;color:#1d4ed8';r1.textContent='🔨 1º Leilão: '+fmtDataCard(item.data_leilao_1);precos.appendChild(r1);}
+        if(item.data_encerramento){var r2=document.createElement('div');r2.style.cssText='font-size:.75rem;font-weight:700;margin:2px 0 0 0;color:#1e3a8a';r2.textContent='🔨 2º Leilão: '+fmtDataCard(item.data_encerramento);precos.appendChild(r2);}
+      } else if(item.data_encerramento){
+        var dataLabel,dataColor;
+        if(mod.indexOf('venda online')!==-1){dataLabel='⏰ Encerra em: ';dataColor='#b45309';}
+        else if(mod.indexOf('licitacao')!==-1||mod.indexOf('licitação')!==-1){dataLabel='📋 Licitação em: ';dataColor='#065f46';}
+        else{dataLabel='📅 ';dataColor='#64748b';}
+        var dataRow=document.createElement('div');
+        dataRow.style.cssText='font-size:.75rem;font-weight:700;margin:6px 0 0 0;color:'+dataColor;
+        dataRow.textContent=dataLabel+fmtDataCard(item.data_encerramento);
+        precos.appendChild(dataRow);
       }
-      var dataRow=document.createElement('div');
-      dataRow.style.cssText='font-size:.75rem;font-weight:700;margin:6px 0 0 0;color:'+dataColor;
-      dataRow.textContent=dataLabel+dataFmt;
-      precos.appendChild(dataRow);
     }
     body.appendChild(chips); body.appendChild(aut);
     var footer=document.createElement('div'); footer.className='imovel-footer';
@@ -742,6 +742,14 @@ function mascaraM2Focus(el){
     var wa=document.createElement('a'); wa.className='imovel-link';  wa.target='_blank'; wa.rel='noopener noreferrer'; var hdnBtn=getHdnFromLink(item.link||'')||item.num_imovel||''; wa.href=hdnBtn?'imovel.php?hdnimovel='+hdnBtn:(item.link||'#'); wa.textContent='🏠 Ver imóvel';
     footer.appendChild(st); footer.appendChild(wa);
     card.appendChild(thumb); card.appendChild(body); card.appendChild(footer);
+
+    /* Card inteiro clicável */
+    var cardUrl=hdnBtn?'imovel.php?hdnimovel='+hdnBtn:(item.link||'#');
+    card.addEventListener('click',function(e){
+      if(e.target.closest('.btn-card-action,.imovel-link')) return;
+      window.open(cardUrl,'_blank','noopener,noreferrer');
+    });
+
     return card;
   }
 
@@ -875,7 +883,7 @@ function mascaraM2Focus(el){
         if(cnt) cnt.textContent=(_total===1?'1 imóvel encontrado':_total.toLocaleString('pt-BR')+' imóveis encontrados');
         atualizarSubtitulo(_total);
         TODOS=(data.imoveis||[]).map(function(it){
-          return {num_imovel:it.hdnimovel||it.numero,uf:it.uf,cidade:it.cidade,bairro:it.bairro,endereco:it.endereco,descricao:it.descricao,modalidade:it.modalidade_raw||it.modalidade,link:it.link,preco:parseInt(it.preco,10)||0,avaliacao:parseInt(it.avaliacao,10)||0,desconto:String(it.desconto),fgts:it.fgts,financiamento:it.financiamento,disputa:it.disputa,condominio:it.condominio||'',iptu:it.iptu||'',data_encerramento:it.data_encerramento||''};
+          return {num_imovel:it.hdnimovel||it.numero,uf:it.uf,cidade:it.cidade,bairro:it.bairro,endereco:it.endereco,descricao:it.descricao,modalidade:it.modalidade_raw||it.modalidade,link:it.link,preco:parseInt(it.preco,10)||0,avaliacao:parseInt(it.avaliacao,10)||0,desconto:String(it.desconto),fgts:it.fgts,financiamento:it.financiamento,disputa:it.disputa,condominio:it.condominio||'',iptu:it.iptu||'',data_encerramento:it.data_encerramento||'',data_leilao_1:it.data_leilao_1||''};
         });
         if(grid){grid.textContent='';TODOS.forEach(function(it){grid.appendChild(buildCard(it));});}
         renderPaginacao(_total,_page);

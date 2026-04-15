@@ -70,6 +70,7 @@ if ($found) {
     $condominio = (string)($imovel['condominio'] ?? '');
     $iptu       = (string)($imovel['iptu']       ?? '');
     $data_enc   = (string)($imovel['data_encerramento'] ?? '');
+    $data_leil1 = (string)($imovel['data_leilao_1']    ?? '');
     $foto_url   = (string)($imovel['foto_url'] ?? '');
 
     $precoBrl   = fmtBRL_php($precoCent);
@@ -99,9 +100,9 @@ if ($found) {
               . $pageUrl;
     $waUrl = 'https://wa.me/' . WA_NUMBER . '?text=' . rawurlencode($waMsgRaw);
 
-    /* Fallback edital: padrão EL{hdn}.PDF (principal) e E{hdn}.pdf (alternativo) */
-    $linkEdital    = $hdn ? 'https://venda-imoveis.caixa.gov.br/editais/EL' . $hdn . '.PDF' : $link;
-    $linkEditalAlt = $hdn ? 'https://venda-imoveis.caixa.gov.br/editais/E'  . $hdn . '.pdf' : $link;
+    /* Edital: URL real vem do scraper; fallback = página do imóvel na CAIXA */
+    $linkEdital    = $link ?: '#';
+    $linkEditalAlt = $link ?: '#';
     $linkMatricula = $hdn ? 'https://venda-imoveis.caixa.gov.br/editais/matricula/' . $uf . '/' . $hdn . '.pdf' : $link;
     $fotoUrl       = $foto_url ?: 'https://venda-imoveis.caixa.gov.br/fotos/F' . str_pad($hdn, 14, '0', STR_PAD_LEFT) . '21.jpg';
 
@@ -114,7 +115,7 @@ if ($found) {
     $hdn=$hdnimovel; $numero=''; $uf='SP'; $cidade=''; $bairro=''; $endereco='';
     $descricao=''; $modalidade=''; $mod_raw=''; $link='#';
     $precoCent=0; $avalCent=0; $desconto=0; $tipoTxt='Imóvel';
-    $fgts=0; $fin=0; $disputa=0; $condominio=''; $iptu=''; $data_enc='';
+    $fgts=0; $fin=0; $disputa=0; $condominio=''; $iptu=''; $data_enc=''; $data_leil1='';
     $precoBrl=''; $avalBrl=''; $econBrl='';
     $isSP=true; $isCompDireta=false; $fotoUrl=''; $foto_url='';
     $waUrl='https://wa.me/'.WA_NUMBER;
@@ -151,11 +152,12 @@ if ($found) {
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root{--azul:#0053a6;--azul-esc:#00366f;--laranja:#f39200;--azul-bg:#f1f7ff;--azul-card:#e8f2ff;--borda:#cfe2ff;--texto:#1e293b;--muted:#64748b;--radius:14px;--sombra:0 4px 18px rgba(0,83,166,.10);--hdrH:84px;}
     @media(max-width:900px){:root{--hdrH:76px}}
-    html{scroll-behavior:smooth;color-scheme:light}
-    body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--azul-bg);color:var(--texto);line-height:1.55;font-size:15px}
+    html{scroll-behavior:smooth;color-scheme:light;overflow-x:hidden}
+    html{overflow-x:hidden}
+    body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--azul-bg);color:var(--texto);line-height:1.55;font-size:15px;overflow-x:hidden}
     a{color:inherit;text-decoration:none}
     .menu-chk{display:none!important;position:absolute;left:-9999px}
-    .site-header{position:sticky;top:0;z-index:200;background:#01468d;box-shadow:0 2px 10px rgba(0,0,0,.25);width:100%;overflow-x:clip}
+    .site-header{position:sticky;top:0;z-index:200;background:#01468d;color:#fff;box-shadow:0 3px 12px rgba(0,0,0,.25)}
     .hdr{max-width:1400px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 20px;min-height:84px}
     .logo{display:flex;align-items:center;gap:12px;flex-shrink:0}
     .logo-icon{width:70px;height:70px;flex-shrink:0;border-radius:14px;overflow:hidden}
@@ -170,15 +172,16 @@ if ($found) {
     .btn-nav-cta{background:var(--laranja)!important;color:#3b1f00!important;padding:7px 14px!important;border-radius:999px!important;font-weight:900!important;opacity:1!important;box-shadow:0 3px 8px rgba(0,0,0,.22)}
     .nav-links a.active{opacity:1;background:rgba(255,255,255,.18);border-radius:8px;padding:4px 10px;font-weight:900}
     .nav-mobile a.active{background:#c0d8f8;color:var(--azul-esc);font-weight:900}
-    .hamburger{display:none;align-items:center;justify-content:center;width:44px;height:44px;flex-shrink:0;background:rgba(255,255,255,.1);border:2px solid rgba(255,255,255,.4);border-radius:10px;cursor:pointer;color:#fff}
-    .hamburger svg{width:22px;height:22px;display:block}
+    .hamburger{display:none;align-items:center;justify-content:center;width:44px;height:44px;flex-shrink:0;background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.3);border-radius:10px;cursor:pointer;color:#fff;transition:background .15s}
+    .hamburger svg{width:20px;height:20px;display:block}
+    .hamburger:hover,.hamburger:focus-visible{background:rgba(255,255,255,.22);outline:none}
     .nav-mobile{display:none;flex-direction:column;width:100%;background:#dceeff;border-top:2px solid #a8cfee}
     .menu-chk:checked ~ .nav-mobile{display:flex!important}
     .nav-mobile a{display:block;padding:14px 20px;font-size:.97rem;font-weight:700;color:#0b1a33;background:#e8f3ff;border-bottom:1px solid #b8d8f5;text-decoration:none}
     .nav-mobile a:hover{background:#cde5ff}
     .nav-mob-cta{background:#e97500!important;color:#fff!important;font-weight:900!important;border-bottom:none!important}
     .nav-mob-close{display:flex;align-items:center;padding:12px 20px;font-size:.9rem;font-weight:700;color:#01468d;background:#c8e0f8;border-bottom:2px solid #a8cfee;cursor:pointer}
-    @media(max-width:900px){.hdr{padding:0 12px;min-height:76px;gap:8px}.nav-links{display:none!important}.hamburger{display:flex!important}.logo-icon{width:54px!important;height:54px!important}.logo-icon-img{width:54px!important;height:54px!important}.logo-aio{font-size:1.13rem}.logo{flex-shrink:1;min-width:0}.logo-txt{min-width:0;overflow:hidden;max-width:calc(100vw - 150px)}.logo-sub-full{display:none}.logo-sub-mobile{display:block}.logo-sub{white-space:normal;font-size:.71rem;text-align:left;text-align-last:left}}
+    @media(max-width:900px){.hdr{padding:0 8px 0 6px;min-height:76px;gap:6px}.nav-links{display:none!important}.hamburger{display:flex}.logo-icon{width:44px;height:44px}.logo-icon-img{width:44px;height:44px}.logo-aio{font-size:1.2rem}.logo{flex-shrink:1;min-width:0;gap:5px}.logo-txt{min-width:0;overflow:hidden;max-width:calc(100vw - 112px)}.logo-sub-full{display:none}.logo-sub-mobile{display:block}.logo-sub{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:.71rem;text-align:left;text-align-last:left}}
     .page-wrap{max-width:1100px;margin:0 auto;padding:20px 16px 24px}
     .breadcrumb{display:flex;align-items:center;gap:8px;font-size:.82rem;color:var(--muted);margin-bottom:16px;flex-wrap:wrap}
     .breadcrumb a{color:var(--azul);font-weight:700}.breadcrumb a:hover{text-decoration:underline}
@@ -201,15 +204,12 @@ if ($found) {
     .tag-mod-det{position:absolute;top:12px;right:12px;background:var(--laranja);color:#3b1f00;font-size:.78rem;font-weight:900;padding:5px 14px;border-radius:999px;z-index:10;box-shadow:0 3px 8px rgba(0,0,0,.18)}
     .det-cidade-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:2px}
     .det-cidade{font-size:1rem;font-weight:900;color:#111827}
-    .det-actions-mobile{display:none;align-items:center;gap:6px;flex-shrink:0}
-    @media(max-width:900px){
-      .det-actions-mobile{display:flex}
-    }
+    .det-actions-mobile{display:flex;align-items:center;gap:6px;flex-shrink:0}
     .btn-det-action{background:none;border:1.5px solid #e2e8f0;border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1.1rem;transition:background .15s,border-color .15s;flex-shrink:0;padding:0}
     .btn-det-action:hover{background:#f1f5f9;border-color:#cbd5e1}
     .btn-det-action.is-fav{border-color:#e11d48;background:#fff1f2}
-    .det-titulo{font-size:.80rem;font-weight:600;color:var(--muted);margin-bottom:4px}
-    .det-endereco{font-size:.78rem;color:#6b7280;margin-bottom:14px}
+    .det-titulo{font-size:.80rem;font-weight:600;color:var(--muted);margin-bottom:1px}
+    .det-endereco{font-size:.78rem;color:#6b7280;margin-bottom:6px}
     .preco-destaque{background:linear-gradient(135deg,#0f172a,#1d4ed8);border-radius:12px;padding:14px 18px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
     .preco-venda-det{color:#f9fafb;font-size:1.5rem;font-weight:900}
     .preco-av-det{color:#94a3b8;font-size:.82rem;text-decoration:line-through}
@@ -233,9 +233,15 @@ if ($found) {
     .sim-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
     @media(max-width:500px){.sim-grid{grid-template-columns:1fr}}
     .fgroup{display:flex;flex-direction:column;gap:4px}
-    .fgroup label{font-size:.74rem;font-weight:700;color:#475569}
+    .fgroup label{font-size:.74rem;font-weight:700;color:#475569;display:flex;align-items:center;gap:5px}
     .fgroup input,.fgroup select{border:1px solid #cbd5e1;border-radius:10px;padding:9px 10px;font-size:.84rem;width:100%;background:#fff;color:#0f172a;font-family:inherit}
     .fgroup input:focus,.fgroup select:focus{border-color:var(--azul);outline:none;box-shadow:0 0 0 2px rgba(0,83,166,.14)}
+    .sim-tip{position:relative;display:inline-flex;align-items:center;cursor:pointer}
+    .sim-tip-icon{width:14px;height:14px;border-radius:50%;background:#0053a6;color:#fff;font-size:.6rem;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1}
+    .sim-tip-box{display:none;position:absolute;left:0;top:calc(100% + 6px);background:#1e293b;color:#f1f5f9;font-size:.73rem;font-weight:400;line-height:1.45;padding:9px 12px;border-radius:8px;width:230px;z-index:300;box-shadow:0 6px 18px rgba(0,0,0,.28);pointer-events:none}
+    .sim-tip-box::before{content:'';position:absolute;top:-5px;left:10px;border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:5px solid #1e293b}
+    .sim-tip.open .sim-tip-box,.sim-tip:hover .sim-tip-box{display:block}
+    @media(max-width:600px){.sim-tip-box{width:180px}}
     .btn-simular{width:100%;background:linear-gradient(120deg,var(--laranja),#ffb347);border:none;border-radius:999px;padding:10px;font-weight:900;font-size:.9rem;color:#3b1f00;cursor:pointer;margin-top:10px;font-family:inherit}
     .btn-simular:hover{filter:brightness(1.05)}
     .sim-resultado{background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px;padding:12px 14px;font-size:.84rem;line-height:1.8;margin-top:10px;display:none}
@@ -372,7 +378,8 @@ document.addEventListener("DOMContentLoaded",function(){
     </a>
     <nav class="nav-links">
       <a href="index.php">Início</a>
-      <a href="resultados.html">Buscar</a>
+      <a href="index.php#oportunidades">Oportunidades</a>
+      <a href="resultados.html">Buscar Imóveis</a>
       <a href="favoritos.html">❤️ Favoritos</a>
       <a href="simulador-de-financiamento.php">Simulador</a>
       <a href="index.php#duvidas">Dúvidas</a>
@@ -387,7 +394,8 @@ document.addEventListener("DOMContentLoaded",function(){
   <nav class="nav-mobile">
     <label for="menu-toggle" class="nav-mob-close">✕ Fechar</label>
     <a href="index.php" onclick="document.getElementById('menu-toggle').checked=false">🏠 Início</a>
-    <a href="resultados.html" onclick="document.getElementById('menu-toggle').checked=false">🔎 Buscar</a>
+    <a href="index.php#oportunidades" onclick="document.getElementById('menu-toggle').checked=false">🏡 Oportunidades</a>
+    <a href="resultados.html" onclick="document.getElementById('menu-toggle').checked=false">🔍 Buscar Imóveis</a>
     <a href="favoritos.html" onclick="document.getElementById('menu-toggle').checked=false">❤️ Favoritos</a>
     <a href="simulador-de-financiamento.php" onclick="document.getElementById('menu-toggle').checked=false">📊 Simulador</a>
     <a href="index.php#duvidas" onclick="document.getElementById('menu-toggle').checked=false">❓ Dúvidas</a>
@@ -432,9 +440,11 @@ document.addEventListener("DOMContentLoaded",function(){
             <div class="det-cidade-row">
               <div class="det-cidade" id="det-cidade"><?= esc(strtoupper($cidade)) ?> · <?= esc($uf) ?></div>
               <div class="det-actions-mobile">
-                <button class="btn-det-action" id="btn-fav-mobile" onclick="toggleFavMobile()" title="Favoritar imóvel">🤍</button>
-                <button class="btn-det-action" id="btn-share-mobile" onclick="compartilharImovel()" title="Compartilhar imóvel">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                <button class="btn-det-action" id="btn-fav-mobile" onclick="toggleFavDetalhe()" title="Favoritar imóvel">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2" width="18" height="18"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                </button>
+                <button class="btn-det-action" id="btn-share-mobile" onclick="compartilharDetalhe()" title="Compartilhar imóvel">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
                 </button>
               </div>
             </div>
@@ -489,8 +499,13 @@ document.addEventListener("DOMContentLoaded",function(){
             <div class="sec-label">📄 Documentos do leilão</div>
             <div class="docs-list">
               <div class="doc-item" id="doc-edital-wrap">
+<?php if($isCompDireta): ?>
+                <div class="doc-info"><span class="doc-icon">📄</span><span>Regras de Venda Online</span></div>
+                <a class="doc-btn" id="doc-edital" href="https://venda-imoveis.caixa.gov.br/editais/regras-VOL/comocomprar.pdf?v=01" target="_blank" rel="noopener">📄 Ver Regras</a>
+<?php else: ?>
                 <div class="doc-info"><span class="doc-icon">📋</span><span>Edital do Leilão</span></div>
                 <a class="doc-btn" id="doc-edital" href="<?= esc($linkEdital) ?>" target="_blank" rel="noopener">📥 Baixar Edital</a>
+<?php endif; ?>
               </div>
               <div class="doc-item" id="doc-matricula-wrap">
                 <div class="doc-info"><span class="doc-icon">📄</span><span>Matrícula do Imóvel</span></div>
@@ -522,10 +537,6 @@ document.addEventListener("DOMContentLoaded",function(){
         <div style="display:flex;flex-direction:column;gap:10px" class="sidebar-btns-original">
           <a href="<?= esc($waUrl) ?>" class="whats-det" target="_blank" rel="noopener" id="whats-link">💬 Falar com especialista</a>
           <a href="<?= esc($link) ?>" class="link-caixa" id="link-caixa-btn" target="_blank" rel="noopener">🏦 Ver no portal da CAIXA ↗</a>
-          <div style="display:flex;gap:10px">
-            <button class="link-caixa btn-fav-sidebar" id="btn-fav-det" onclick="toggleFavDetalhe()" style="flex:1;cursor:pointer;border:2px solid var(--azul);color:#f87171;background:#fff;font-family:inherit;font-weight:900;font-size:.88rem;display:flex;align-items:center;justify-content:center;gap:6px;border-radius:999px;transition:background .15s,color .15s"><svg class="icon-fav-sidebar" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg><span style="color:#f87171">Favoritar</span></button>
-            <button class="link-caixa" id="btn-share-det" onclick="compartilharDetalhe()" style="flex:1;cursor:pointer;border:2px solid var(--azul);font-family:inherit;font-weight:900;font-size:.88rem;display:flex;align-items:center;justify-content:center;gap:6px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;flex-shrink:0"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg><span>Compartilhar</span></button>
-          </div>
         </div>
 <?php else: ?>
         <!-- Fora de SP: plataforma nacional (sem CRECI) -->
@@ -534,10 +545,6 @@ document.addEventListener("DOMContentLoaded",function(){
             🌎 Plataforma inteligente para leilões da CAIXA em todo o Brasil
           </div>
           <a href="<?= esc($link) ?>" class="link-caixa" id="link-caixa-btn" target="_blank" rel="noopener">🏦 Ver no portal da CAIXA ↗</a>
-          <div style="display:flex;gap:10px">
-            <button class="link-caixa btn-fav-sidebar" id="btn-fav-det" onclick="toggleFavDetalhe()" style="flex:1;cursor:pointer;border:2px solid var(--azul);color:#f87171;background:#fff;font-family:inherit;font-weight:900;font-size:.88rem;display:flex;align-items:center;justify-content:center;gap:6px;border-radius:999px;transition:background .15s,color .15s"><svg class="icon-fav-sidebar" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg><span style="color:#f87171">Favoritar</span></button>
-            <button class="link-caixa" id="btn-share-det" onclick="compartilharDetalhe()" style="flex:1;cursor:pointer;border:2px solid var(--azul);font-family:inherit;font-weight:900;font-size:.88rem;display:flex;align-items:center;justify-content:center;gap:6px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;flex-shrink:0"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg><span>Compartilhar</span></button>
-          </div>
         </div>
 <?php endif; ?>
 
@@ -546,11 +553,11 @@ document.addEventListener("DOMContentLoaded",function(){
           <div class="panel-body">
             <div class="sec-label">📊 Simule o financiamento</div>
             <div class="sim-grid" style="grid-template-columns:1fr">
-              <div class="fgroup"><label>Valor do imóvel (R$)</label><input type="text" id="sim-val2" inputmode="numeric" placeholder="Ex.: 350.000,00"></div>
-              <div class="fgroup"><label>Entrada (R$)</label><input type="text" id="sim-ent2" inputmode="numeric" placeholder="Ex.: 60.000"></div>
-              <div class="fgroup"><label>Prazo (meses)</label><input type="number" id="sim-prazo2" value="360" min="12" step="12"></div>
-              <div class="fgroup"><label>Juros (% a.a.)</label><input type="number" id="sim-juros2" value="10.5" min="0" step="0.1"></div>
-              <div class="fgroup"><label>Sistema</label><select id="sim-sis2"><option value="PRICE">PRICE (parcela fixa)</option><option value="SAC">SAC (decrescente)</option></select></div>
+              <div class="fgroup"><label>Valor do imóvel (R$) <span class="sim-tip" id="tip-val2"><span class="sim-tip-icon">i</span><span class="sim-tip-box">Informe o Valor de Avaliação do edital se desejar liberar a cota máxima de crédito. Esse valor é a base para reduzir sua entrada e aumentar o financiamento.</span></span></label><input type="text" id="sim-val2" inputmode="numeric" placeholder="Ex.: R$ 350.000,00"></div>
+              <div class="fgroup"><label>Entrada (R$) <span class="sim-tip" id="tip-ent2"><span class="sim-tip-icon">i</span><span class="sim-tip-box">Para imóveis de leilão, o uso do Valor de Avaliação permite reduzir a entrada para 5%. Caso utilize o valor de venda, a entrada padrão sobe para 20%.</span></span></label><input type="text" id="sim-ent2" inputmode="numeric" placeholder="Ex.: R$ 60.000,00"></div>
+              <div class="fgroup"><label>Prazo (meses) <span class="sim-tip"><span class="sim-tip-icon">i</span><span class="sim-tip-box">Quanto maior o prazo, menor a parcela mensal, mas maior o total de juros pago. O prazo máximo para financiamento CAIXA é de 35 anos (420 meses).</span></span></label><input type="number" id="sim-prazo2" value="360" min="12" step="12"></div>
+              <div class="fgroup"><label>Juros (% a.a.) <span class="sim-tip"><span class="sim-tip-icon">i</span><span class="sim-tip-box">A taxa varia conforme relacionamento com a CAIXA, uso do FGTS e perfil do cliente. A média atual para financiamentos habitacionais é de 10,5% a.a.</span></span></label><input type="number" id="sim-juros2" value="10.5" min="0" step="0.1"></div>
+              <div class="fgroup"><label>Sistema <span class="sim-tip"><span class="sim-tip-icon">i</span><span class="sim-tip-box">PRICE: parcelas fixas, mais previsibilidade no orçamento. SAC: parcelas decrescentes, menos juros no total. Para imóveis da CAIXA, o SAC costuma ser mais vantajoso a longo prazo.</span></span></label><select id="sim-sis2"><option value="PRICE">PRICE (parcela fixa)</option><option value="SAC">SAC (decrescente)</option></select></div>
             </div>
             <button class="btn-simular" onclick="rodarSim2()">📊 Simular</button>
             <div class="sim-resultado" id="sim-resultado2"></div>
@@ -584,7 +591,7 @@ document.addEventListener("DOMContentLoaded",function(){
         <a href="index.php#oportunidades">Oportunidades</a>
         <a href="simulador-de-financiamento.php">Simulador de Financiamento</a>
         <a href="favoritos.html">❤️ Favoritos</a>
-        <a href="blog.html">Blog</a>
+        <a href="blog.html">Blog do Arremate</a>
       </div>
       <div class="footer-col">
         <h4>Suporte</h4>
@@ -636,6 +643,7 @@ window.__IMOVEL_DATA__ = {
   condominio:        '<?= jsStr($condominio) ?>',
   iptu:              '<?= jsStr($iptu) ?>',
   data_encerramento: '<?= jsStr($data_enc) ?>',
+  data_leilao_1:     '<?= jsStr($data_leil1) ?>',
   foto_url:          '<?= jsStr($foto_url) ?>',
   nao_encontrado:    <?= $found ? 'false' : 'true' ?>
 };
@@ -675,8 +683,8 @@ window.corrigirModalidade = function(m) {
 function norm(v){return String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();}
 function fmtBRL(v){if(v===null||v===undefined||v==='')return '';var n=parseFloat(String(v).replace(/[^0-9.,]/g,'').replace(',','.'));if(isNaN(n))return '';return n.toLocaleString('pt-BR',{style:'currency',currency:'BRL',minimumFractionDigits:2});}
 function parsePrecoNum(v){if(!v)return 0;var s=String(v).replace(/[R$\s\.]/g,'').replace(',','.');return parseFloat(s)||0;}
-function limpaNumeroBR(v){return parseFloat(String(v||'').replace(/\./g,'').replace(',','.'))||0;}
-function formataMilhar(n){return Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.');}
+function limpaNumeroBR(v){var s=String(v||'').replace(/[R$\s]/g,'').replace(/\./g,'').replace(',','.');return parseFloat(s)||0;}
+function formataMilhar(n){var p=parseFloat(n).toFixed(2).split('.');p[0]=p[0].replace(/\B(?=(\d{3})+(?!\d))/g,'.');return p.join(',');}
 function getHdnFromLink(link){if(!link)return '';try{var u=new URL(String(link).trim());return(u.searchParams.get('hdnimovel')||'').replace(/\D/g,'');}catch(e){var m=String(link).match(/hdnimovel=(\d+)/i);return m?m[1]:'';}}
 function setText(id,val){var el=document.getElementById(id);if(el)el.textContent=val;}
 function setHref(id,val){var el=document.getElementById(id);if(el)el.href=val;}
@@ -704,9 +712,11 @@ function toggleGallery(mode){
   var galleryMapa=document.getElementById('gallery-mapa');
   var fotoEl=document.querySelector('.foto-principal');
   var fallback=document.getElementById('foto-fallback');
-  
+  var tagTipo=document.getElementById('tag-tipo');
+
   if(mode==='mapa'){
     btnMapa.classList.add('active');btnFoto.classList.remove('active');
+    if(tagTipo)tagTipo.style.display='none';
     if(galleryMapa){
       if(!galleryMapa.innerHTML&&mapaIframeHtml)galleryMapa.innerHTML=mapaIframeHtml;
       else if(!galleryMapa.innerHTML&&mapaEndereco){var enc=encodeURIComponent(mapaEndereco+', Brasil');galleryMapa.innerHTML='<iframe src="https://maps.google.com/maps?q='+enc+'&output=embed&z=15" allowfullscreen loading="lazy" style="width:100%;height:100%;border:none"></iframe>';}
@@ -716,6 +726,7 @@ function toggleGallery(mode){
     if(fallback)fallback.style.display='none';
   } else {
     btnFoto.classList.add('active');btnMapa.classList.remove('active');
+    if(tagTipo)tagTipo.style.display='';
     if(galleryMapa)galleryMapa.style.display='none';
     if(fotoEl)fotoEl.style.display='block';
     else if(fallback)fallback.style.display='flex';
@@ -723,7 +734,15 @@ function toggleGallery(mode){
 }
 
 function aplicarMascaraSim(){
-  ['sim-val','sim-ent','sim-renda','sim-val2','sim-ent2'].forEach(function(id){var el=document.getElementById(id);if(!el)return;el.addEventListener('input',function(){var n=limpaNumeroBR(this.value.replace(/\./g,''));this.value=n?formataMilhar(n):'';});});
+  ['sim-val','sim-ent','sim-renda','sim-val2','sim-ent2'].forEach(function(id){var el=document.getElementById(id);if(!el)return;el.addEventListener('input',function(){var raw=this.value.replace(/[^\d,]/g,'');var parts=raw.split(',');var intFmt=parts[0]?parts[0].replace(/\B(?=(\d{3})+(?!\d))/g,'.'):'';var dec=parts.length>1?','+parts[1].substring(0,2):',00';this.value=intFmt?'R$ '+intFmt+dec:'';});});
+  /* Tooltip toggle nos campos do simulador */
+  ['tip-val2','tip-ent2'].forEach(function(id){
+    var tip=document.getElementById(id); if(!tip) return;
+    tip.addEventListener('click',function(e){e.stopPropagation();tip.classList.toggle('open');});
+  });
+  document.addEventListener('click',function(){
+    ['tip-val2','tip-ent2'].forEach(function(id){var t=document.getElementById(id);if(t)t.classList.remove('open');});
+  });
 }
 
 function extrairAreas(desc){
@@ -751,34 +770,35 @@ function renderAreas(desc){
 
 function renderPagamento(desc,modalidade,apiData){
   var grid=document.getElementById('pagamento-grid');if(!grid)return;
+  grid.innerHTML=''; /* limpa antes de renderizar para evitar duplicação */
   var d=(desc+' '+modalidade).toLowerCase();
   var isTerreno=(d.indexOf('terreno')!==-1||d.indexOf('lote')!==-1||d.indexOf('gleba')!==-1);
-  var fgts2=isTerreno?false:(apiData?apiData.fgts==1:d.indexOf('fgts')!==-1);
-  var fin2=apiData?apiData.financiamento==1:(d.indexOf('financi')!==-1||d.indexOf('sfh')!==-1);
+  var _db=window.__IMOVEL_DATA__||{};
+  var fgts2=isTerreno?false:(apiData?apiData.fgts==1:_db.fgts==1);
+  var fin2=apiData?apiData.financiamento==1:_db.financiamento==1;
   var parcel=apiData?apiData.parcelamento==1:false;
   [{icon:'💵',label:'À vista',ok:true},{icon:'🏦',label:'Financiamento CAIXA',ok:fin2},{icon:'💼',label:'FGTS',ok:fgts2},{icon:'🔄',label:'Parcelamento',ok:parcel}].forEach(function(i){
     var cls=i.ok?'pagamento-item':'pagamento-item inativo';
     var badge=i.ok?'<div class="pagamento-ok">✓ Aceito</div>':'<div class="pagamento-no">✗ Não</div>';
     grid.innerHTML+='<div class="'+cls+'"><div class="pagamento-icon">'+i.icon+'</div><div>'+i.label+'</div>'+badge+'</div>';
   });
-  // Regras de despesas — sempre exibidas (fallback "Consulte o edital" quando não scraped)
+  // Regras de despesas — sempre exibidas (textos oficiais da CAIXA)
   var rw=document.getElementById('regras-despesas'),rc=document.getElementById('regras-despesas-content');
   if(rc)rc.innerHTML='';
   if(rw)rw.style.display='block';
   if(rc){
-    // Textos conforme linguagem oficial do site da CAIXA
     var cmTxt={
-      limitada:'As dívidas condominiais até o limite de 10% do valor de avaliação do imóvel são de responsabilidade da CAIXA. As que excederem esse percentual são de responsabilidade do adquirente.',
-      comprador:'As dívidas condominiais são de responsabilidade do adquirente.',
+      limitada:'As despesas de condomínio vencidas e não pagas são de responsabilidade da CAIXA Econômica Federal, limitadas ao equivalente a 10% (dez por cento) do valor de avaliação do imóvel; as despesas que ultrapassarem esse limite são de responsabilidade do adquirente.',
+      comprador:'As despesas de condomínio são de responsabilidade do adquirente.',
     };
     var iptuTxt={
-      caixa:'Os tributos, taxas e demais encargos incidentes sobre o imóvel até a data da venda são de responsabilidade da CAIXA.',
-      comprador:'Os tributos, taxas e demais encargos são de responsabilidade do adquirente.',
+      caixa:'Os tributos, taxas e demais encargos incidentes sobre o imóvel até a data desta venda são de responsabilidade da CAIXA Econômica Federal.',
+      comprador:'Os tributos, taxas e demais encargos incidentes sobre o imóvel são de responsabilidade do adquirente.',
     };
-    var condVal=apiData&&apiData.condominio?apiData.condominio:'';
-    var iptuVal=apiData&&apiData.iptu?apiData.iptu:'';
-    var condTexto=condVal?(cmTxt[condVal]||condVal):'Consulte o edital do imóvel.';
-    var iptuTexto=iptuVal?(iptuTxt[iptuVal]||iptuVal):'Consulte o edital do imóvel.';
+    var condVal=(apiData&&apiData.condominio)?apiData.condominio:'';
+    var iptuVal=(apiData&&apiData.iptu)?apiData.iptu:'';
+    var condTexto=condVal?(cmTxt[condVal]||condVal):'Consulte o edital do imóvel para verificar a responsabilidade pelas despesas de condomínio.';
+    var iptuTexto=iptuVal?(iptuTxt[iptuVal]||iptuVal):'Consulte o edital do imóvel para verificar a responsabilidade pelos tributos e taxas.';
     var row='<div style="background:#f8fafc;border-radius:8px;padding:10px 12px;border-left:3px solid #0053a6;margin-bottom:8px"><div style="color:#0053a6;font-weight:700;font-size:.78rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">{titulo}</div><div style="color:#334155;font-size:.82rem;line-height:1.6">{texto}</div></div>';
     rc.innerHTML+=row.replace('{titulo}','Condomínio').replace('{texto}',condTexto);
     rc.innerHTML+=row.replace('{titulo}','Tributos e Taxas').replace('{texto}',iptuTexto);
@@ -794,8 +814,7 @@ async function buscarDadosApi(hdn){
 
   // Calcular links de fallback a partir dos dados PHP
   var uf = base.uf || 'SP';
-  var linkEditalEl  = 'https://venda-imoveis.caixa.gov.br/editais/EL' + hdn + '.PDF';
-  var linkEditalE   = 'https://venda-imoveis.caixa.gov.br/editais/E'  + hdn + '.pdf';
+  var linkCaixaFb = base.link || '#'; /* Página do imóvel na CAIXA — contém o link do edital */
   var linkMatriculaFb = 'https://venda-imoveis.caixa.gov.br/editais/matricula/' + uf + '/' + hdn + '.pdf';
 
   try {
@@ -809,15 +828,16 @@ async function buscarDadosApi(hdn){
       if (data.iptu) base.iptu = data.iptu;
       if (data.foto_url) base.foto_url = data.foto_url;
       if (data.data_encerramento) base.data_encerramento = data.data_encerramento;
-      if (data.data_inicio) base.data_inicio = data.data_inicio;
+      if (data.data_leilao_1)    base.data_leilao_1    = data.data_leilao_1;
+      if (data.data_inicio)      base.data_inicio       = data.data_inicio;
 
       if (data.foto_url) {
         var fotoEl = document.querySelector('.foto-principal');
         if (fotoEl) { var ti=new Image(); ti.onload=function(){fotoEl.src=data.foto_url;}; ti.src=data.foto_url; }
       }
 
-      // Documentos: edital com URL do scraper ou fallback
-      var edUrl = data.edital_url || linkEditalEl;
+      // Documentos: edital com URL do scraper ou fallback para página da CAIXA
+      var edUrl = data.edital_url || linkCaixaFb;
       setHref('doc-edital', edUrl);
       var edWrap = document.getElementById('doc-edital-wrap');
       if (edWrap) edWrap.style.display = 'flex';
@@ -836,31 +856,32 @@ async function buscarDadosApi(hdn){
         if (base.disputa == 1) condRow.innerHTML += '<span class="badge-cond badge-disputa">⚡ Em disputa</span>';
       }
 
-      // Atualizar data_encerramento na lista de informações se foi retornada pela API
-      if (data.data_encerramento) {
-        base.data_encerramento = data.data_encerramento;
+      // Atualizar datas na lista de informações quando retornadas pela API
+      if (data.data_encerramento || data.data_leilao_1) {
         var infoList = document.getElementById('info-list');
         if (infoList) {
-          var dataEnc = data.data_encerramento;
-          var dataFmt = dataEnc;
-          if (/^\d{4}-\d{2}-\d{2}/.test(dataEnc)) {
-            var dp = dataEnc.split(/[T ]/);
-            var parts = dp[0].split('-');
-            dataFmt = parts[2]+'/'+parts[1]+'/'+parts[0];
-            if (dp[1]) dataFmt += ' às ' + dp[1].substring(0,5);
-          }
-          var modC2 = canonModalidade(base.modalidade_raw || base.modalidade || '');
-          var labelData = '📅 Encerra em';
-          if (modC2 === 'leilao_sfi') labelData = '📅 Data do Leilão';
-          else if (modC2 === 'licitacao_aberta') labelData = '📅 Data da Licitação';
-          else if (modC2 === 'compra_direta') labelData = '📅 Disponível até';
+          var modC2api = canonModalidade(base.modalidade_raw || base.modalidade || '');
 
-          // Verificar se já existe e atualizar, ou adicionar nova
-          var existsRow = infoList.querySelector('[data-field="data_encerramento"]');
-          if (existsRow) {
-            existsRow.querySelector('.info-val').textContent = dataFmt;
-          } else {
-            infoList.innerHTML += '<div class="info-row" data-field="data_encerramento"><span class="info-label">' + labelData + '</span><span class="info-val">' + dataFmt + '</span></div>';
+          if (modC2api === 'leilao_sfi' && (data.data_leilao_1 || data.data_encerramento)) {
+            // SFI: atualiza/cria linha do 1º e 2º Leilão
+            var r1 = infoList.querySelector('[data-field="data_leilao_1"]');
+            var v1 = fmtData(data.data_leilao_1 || '');
+            if (r1) { r1.querySelector('.info-val').textContent = v1 || '—'; }
+            else { infoList.innerHTML += '<div class="info-row" data-field="data_leilao_1"><span class="info-label">📅 1º Leilão</span><span class="info-val">' + (v1||'—') + '</span></div>'; }
+
+            var r2 = infoList.querySelector('[data-field="data_encerramento"]');
+            var v2 = fmtData(data.data_encerramento || '');
+            if (r2) { r2.querySelector('.info-val').textContent = v2 || '—'; }
+            else { infoList.innerHTML += '<div class="info-row" data-field="data_encerramento"><span class="info-label">📅 2º Leilão</span><span class="info-val">' + (v2||'—') + '</span></div>'; }
+          } else if (data.data_encerramento) {
+            // Demais modalidades: única data de encerramento
+            var labelApi = '📅 Encerra em';
+            if (modC2api === 'licitacao_aberta') labelApi = '📅 Data da Licitação';
+            else if (modC2api === 'compra_direta') labelApi = '📅 Disponível até';
+            var vEnc = fmtData(data.data_encerramento);
+            var existsRow = infoList.querySelector('[data-field="data_encerramento"]');
+            if (existsRow) { existsRow.querySelector('.info-val').textContent = vEnc; }
+            else { infoList.innerHTML += '<div class="info-row" data-field="data_encerramento"><span class="info-label">' + labelApi + '</span><span class="info-val">' + vEnc + '</span></div>'; }
           }
         }
       }
@@ -884,8 +905,7 @@ async function buscarDadosApi(hdn){
     }
   } catch (e) {
     console.log('Scrape indisponível (Radware?), usando dados locais:', e.message);
-    // Fallback: edital e matrícula com padrão URL (sem ocultar)
-    setHref('doc-edital', linkEditalEl);
+    setHref('doc-edital', linkCaixaFb);
     setHref('doc-matricula', linkMatriculaFb);
   }
   return base;
@@ -902,7 +922,16 @@ function montarPagina(item){
   var modLabel=window.corrigirModalidade(item.modalidade)||'';
   setText('tag-mod',modLabel);
   var elMod=document.getElementById('tag-mod');if(elMod&&modLabel){var cM=window.corMod(modLabel);elMod.style.background=cM.bg;elMod.style.color=cM.color;}
-  if(modLabel==='Compra Direta')document.body.classList.add('is-direta','is-compra-direta');
+  if(modLabel==='Compra Direta'){
+    document.body.classList.add('is-direta','is-compra-direta');
+    /* Troca botão edital por Regras de Venda Online */
+    var edInfo=document.querySelector('#doc-edital-wrap .doc-info span:last-child');
+    var edBtn=document.getElementById('doc-edital');
+    var edIcon=document.querySelector('#doc-edital-wrap .doc-icon');
+    if(edInfo)edInfo.textContent='Regras de Venda Online';
+    if(edIcon)edIcon.textContent='📄';
+    if(edBtn){edBtn.href='https://venda-imoveis.caixa.gov.br/editais/regras-VOL/comocomprar.pdf?v=01';edBtn.textContent='📄 Ver Regras';}
+  }
   setText('det-cidade',(item.cidade||'').toUpperCase()+' · '+(item.uf||'SP'));
   setText('det-titulo',item.bairro?item.bairro.trim():tipoTxt+' em '+(item.uf||'SP'));
   setText('det-endereco',item.endereco||'');
@@ -911,8 +940,11 @@ function montarPagina(item){
   var pct=parseFloat(String(item.desconto||'0').replace('%','').replace(',','.'));
   var dbEl=document.getElementById('desconto-badge');if(pct>0&&dbEl){dbEl.style.display='block';dbEl.textContent='-'+pct.toFixed(0)+'% OFF';}
   renderAreas(item.descricao||'');
+  /* Renderiza pagamento/regras imediatamente com dados do banco (sem latência de scrape) */
+  renderPagamento(item.descricao||'',window.corrigirModalidade(item.modalidade)||'',item);
   buscarDadosApi(hdn).then(function(apiData){
-    renderPagamento(item.descricao||'',window.corrigirModalidade(item.modalidade)||'',apiData);
+    /* Atualiza se o scraper trouxer dados mais recentes */
+    if(apiData&&(apiData.condominio||apiData.iptu))renderPagamento(item.descricao||'',window.corrigirModalidade(item.modalidade)||'',apiData);
     var condRow=document.getElementById('cond-row');
     if(condRow&&apiData){condRow.innerHTML='';if(apiData.fgts==1)condRow.innerHTML+='<span class="badge-cond badge-fgts">✅ Aceita FGTS</span>';if(apiData.financiamento==1)condRow.innerHTML+='<span class="badge-cond badge-fin">🏦 Aceita Financiamento</span>';if(apiData.disputa==1)condRow.innerHTML+='<span class="badge-cond badge-disputa">⚡ Em disputa</span>';}
     var infoList=document.getElementById('info-list');
@@ -932,22 +964,32 @@ function montarPagina(item){
   var infoItems=[{l:'Nº do imóvel',v:item.num_imovel||hdn||'—'},{l:'Cidade',v:(item.cidade||'—')+' · '+(item.uf||'SP')},{l:'Modalidade',v:modLabel||'—'}];
   var modC2=canonModalidade(item.modalidade||'');
 
-  // Fix #3+4: Usar data_encerramento do banco (campo já disponível via PHP)
-  var dataEnc = item.data_encerramento || '';
-  if (dataEnc) {
-    // Formatar data: YYYY-MM-DD → DD/MM/YYYY HH:MM ou deixar como está
-    var dataFmt = dataEnc;
-    if (/^\d{4}-\d{2}-\d{2}/.test(dataEnc)) {
-      var dp = dataEnc.split(/[T ]/);
-      var parts = dp[0].split('-');
-      dataFmt = parts[2]+'/'+parts[1]+'/'+parts[0];
-      if (dp[1]) dataFmt += ' às ' + dp[1].substring(0,5);
-    }
+  // Helper: formata 'YYYY-MM-DD HH:MM:SS' → 'DD/MM/YYYY às HH:MM'
+  function fmtData(raw) {
+    if (!raw || !/^\d{4}-\d{2}-\d{2}/.test(raw)) return raw || '';
+    var dp = raw.split(/[T ]/);
+    var parts = dp[0].split('-');
+    var s = parts[2]+'/'+parts[1]+'/'+parts[0];
+    if (dp[1]) s += ' às ' + dp[1].substring(0,5);
+    return s;
+  }
+
+  // Datas de leilão — SFI tem 2 datas; demais modalidades têm apenas encerramento
+  var dataLeil1 = item.data_leilao_1 || '';
+  var dataEnc   = item.data_encerramento || '';
+
+  if (modC2 === 'leilao_sfi' && dataLeil1) {
+    // SFI: exibe 1º e 2º Leilão separadamente
+    infoItems.push({l: '📅 1º Leilão', v: fmtData(dataLeil1) || '—'});
+    infoItems.push({l: '📅 2º Leilão', v: fmtData(dataEnc)   || '—'});
+  } else {
+    // Licitação Aberta / Venda Online / Compra Direta: uma única data
     var labelData = '📅 Encerra em';
-    if (modC2 === 'leilao_sfi') labelData = '📅 Data do Leilão';
-    else if (modC2 === 'licitacao_aberta') labelData = '📅 Data da Licitação';
+    if (modC2 === 'licitacao_aberta') labelData = '📅 Data da Licitação';
     else if (modC2 === 'compra_direta') labelData = '📅 Disponível até';
-    infoItems.push({l: labelData, v: dataFmt});
+    if (modC2 !== 'compra_direta' || dataEnc) {
+      infoItems.push({l: labelData, v: fmtData(dataEnc) || '—'});
+    }
   }
   infoItems=infoItems.concat([{l:'Preço de venda',v:fmtBRL(item.preco)||'—'},{l:'Avaliação',v:item.avaliacao?fmtBRL(item.avaliacao):'—'},{l:'Desconto',v:pct>0?pct.toFixed(0)+'%':'—'}]);
   if(infoList)infoItems.forEach(function(i){infoList.innerHTML+='<div class="info-row"><span class="info-label">'+i.l+'</span><span class="info-val">'+i.v+'</span></div>';});
@@ -996,18 +1038,21 @@ function removeFav(id){salvarFavs(lerFavs().filter(function(f){return f.id!==Str
 var _SVG_HEART_FILLED='<svg viewBox="0 0 24 24" fill="#dc2626" stroke="#dc2626" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>';
 var _SVG_HEART_EMPTY='<svg viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>';
 
+var _SVG_HEART_FILLED_SM='<svg viewBox="0 0 24 24" fill="#dc2626" stroke="#dc2626" stroke-width="2" width="18" height="18"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>';
+var _SVG_HEART_EMPTY_SM='<svg viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2" width="18" height="18"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>';
+
 function toggleFavDetalhe(){
   var d=window.__IMOVEL_DATA__;if(!d)return;
-  var id=d.hdnimovel;var btn=document.getElementById('btn-fav-det');if(!btn)return;
-  if(isFav(id)){removeFav(id);btn.innerHTML=_SVG_HEART_EMPTY+'<span style="color:#f87171">Favoritar</span>';btn.style.background='#fff';}
-  else{addFav(id);btn.innerHTML=_SVG_HEART_FILLED+'<span style="color:#dc2626">Favoritado</span>';btn.style.background='#fff';}
+  var id=d.hdnimovel;
+  if(isFav(id)){removeFav(id);}else{addFav(id);}
+  atualizarBtnFavDetalhe();
 }
 
 function atualizarBtnFavDetalhe(){
   var d=window.__IMOVEL_DATA__;if(!d)return;
-  var btn=document.getElementById('btn-fav-det');if(!btn)return;
-  if(isFav(d.hdnimovel)){btn.innerHTML=_SVG_HEART_FILLED+'<span style="color:#dc2626">Favoritado</span>';btn.style.background='#fff';}
-  else{btn.innerHTML=_SVG_HEART_EMPTY+'<span style="color:#f87171">Favoritar</span>';btn.style.background='#fff';}
+  var fav=isFav(d.hdnimovel);
+  var btnCard=document.getElementById('btn-fav-mobile');
+  if(btnCard){btnCard.innerHTML=fav?_SVG_HEART_FILLED_SM:_SVG_HEART_EMPTY_SM;btnCard.classList.toggle('is-fav',fav);btnCard.title=fav?'Remover dos favoritos':'Favoritar imóvel';}
 }
 document.addEventListener('DOMContentLoaded',function(){setTimeout(atualizarBtnFavDetalhe,100);});
 
@@ -1147,5 +1192,6 @@ function rodarSim2(){
 })();
 </script>
 <?php include __DIR__ . '/cookie-banner.php'; ?>
+<script src="logo-fit.js"></script>
 </body>
 </html>

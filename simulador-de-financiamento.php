@@ -32,7 +32,7 @@ $ano = date('Y');
  --radius:14px;
  --sombra:0 4px 18px rgba(0,83,166,.10);
 }
-html{scroll-behavior:smooth;color-scheme:light}
+html{scroll-behavior:smooth;color-scheme:light;overflow-x:hidden}
 body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--azul-bg)!important;color:var(--texto);line-height:1.55;font-size:15px}
 a{color:inherit;text-decoration:none}
 [id]{scroll-margin-top:80px}
@@ -41,7 +41,7 @@ input,select,textarea{background-color:#fff;color:#0f172a}
 
 /* ── HEADER ── */
 .menu-chk{display:none!important;position:absolute;left:-9999px}
-.site-header{position:sticky;top:0;z-index:200;background:#01468d;box-shadow:0 2px 10px rgba(0,0,0,.25)}
+.site-header{position:sticky;top:0;z-index:200;background:#01468d;color:#fff;box-shadow:0 3px 12px rgba(0,0,0,.25)}
 .hdr{max-width:1400px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 20px;min-height:84px}
 .logo{display:flex;align-items:center;gap:12px;flex-shrink:0;flex-grow:0}
 .logo-icon{width:70px;height:70px;flex-shrink:0;border-radius:14px;overflow:hidden}
@@ -57,8 +57,9 @@ input,select,textarea{background-color:#fff;color:#0f172a}
 .nav-links a.active{opacity:1;background:rgba(255,255,255,.18);border-radius:8px;padding:4px 10px;font-weight:900}
 .btn-nav-cta{background:var(--laranja)!important;color:#3b1f00!important;padding:7px 14px!important;border-radius:999px!important;font-weight:900!important;opacity:1!important;box-shadow:0 3px 8px rgba(0,0,0,.22)}
 .btn-nav-cta:hover{filter:brightness(1.08)}
-.hamburger{display:none;align-items:center;justify-content:center;width:44px;height:44px;flex-shrink:0;background:rgba(255,255,255,.1);border:2px solid rgba(255,255,255,.4);border-radius:10px;cursor:pointer;color:#fff}
-.hamburger svg{width:22px;height:22px;display:block}
+.hamburger{display:none;align-items:center;justify-content:center;width:44px;height:44px;flex-shrink:0;background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.3);border-radius:10px;cursor:pointer;color:#fff;transition:background .15s}
+.hamburger svg{width:20px;height:20px;display:block}
+    .hamburger:hover,.hamburger:focus-visible{background:rgba(255,255,255,.22);outline:none}
 .nav-mobile{display:none;flex-direction:column;width:100%;background:#dceeff;border-top:2px solid #a8cfee}
 .menu-chk:checked~.nav-mobile{display:flex!important}
 .nav-mobile a{display:block;padding:14px 20px;font-size:.97rem;font-weight:700;color:#0b1a33;background:#e8f3ff;border-bottom:1px solid #b8d8f5;text-decoration:none;transition:background .15s}
@@ -68,18 +69,18 @@ input,select,textarea{background-color:#fff;color:#0f172a}
 .nav-mob-close{display:flex;align-items:center;padding:12px 20px;font-size:.9rem;font-weight:700;color:#01468d;background:#c8e0f8;border-bottom:2px solid #a8cfee;cursor:pointer}
 
 /* ── PAGE HERO ── */
-.page-hero{background:linear-gradient(135deg,#0b1a33 0%,#001634 50%,var(--azul) 100%);color:#fff;padding:40px 20px 36px;text-align:center}
+.page-hero{background:linear-gradient(135deg,#0b1a33 0%,#001634 50%,var(--azul) 100%);color:#fff;padding:22px 20px 20px;text-align:center}
 .page-hero-inner{max-width:860px;margin:0 auto}
-.page-hero h1{font-size:1.85rem;font-weight:900;line-height:1.2;margin-bottom:14px}
+.page-hero h1{font-size:1.55rem;font-weight:900;line-height:1.2;margin-bottom:8px}
 .page-hero h1 em{color:var(--laranja);font-style:normal}
-.page-hero h2{font-size:.97rem;font-weight:400;opacity:.88;max-width:780px;margin:0 auto;line-height:1.6}
+.page-hero h2{font-size:.88rem;font-weight:400;opacity:.88;max-width:780px;margin:0 auto;line-height:1.5}
 
 /* ── MAIN LAYOUT ── */
 .main-wrap{max-width:1200px;margin:0 auto;padding:32px 20px 48px}
 .sim-cols{display:grid;grid-template-columns:480px 1fr;gap:24px;align-items:start}
 
 /* ── FORM PANEL ── */
-.form-panel{background:#fff;border:1px solid var(--borda);border-radius:var(--radius);box-shadow:var(--sombra);overflow:hidden}
+.form-panel{background:#fff;border:1px solid var(--borda);border-radius:var(--radius);box-shadow:var(--sombra);overflow:visible}
 .form-section{padding:20px 22px;border-bottom:1px solid #e8f0fb}
 .form-section:last-of-type{border-bottom:none}
 .form-section-title{font-size:.82rem;font-weight:900;text-transform:uppercase;letter-spacing:.07em;color:var(--azul-esc);margin-bottom:14px;display:flex;align-items:center;gap:7px}
@@ -121,7 +122,7 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
 .check-extra.open{display:block}
 
 /* Btn calculate */
-.btn-calc{width:100%;background:linear-gradient(120deg,var(--laranja),#ffb347);border:none;border-radius:12px;padding:14px 22px;font-weight:900;font-size:1rem;color:#3b2200;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:9px;box-shadow:0 4px 16px rgba(243,146,0,.35);font-family:inherit;transition:filter .18s,box-shadow .18s;margin:20px 22px 22px}
+.btn-calc{width:auto;min-width:220px;background:linear-gradient(120deg,var(--laranja),#ffb347);border:none;border-radius:12px;padding:14px 32px;font-weight:900;font-size:1rem;color:#3b2200;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:9px;box-shadow:0 4px 16px rgba(243,146,0,.35);font-family:inherit;transition:filter .18s,box-shadow .18s;margin:20px auto 22px}
 .btn-calc:hover{filter:brightness(1.06);box-shadow:0 6px 22px rgba(243,146,0,.45)}
 .btn-calc:active{filter:brightness(.97)}
 .form-disclaimer{font-size:.73rem;color:var(--muted);text-align:center;padding:0 22px 18px;line-height:1.5}
@@ -222,16 +223,17 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
   .info-grid{grid-template-columns:repeat(2,1fr)}
 }
 @media(max-width:900px){
-  .hdr{padding:0 12px;min-height:76px;gap:8px}
+  .hdr{padding:0 8px 0 6px;min-height:76px;gap:6px}
   .nav-links{display:none!important}
-  .hamburger{display:flex!important}
-  .logo-icon{width:54px!important;height:54px!important}
-  .logo-icon-img{width:54px!important;height:54px!important}
-  .logo-aio{font-size:1.13rem}
-  .logo-txt{max-width:calc(100vw - 112px)}
+  .hamburger{display:flex}
+  .logo-icon{width:44px;height:44px}
+  .logo-icon-img{width:44px;height:44px}
+  .logo-aio{font-size:1.2rem}
+  .logo{flex-shrink:1;min-width:0;gap:5px}
+      .logo-txt{max-width:calc(100vw - 112px)}
   .logo-sub-full{display:none}
   .logo-sub-mobile{display:block}
-  .logo-sub{white-space:normal;font-size:.71rem;text-align:left;text-align-last:left}
+  .logo-sub{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:.71rem;text-align:left;text-align-last:left}
   .page-hero h1{font-size:1.4rem}
   .faq-list{grid-template-columns:1fr}
 }
@@ -242,7 +244,7 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
   .page-hero h1{font-size:1.2rem}
   .main-wrap{padding:20px 14px 36px}
   .form-section{padding:16px 16px}
-  .btn-calc{margin:16px 16px 18px}
+  .btn-calc{margin:16px auto 18px;min-width:200px}
   .form-disclaimer{padding:0 16px 14px}
   .result-card-body{padding:14px 14px}
   .result-card-hdr{padding:12px 14px}
@@ -251,6 +253,13 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
   .radio-group{flex-direction:column}
 }
 @media(min-width:901px){.nav-mobile{display:none!important}}
+label{display:flex;align-items:center;gap:5px}
+.sim-tip{position:relative;display:inline-flex;align-items:center;cursor:pointer}
+.sim-tip-icon{width:14px;height:14px;border-radius:50%;background:#0053a6;color:#fff;font-size:.6rem;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1}
+.sim-tip-box{display:none;position:absolute;left:0;top:calc(100% + 6px);background:#1e293b;color:#f1f5f9;font-size:.73rem;font-weight:400;line-height:1.45;padding:9px 12px;border-radius:8px;width:260px;z-index:300;box-shadow:0 6px 18px rgba(0,0,0,.28);pointer-events:none}
+.sim-tip-box::before{content:'';position:absolute;top:-5px;left:10px;border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:5px solid #1e293b}
+.sim-tip:hover .sim-tip-box{display:block}
+@media(max-width:600px){.sim-tip-box{width:200px}}
 </style>
 </head>
 <body>
@@ -273,6 +282,7 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
       </div>
     </a>
     <nav class="nav-links" id="navDesktop">
+      <a href="index.php">Início</a>
       <a href="index.php#oportunidades">Oportunidades</a>
       <a href="resultados.html">Buscar Imóveis</a>
       <a href="favoritos.html">❤️ Favoritos</a>
@@ -290,7 +300,7 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
   </div>
   <nav class="nav-mobile">
     <label for="menu-toggle" class="nav-mob-close">✕ Fechar</label>
-    <a href="index.php#busque-imoveis" onclick="document.getElementById('menu-toggle').checked=false">🔎 Buscar imóvel</a>
+    <a href="index.php" onclick="document.getElementById('menu-toggle').checked=false">🏠 Início</a>
     <a href="index.php#oportunidades" onclick="document.getElementById('menu-toggle').checked=false">🏡 Oportunidades</a>
     <a href="resultados.html" onclick="document.getElementById('menu-toggle').checked=false">🔍 Buscar Imóveis</a>
     <a href="favoritos.html" onclick="document.getElementById('menu-toggle').checked=false">❤️ Favoritos</a>
@@ -320,12 +330,12 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
         <div class="form-section-title">🏠 Dados do Imóvel</div>
         <div class="frow">
           <div class="fg">
-            <label for="sim_val">Valor do imóvel (R$)</label>
-            <input type="text" id="sim_val" inputmode="numeric" placeholder="Ex.: 350.000" autocomplete="off" oninput="mascaraMoeda(this);atualizarPctEntrada();calcDebounced()">
+            <label for="sim_val">Valor do imóvel (R$) <span class="sim-tip"><span class="sim-tip-icon">i</span><span class="sim-tip-box">Informe o Valor de Avaliação do edital se desejar liberar a cota máxima de crédito. Esse valor é a base para reduzir sua entrada e aumentar o financiamento.</span></span></label>
+            <input type="text" id="sim_val" inputmode="numeric" placeholder="Ex.: R$ 350.000,00" autocomplete="off" oninput="mascaraMoeda(this);atualizarPctEntrada();calcDebounced()">
           </div>
           <div class="fg">
-            <label for="sim_ent">Valor de entrada (R$)</label>
-            <input type="text" id="sim_ent" inputmode="numeric" placeholder="Ex.: 70.000" autocomplete="off" oninput="mascaraMoeda(this);atualizarPctEntrada();calcDebounced()">
+            <label for="sim_ent">Valor de entrada (R$) <span class="sim-tip"><span class="sim-tip-icon">i</span><span class="sim-tip-box">Para imóveis de leilão, o uso do Valor de Avaliação permite reduzir a entrada para 5%. Caso utilize o valor de venda, a entrada padrão sobe para 20%.</span></span></label>
+            <input type="text" id="sim_ent" inputmode="numeric" placeholder="Ex.: R$ 70.000,00" autocomplete="off" oninput="mascaraMoeda(this);atualizarPctEntrada();calcDebounced()">
             <div class="helper" id="pct_entrada_helper">% de entrada: —</div>
           </div>
         </div>
@@ -347,20 +357,20 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
         <div class="form-section-title">📋 Financiamento</div>
 
         <div class="fg">
-          <label>Prazo do financiamento</label>
+          <label>Prazo do financiamento <span class="sim-tip"><span class="sim-tip-icon">i</span><span class="sim-tip-box">Quanto maior o prazo, menor a parcela mensal. O prazo máximo para financiamento CAIXA é de 35 anos (420 meses).</span></span></label>
           <div class="slider-wrap">
             <div class="slider-label">
               <span>5 anos</span>
-              <strong id="prazo_label">20 anos (240 meses)</strong>
+              <strong id="prazo_label">30 anos (360 meses)</strong>
               <span>35 anos</span>
             </div>
-            <input type="range" id="sim_prazo_slider" min="5" max="35" value="20" step="1"
+            <input type="range" id="sim_prazo_slider" min="5" max="35" value="30" step="1"
                    oninput="atualizarPrazoLabel(this.value);calcDebounced()" style="--pct:50%">
           </div>
         </div>
 
         <div class="fg">
-          <label>Sistema de amortização</label>
+          <label>Sistema de amortização <span class="sim-tip"><span class="sim-tip-icon">i</span><span class="sim-tip-box">PRICE: parcelas fixas, mais previsibilidade no orçamento. SAC: parcelas decrescentes, valor total pago menor. Para imóveis da CAIXA, o SAC costuma ser mais vantajoso a longo prazo.</span></span></label>
           <div class="radio-group" id="sis_group">
             <label class="radio-opt selected" id="opt_price">
               <input type="radio" name="sim_sis" value="PRICE" checked onchange="selecionarRadio('sis_group',this);calcDebounced()">
@@ -381,13 +391,13 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
 
         <div class="frow">
           <div class="fg">
-            <label for="sim_juros">Taxa de juros (% a.a.)</label>
+            <label for="sim_juros">Taxa de juros (% a.a.) <span class="sim-tip"><span class="sim-tip-icon">i</span><span class="sim-tip-box">A taxa varia conforme relacionamento com a CAIXA, uso do FGTS e perfil do cliente. A média atual para financiamentos habitacionais é de 10,5% a.a.</span></span></label>
             <input type="number" id="sim_juros" inputmode="decimal" value="10.5" min="0" max="30" step="0.1" autocomplete="off" oninput="calcDebounced()">
             <div class="helper">Taxa média CAIXA: ~10,5% a.a. (varia conforme perfil e modalidade)</div>
           </div>
           <div class="fg">
-            <label for="sim_renda">Renda mensal bruta (R$)</label>
-            <input type="text" id="sim_renda" inputmode="numeric" placeholder="Opcional" autocomplete="off" oninput="mascaraMoeda(this);calcDebounced()">
+            <label for="sim_renda">Renda mensal bruta (R$) <span class="sim-tip"><span class="sim-tip-icon">i</span><span class="sim-tip-box">A CAIXA limita o comprometimento a 30% da renda bruta familiar. Some as rendas de todos os compradores para aumentar sua capacidade de financiamento.</span></span></label>
+            <input type="text" id="sim_renda" inputmode="numeric" placeholder="Ex.: R$ 8.000,00" autocomplete="off" oninput="mascaraMoeda(this);calcDebounced()">
             <div class="helper">Para calcular comprometimento de renda (regra dos 30%)</div>
           </div>
         </div>
@@ -419,7 +429,7 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
             <div class="check-extra" id="reg_extra">
               <div class="fg" style="margin-top:8px;margin-bottom:0">
                 <label for="reg_val">Valor estimado (R$)</label>
-                <input type="text" id="reg_val" inputmode="numeric" placeholder="Ex.: 4.000" autocomplete="off" oninput="mascaraMoeda(this);calcDebounced()">
+                <input type="text" id="reg_val" inputmode="numeric" placeholder="Ex.: R$ 4.000,00" autocomplete="off" oninput="mascaraMoeda(this);calcDebounced()">
               </div>
             </div>
           </div>
@@ -433,7 +443,7 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
             <div class="check-extra" id="reforma_extra">
               <div class="fg" style="margin-top:8px;margin-bottom:0">
                 <label for="reforma_val">Valor estimado (R$)</label>
-                <input type="text" id="reforma_val" inputmode="numeric" placeholder="Ex.: 20.000" autocomplete="off" oninput="mascaraMoeda(this);calcDebounced()">
+                <input type="text" id="reforma_val" inputmode="numeric" placeholder="Ex.: R$ 20.000,00" autocomplete="off" oninput="mascaraMoeda(this);calcDebounced()">
               </div>
             </div>
           </div>
@@ -443,7 +453,7 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
       <button class="btn-calc" type="button" onclick="calcular()">
         📊 Calcular Financiamento
       </button>
-      <p class="form-disclaimer">Valores estimados para fins de planejamento. Não incluem seguros obrigatórios (MIP/DFI), taxas administrativas da CAIXA ou condições específicas do imóvel. Consulte a CAIXA para simulação oficial.</p>
+      <p class="form-disclaimer">📋 Simulação estimada para referência. Não inclui seguros, taxas administrativas nem aprovação de crédito pelo banco. Para condições reais, consulte uma agência CAIXA ou correspondente bancário.</p>
 
     </div><!-- /form-panel -->
 
@@ -569,7 +579,7 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
         <a href="index.php#oportunidades">Oportunidades</a>
         <a href="simulador-de-financiamento.php">Simulador de Financiamento</a>
         <a href="favoritos.html">❤️ Favoritos</a>
-        <a href="blog.html">Blog</a>
+        <a href="blog.html">Blog do Arremate</a>
       </div>
       <div class="footer-col">
         <h4>Suporte</h4>
@@ -623,7 +633,7 @@ function mascaraMoeda(el) {
   var raw = el.value.replace(/\D/g, '');
   if (raw === '') { el.value = ''; return; }
   var num = parseInt(raw, 10) / 100;
-  el.value = formataMilharBR(num);
+  el.value = 'R$ ' + formataMilharBR(num);
 }
 
 /* ──────────────────────────────────────────────────────────
@@ -698,7 +708,7 @@ function calcDebounced() {
 function lerInputs() {
   var val     = limpaNumeroBR(document.getElementById('sim_val').value)   || 0;
   var ent     = limpaNumeroBR(document.getElementById('sim_ent').value)   || 0;
-  var prazoA  = parseInt(document.getElementById('sim_prazo_slider').value, 10) || 20;
+  var prazoA  = parseInt(document.getElementById('sim_prazo_slider').value, 10) || 30;
   var prazo   = prazoA * 12;
   var jaa     = parseFloat(document.getElementById('sim_juros').value)    || 10.5;
   var sis     = document.querySelector('input[name="sim_sis"]:checked').value;
@@ -915,5 +925,6 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 </script>
+<script src="logo-fit.js"></script>
 </body>
 </html>

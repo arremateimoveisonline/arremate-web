@@ -32,7 +32,7 @@ $ano = date('Y');
  --radius:14px;
  --sombra:0 4px 18px rgba(0,83,166,.10);
 }
-html{scroll-behavior:smooth;color-scheme:light}
+html{scroll-behavior:smooth;color-scheme:light;overflow-x:hidden}
 body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--azul-bg)!important;color:var(--texto);line-height:1.55;font-size:15px}
 a{color:inherit;text-decoration:none}
 [id]{scroll-margin-top:80px}
@@ -95,7 +95,7 @@ input,select,textarea{background-color:#fff;color:#0f172a}
 
 /* HEADER */
 .menu-chk{display:none!important;position:absolute;left:-9999px}
-.site-header{position:sticky;top:0;z-index:200;background:#01468d;box-shadow:0 2px 10px rgba(0,0,0,.25)}
+.site-header{position:sticky;top:0;z-index:200;background:#01468d;color:#fff;box-shadow:0 3px 12px rgba(0,0,0,.25)}
 .hdr{max-width:1400px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 20px;min-height:84px}
 .logo{display:flex;align-items:center;gap:12px;flex-shrink:0;flex-grow:0}
 .logo-icon{width:70px;height:70px;flex-shrink:0;border-radius:14px;overflow:hidden}
@@ -112,8 +112,9 @@ input,select,textarea{background-color:#fff;color:#0f172a}
 .btn-nav-cta:hover{filter:brightness(1.08)}
 .nav-links a.active{opacity:1;background:rgba(255,255,255,.18);border-radius:8px;padding:4px 10px;font-weight:900}
 .nav-mobile a.active{background:#c0d8f8;color:var(--azul-esc);font-weight:900}
-.hamburger{display:none;align-items:center;justify-content:center;width:44px;height:44px;flex-shrink:0;background:rgba(255,255,255,.1);border:2px solid rgba(255,255,255,.4);border-radius:10px;cursor:pointer;color:#fff}
-.hamburger svg{width:22px;height:22px;display:block}
+.hamburger{display:none;align-items:center;justify-content:center;width:44px;height:44px;flex-shrink:0;background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.3);border-radius:10px;cursor:pointer;color:#fff;transition:background .15s}
+.hamburger svg{width:20px;height:20px;display:block}
+    .hamburger:hover,.hamburger:focus-visible{background:rgba(255,255,255,.22);outline:none}
 .nav-mobile{display:none;flex-direction:column;width:100%;background:#dceeff;border-top:2px solid #a8cfee}
 .menu-chk:checked~.nav-mobile{display:flex!important}
 .nav-mobile a{display:block;padding:14px 20px;font-size:.97rem;font-weight:700;color:#0b1a33;background:#e8f3ff;border-bottom:1px solid #b8d8f5;text-decoration:none;transition:background .15s}
@@ -161,6 +162,7 @@ input,select,textarea{background-color:#fff;color:#0f172a}
 
 /* SIMULATE BUTTON */
 .btn-simular{width:100%;background:linear-gradient(120deg,var(--laranja),#ffb347);border:none;border-radius:12px;padding:14px 22px;font-weight:900;font-size:1rem;color:#3b2200;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:9px;box-shadow:0 4px 16px rgba(243,146,0,.35);font-family:inherit;margin-top:6px;transition:filter .15s,transform .1s}
+.form-disclaimer{font-size:.73rem;color:#64748b;text-align:center;margin-top:10px;line-height:1.5;padding:0 4px}
 .btn-simular:hover{filter:brightness(1.06);transform:translateY(-1px)}
 .btn-simular:active{transform:translateY(0)}
 
@@ -226,16 +228,17 @@ input,select,textarea{background-color:#fff;color:#0f172a}
 
 /* RESPONSIVO */
 @media(max-width:900px){
-  .hdr{padding:0 12px;min-height:76px;gap:8px}
+  .hdr{padding:0 8px 0 6px;min-height:76px;gap:6px}
   .nav-links{display:none!important}
-  .hamburger{display:flex!important}
-  .logo-icon{width:54px!important;height:54px!important}
-  .logo-icon-img{width:54px!important;height:54px!important}
-  .logo-aio{font-size:1.13rem}
-  .logo-txt{max-width:calc(100vw - 112px)}
+  .hamburger{display:flex}
+  .logo-icon{width:44px;height:44px}
+  .logo-icon-img{width:44px;height:44px}
+  .logo-aio{font-size:1.2rem}
+  .logo{flex-shrink:1;min-width:0;gap:5px}
+      .logo-txt{max-width:calc(100vw - 112px)}
   .logo-sub-full{display:none}
   .logo-sub-mobile{display:block}
-  .logo-sub{white-space:normal;font-size:.71rem;text-align:left;text-align-last:left}
+  .logo-sub{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:.71rem;text-align:left;text-align-last:left}
   .sim-layout{grid-template-columns:1fr}
   .faq-grid{grid-template-columns:1fr}
   .steps-grid{grid-template-columns:1fr;gap:10px}
@@ -500,6 +503,7 @@ input,select,textarea{background-color:#fff;color:#0f172a}
         <button class="btn-simular" onclick="simular()" type="button">
           📊 Simular agora
         </button>
+        <p class="form-disclaimer">📋 Simulação estimada para referência. Não inclui seguros, taxas administrativas nem aprovação de crédito pelo banco. Para condições reais, consulte uma agência CAIXA ou correspondente bancário.</p>
       </div>
     </div>
 
@@ -581,7 +585,7 @@ input,select,textarea{background-color:#fff;color:#0f172a}
         <a href="index.php#oportunidades">Oportunidades</a>
         <a href="simulador-de-financiamento.php">Simulador de Financiamento</a>
         <a href="favoritos.html">❤️ Favoritos</a>
-        <a href="blog.html">Blog</a>
+        <a href="blog.html">Blog do Arremate</a>
       </div>
       <div class="footer-col">
         <h4>Suporte</h4>
@@ -866,5 +870,6 @@ function simular(){
   }
 }
 </script>
+<script src="logo-fit.js"></script>
 </body>
 </html>
