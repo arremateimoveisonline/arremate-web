@@ -237,7 +237,8 @@ function extrairCampos(html, pageText) {
   for (const l of linhas) {
     if (!l || l.length > 40) continue;
     if (l.includes(':')) continue; // pula "Leiloeiro: X", "Valor: R$ ...", "Averbação dos leilões: ..."
-    if (/^Compra\s+Direta\b/i.test(l))                                      { modalidade_raw = l; modalidade = 'Compra Direta'; break; }
+    if (/^Compra\s+Direta\b/i.test(l))                                       { modalidade_raw = l; modalidade = 'Compra Direta'; break; }
+    if (/^Venda\s+Direta\s+Online\b/i.test(l))                              { modalidade_raw = l; modalidade = 'Compra Direta'; break; }
     if (/^Venda\s+Online\b/i.test(l) && !/regras|formas|pagamento/i.test(l)){ modalidade_raw = l; modalidade = 'Venda Online'; break; }
     if (/^Licita[cç][aã]o\s+Aberta\b/i.test(l))                             { modalidade_raw = l; modalidade = 'Licitação Aberta'; break; }
     if (/^[12]?\s*[ºoO\.]?\s*Leil[aã]o\b/i.test(l))                         { modalidade_raw = l; modalidade = 'Leilão SFI - Edital Único'; break; }

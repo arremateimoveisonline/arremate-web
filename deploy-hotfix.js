@@ -89,12 +89,19 @@ async function main() {
     await sshExec(conn, cmd);
   }
 
-  // 3. Verifica banco
+  // 3. Fix de encoding corrompido nas modalidades
+  console.log('\n🔧 Corrigindo encoding de modalidades...');
+  await sshExec(conn, `sqlite3 /var/www/dados/imoveis.db "UPDATE imoveis SET modalidade = 'Leilão SFI - Edital Único' WHERE modalidade LIKE '%Leil%o SFI%' AND modalidade != 'Leilão SFI - Edital Único';" && echo "  ✅ Leilão fix aplicado"`);
+  await sshExec(conn, `sqlite3 /var/www/dados/imoveis.db "UPDATE imoveis SET modalidade = 'Licitação Aberta' WHERE modalidade LIKE '%Licita%o Aberta%' AND modalidade != 'Licitação Aberta';" && echo "  ✅ Licitação fix aplicado"`);
+  await sshExec(conn, `sqlite3 /var/www/dados/imoveis.db "UPDATE imoveis SET modalidade = 'Compra Direta' WHERE modalidade = 'Venda Direta Online';" && echo "  ✅ Compra Direta unificado"`);
+  await sshExec(conn, `sqlite3 /var/www/dados/imoveis.db "SELECT modalidade, COUNT(*) as n FROM imoveis GROUP BY modalidade ORDER BY n DESC;"`);
+
+  // 4. Verifica banco
   console.log('\n📊 Estado do banco após migração:');
   await sshExec(conn, `sqlite3 /var/www/dados/imoveis.db "SELECT COUNT(*) as total_imoveis FROM imoveis;"`);
   await sshExec(conn, `sqlite3 /var/www/dados/imoveis.db "PRAGMA table_info(imoveis);" | grep -E "area_|status_caixa"`);
 
-  // 4. Permissões
+  // 5. Permissões
   await sshExec(conn, `chown www-data:www-data /var/www/dados/imoveis.db 2>/dev/null; chmod 664 /var/www/dados/imoveis.db 2>/dev/null; true`);
 
   conn.end();
