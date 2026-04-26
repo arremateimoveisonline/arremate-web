@@ -40,27 +40,25 @@
     .btn-nav-cta:hover{filter:brightness(1.08)}
     .nav-links a.active{opacity:1;background:rgba(255,255,255,.18);border-radius:8px;padding:4px 10px;font-weight:900}
     .nav-mobile a.active{background:#c0d8f8;color:var(--azul-esc);font-weight:900}
-    .hamburger{display:none;align-items:center;justify-content:center;width:44px;height:44px;flex-shrink:0;background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.3);border-radius:10px;cursor:pointer;color:#fff;transition:background .15s}
-    .hamburger svg{width:20px;height:20px;display:block}
-    .hamburger:hover,.hamburger:focus-visible{background:rgba(255,255,255,.22);outline:none}
+    .hamburger{display:none;align-items:center;justify-content:center;width:44px;height:44px;flex-shrink:0;background:rgba(255,255,255,.1);border:2px solid rgba(255,255,255,.4);border-radius:10px;cursor:pointer;color:#fff}
+    .hamburger svg{width:22px;height:22px;display:block}
     .nav-mobile{display:none;flex-direction:column;width:100%;background:#dceeff;border-top:2px solid #a8cfee}
-    .menu-chk:checked~.nav-mobile{display:flex!important}
+    .menu-chk:checked~.nav-mobile{display:flex!important;position:absolute;width:100%;left:0;top:100%;box-shadow:0 8px 24px rgba(0,0,0,.22)}
     .nav-mobile a{display:block;padding:14px 20px;font-size:.97rem;font-weight:700;color:#0b1a33;background:#e8f3ff;border-bottom:1px solid #b8d8f5;text-decoration:none;transition:background .15s}
     .nav-mobile a:hover{background:#cde5ff}
     .nav-mob-cta{background:#e97500!important;color:#fff!important;font-weight:900!important}
     .nav-mob-close{display:flex;align-items:center;padding:12px 20px;font-size:.9rem;font-weight:700;color:#01468d;background:#c8e0f8;border-bottom:2px solid #a8cfee;cursor:pointer}
     @media(max-width:900px){
-      .hdr{padding:0 8px 0 6px;min-height:76px;gap:6px}
+      .hdr{padding:0 8px 0 6px;min-height:80px;gap:6px}
       .nav-links{display:none!important}
-      .hamburger{display:flex}
-      .logo-icon{width:44px;height:44px}
-      .logo-icon-img{width:44px;height:44px}
-      .logo-aio{font-size:1.2rem}
+      .hamburger{display:flex!important}
+      .logo-icon{width:48px!important;height:48px!important}
+      .logo-icon-img{width:48px!important;height:48px!important}
+      .logo-aio{font-size:1.0rem}
       .logo-sub-full{display:none}
       .logo-sub-mobile{display:block}
-      .logo{flex-shrink:1;min-width:0;gap:5px}
       .logo-txt{max-width:calc(100vw - 112px)}
-      .logo-sub{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:.71rem;text-align:left;text-align-last:left}
+      .logo-sub{white-space:normal;font-size:.71rem;text-align:left;text-align-last:left}
     }
     @media(min-width:901px){.nav-mobile{display:none!important}}
 
@@ -98,13 +96,10 @@
     .tag-desc{position:absolute;top:10px;right:10px;background:var(--laranja);color:#3b1f00;font-size:.72rem;font-weight:900;padding:5px 14px;border-radius:999px;z-index:10;box-shadow:0 3px 8px rgba(0,0,0,.18)}
     .tag-desc-direta{background:#16a34a!important;color:#fff!important}
 
-    /* Botão remover — exclusivo de favoritos, posicionado no canto superior direito do thumb */
-    .btn-remover-fav{position:absolute;top:10px;right:10px;z-index:20;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.92);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;box-shadow:0 2px 8px rgba(0,0,0,.18);transition:background .15s,transform .15s;flex-shrink:0}
-    .btn-remover-fav:hover{background:#fee2e2;transform:scale(1.12)}
-    .btn-remover-fav title{display:none}
-
-    /* Quando existe tag-desc, o botão remover sobe abaixo dela */
-    .thumb-has-tag .btn-remover-fav{top:46px}
+    /* Botão remover — mesmo estilo e posição dos card-actions de resultados.html */
+    .btn-remover-fav{position:absolute;bottom:8px;right:8px;z-index:20;width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.92);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.2);transition:transform .15s,background .15s;flex-shrink:0}
+    .btn-remover-fav svg{width:16px;height:16px;display:block}
+    .btn-remover-fav:hover{background:#fee2e2;transform:scale(1.08)}
 
     .imovel-body{padding:12px 14px 10px;flex:1;display:flex;flex-direction:column;gap:4px}
     .imovel-local{font-size:1rem;font-weight:700;color:#111827;margin-bottom:1px}
@@ -502,7 +497,7 @@
     btnRem.className = 'btn-remover-fav';
     btnRem.setAttribute('aria-label', 'Remover dos favoritos');
     btnRem.title = 'Remover dos favoritos';
-    btnRem.textContent = '🗑️';
+    btnRem.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>';
     btnRem.addEventListener('click', function (e) {
       e.preventDefault();
       e.stopPropagation();
@@ -608,6 +603,7 @@
     body.appendChild(endereco);
     body.appendChild(precos);
     body.appendChild(chips);
+    aut.style.marginTop = 'auto';
     body.appendChild(aut);
 
     /* ── RODAPÉ DO CARD ── */

@@ -69,9 +69,10 @@ if ($found) {
     $disputa    = (int)($imovel['disputa']       ?? 0);
     $condominio = (string)($imovel['condominio'] ?? '');
     $iptu       = (string)($imovel['iptu']       ?? '');
-    $data_enc   = (string)($imovel['data_encerramento'] ?? '');
-    $data_leil1 = (string)($imovel['data_leilao_1']    ?? '');
-    $foto_url   = (string)($imovel['foto_url'] ?? '');
+    $data_enc      = (string)($imovel['data_encerramento'] ?? '');
+    $data_leil1    = (string)($imovel['data_leilao_1']    ?? '');
+    $foto_url      = (string)($imovel['foto_url']         ?? '');
+    $status_caixa  = (string)($imovel['status_caixa']     ?? '');
 
     $precoBrl   = fmtBRL_php($precoCent);
     $avalBrl    = fmtBRL_php($avalCent);
@@ -100,9 +101,10 @@ if ($found) {
               . $pageUrl;
     $waUrl = 'https://wa.me/' . WA_NUMBER . '?text=' . rawurlencode($waMsgRaw);
 
-    /* Edital: URL real vem do scraper; fallback = página do imóvel na CAIXA */
-    $linkEdital    = $link ?: '#';
-    $linkEditalAlt = $link ?: '#';
+    /* Edital: URL real do PDF (salva pelo scraper); fallback = página do imóvel na CAIXA */
+    $edital_url_db = trim($imovel['edital_url'] ?? '');
+    $linkEdital    = $edital_url_db ?: ($link ?: '#');
+    $linkEditalAlt = $edital_url_db ?: ($link ?: '#');
     $linkMatricula = $hdn ? 'https://venda-imoveis.caixa.gov.br/editais/matricula/' . $uf . '/' . $hdn . '.pdf' : $link;
     $fotoUrl       = $foto_url ?: 'https://venda-imoveis.caixa.gov.br/fotos/F' . str_pad($hdn, 14, '0', STR_PAD_LEFT) . '21.jpg';
 
@@ -172,16 +174,26 @@ if ($found) {
     .btn-nav-cta{background:var(--laranja)!important;color:#3b1f00!important;padding:7px 14px!important;border-radius:999px!important;font-weight:900!important;opacity:1!important;box-shadow:0 3px 8px rgba(0,0,0,.22)}
     .nav-links a.active{opacity:1;background:rgba(255,255,255,.18);border-radius:8px;padding:4px 10px;font-weight:900}
     .nav-mobile a.active{background:#c0d8f8;color:var(--azul-esc);font-weight:900}
-    .hamburger{display:none;align-items:center;justify-content:center;width:44px;height:44px;flex-shrink:0;background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.3);border-radius:10px;cursor:pointer;color:#fff;transition:background .15s}
-    .hamburger svg{width:20px;height:20px;display:block}
-    .hamburger:hover,.hamburger:focus-visible{background:rgba(255,255,255,.22);outline:none}
+    .hamburger{display:none;align-items:center;justify-content:center;width:44px;height:44px;flex-shrink:0;background:rgba(255,255,255,.1);border:2px solid rgba(255,255,255,.4);border-radius:10px;cursor:pointer;color:#fff}
+    .hamburger svg{width:22px;height:22px;display:block}
     .nav-mobile{display:none;flex-direction:column;width:100%;background:#dceeff;border-top:2px solid #a8cfee}
-    .menu-chk:checked ~ .nav-mobile{display:flex!important}
+    .menu-chk:checked ~ .nav-mobile{display:flex!important;position:absolute;width:100%;left:0;top:100%;box-shadow:0 8px 24px rgba(0,0,0,.22)}
     .nav-mobile a{display:block;padding:14px 20px;font-size:.97rem;font-weight:700;color:#0b1a33;background:#e8f3ff;border-bottom:1px solid #b8d8f5;text-decoration:none}
     .nav-mobile a:hover{background:#cde5ff}
     .nav-mob-cta{background:#e97500!important;color:#fff!important;font-weight:900!important;border-bottom:none!important}
     .nav-mob-close{display:flex;align-items:center;padding:12px 20px;font-size:.9rem;font-weight:700;color:#01468d;background:#c8e0f8;border-bottom:2px solid #a8cfee;cursor:pointer}
-    @media(max-width:900px){.hdr{padding:0 8px 0 6px;min-height:76px;gap:6px}.nav-links{display:none!important}.hamburger{display:flex}.logo-icon{width:44px;height:44px}.logo-icon-img{width:44px;height:44px}.logo-aio{font-size:1.2rem}.logo{flex-shrink:1;min-width:0;gap:5px}.logo-txt{min-width:0;overflow:hidden;max-width:calc(100vw - 112px)}.logo-sub-full{display:none}.logo-sub-mobile{display:block}.logo-sub{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:.71rem;text-align:left;text-align-last:left}}
+    @media(max-width:900px){
+      .hdr{padding:0 8px 0 6px;min-height:80px;gap:6px}
+      .nav-links{display:none!important}
+      .hamburger{display:flex!important}
+      .logo-icon{width:48px!important;height:48px!important}
+      .logo-icon-img{width:48px!important;height:48px!important}
+      .logo-aio{font-size:1.0rem}
+      .logo-sub-full{display:none}
+      .logo-sub-mobile{display:block}
+      .logo-txt{max-width:calc(100vw - 112px)}
+      .logo-sub{white-space:normal;font-size:.71rem;text-align:left;text-align-last:left}
+    }
     .page-wrap{max-width:1100px;margin:0 auto;padding:20px 16px 24px}
     .breadcrumb{display:flex;align-items:center;gap:8px;font-size:.82rem;color:var(--muted);margin-bottom:16px;flex-wrap:wrap}
     .breadcrumb a{color:var(--azul);font-weight:700}.breadcrumb a:hover{text-decoration:underline}
@@ -205,9 +217,11 @@ if ($found) {
     .det-cidade-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:2px}
     .det-cidade{font-size:1rem;font-weight:900;color:#111827}
     .det-actions-mobile{display:flex;align-items:center;gap:6px;flex-shrink:0}
-    .btn-det-action{background:none;border:1.5px solid #e2e8f0;border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1.1rem;transition:background .15s,border-color .15s;flex-shrink:0;padding:0}
-    .btn-det-action:hover{background:#f1f5f9;border-color:#cbd5e1}
-    .btn-det-action.is-fav{border-color:#e11d48;background:#fff1f2}
+    .btn-det-action{background:rgba(255,255,255,.92);border:none;border-radius:8px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.2);transition:transform .15s,background .15s;flex-shrink:0;padding:0}
+    .btn-det-action svg{width:18px;height:18px;display:block}
+    .btn-det-action:hover{background:#fff;transform:scale(1.08)}
+    .btn-det-action.is-fav{background:#fff1f2}
+    .btn-det-action[id*="share"] svg,.btn-card-action[id*="share"] svg,.btn-share svg{stroke:#1d4ed8!important}
     .det-titulo{font-size:.80rem;font-weight:600;color:var(--muted);margin-bottom:1px}
     .det-endereco{font-size:.78rem;color:#6b7280;margin-bottom:6px}
     .preco-destaque{background:linear-gradient(135deg,#0f172a,#1d4ed8);border-radius:12px;padding:14px 18px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
@@ -444,7 +458,7 @@ document.addEventListener("DOMContentLoaded",function(){
                   <svg viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2" width="18" height="18"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
                 </button>
                 <button class="btn-det-action" id="btn-share-mobile" onclick="compartilharDetalhe()" title="Compartilhar imóvel">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1d4ed8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
                 </button>
               </div>
             </div>
@@ -645,9 +659,27 @@ window.__IMOVEL_DATA__ = {
   data_encerramento: '<?= jsStr($data_enc) ?>',
   data_leilao_1:     '<?= jsStr($data_leil1) ?>',
   foto_url:          '<?= jsStr($foto_url) ?>',
+  status_caixa:      '<?= jsStr($status_caixa) ?>',
   nao_encontrado:    <?= $found ? 'false' : 'true' ?>
 };
 window.__IS_SP__ = <?= $isSP ? 'true' : 'false' ?>;
+
+/* Banner + grayscale imediatos para imóveis removidos (não espera AJAX) */
+(function(){
+  var d = window.__IMOVEL_DATA__;
+  if (!d || d.status_caixa !== 'removido') return;
+  var s = document.createElement('style');
+  s.textContent = '#det-conteudo{filter:grayscale(85%) opacity(.8)!important}#banner-status-caixa{filter:none!important;opacity:1!important}';
+  document.head.appendChild(s);
+  var conteudo = document.getElementById('det-conteudo');
+  if (conteudo) {
+    var banner = document.createElement('div');
+    banner.id = 'banner-status-caixa';
+    banner.style.cssText = 'background:#fee2e2;border:1px solid #f87171;border-radius:10px;padding:14px 18px;margin:0 0 18px;display:flex;align-items:flex-start;gap:12px;font-size:.93rem;color:#991b1b;';
+    banner.innerHTML = '<span style="font-size:1.3rem;flex-shrink:0">⚠️</span><div><strong>O imóvel que você procura não está mais disponível para venda.</strong><br><span style="font-size:.85rem">O imóvel pode ter sido vendido ou retirado do leilão pela CAIXA. Verifique diretamente no portal da CAIXA.</span></div>';
+    conteudo.parentNode.insertBefore(banner, conteudo);
+  }
+})();
 </script>
 
 <script>
@@ -751,11 +783,11 @@ function extrairAreas(desc){
   var m;
   // Formato CSV: "45,16M2 DE AREA PRIVATIVA" ou "45,16 DE AREA PRIVATIVA"
   // Formato scraper: "Área Privativa: 45,16 m²"
-  m=desc.match(/([\d.,]+)\s*(?:m[²2])?\s*de\s*[aá]rea\s*total/i)||desc.match(/[aá]rea\s*total[:\s]+([\d.,]+)/i);
+  m=desc.match(/([\d.,]+)\s*(?:m[²2])?\s*de\s*[aáý]rea\s*total/i)||desc.match(/[aáý]rea\s*total[:\s]+([\d.,]+)/i);
   if(m)areas.total=parseFloat((m[1]||m[2]||'0').replace(',','.'));
-  m=desc.match(/([\d.,]+)\s*(?:m[²2])?\s*de\s*[aá]rea\s*privativa/i)||desc.match(/[aá]rea\s*privativa[:\s]+([\d.,]+)/i);
+  m=desc.match(/([\d.,]+)\s*(?:m[²2])?\s*de\s*[aáý]rea\s*privativa/i)||desc.match(/[aáý]rea\s*privativa[:\s]+([\d.,]+)/i);
   if(m)areas.privativa=parseFloat((m[1]||m[2]||'0').replace(',','.'));
-  m=desc.match(/([\d.,]+)\s*(?:m[²2])?\s*de\s*[aá]rea\s*do\s*terreno/i)||desc.match(/[aá]rea\s*(?:do\s*)?terreno[:\s]+([\d.,]+)/i);
+  m=desc.match(/([\d.,]+)\s*(?:m[²2])?\s*de\s*[aáý]rea\s*do\s*terreno/i)||desc.match(/[aáý]rea\s*(?:do\s*)?terreno[:\s]+([\d.,]+)/i);
   if(m)areas.terreno=parseFloat((m[1]||m[2]||'0').replace(',','.'));
   return areas;
 }
@@ -772,13 +804,10 @@ function renderAreas(desc){
 function renderPagamento(desc,modalidade,apiData){
   var grid=document.getElementById('pagamento-grid');if(!grid)return;
   grid.innerHTML=''; /* limpa antes de renderizar para evitar duplicação */
-  var d=(desc+' '+modalidade).toLowerCase();
-  var isTerreno=(d.indexOf('terreno')!==-1||d.indexOf('lote')!==-1||d.indexOf('gleba')!==-1);
   var _db=window.__IMOVEL_DATA__||{};
-  var fgts2=isTerreno?false:(apiData?apiData.fgts==1:_db.fgts==1);
+  var fgts2=apiData?apiData.fgts==1:_db.fgts==1;
   var fin2=apiData?apiData.financiamento==1:_db.financiamento==1;
-  var parcel=apiData?apiData.parcelamento==1:false;
-  [{icon:'💵',label:'À vista',ok:true},{icon:'🏦',label:'Financiamento CAIXA',ok:fin2},{icon:'💼',label:'FGTS',ok:fgts2},{icon:'🔄',label:'Parcelamento',ok:parcel}].forEach(function(i){
+  [{icon:'💵',label:'À vista',ok:true},{icon:'🏦',label:'Financiamento CAIXA',ok:fin2},{icon:'💼',label:'FGTS',ok:fgts2}].forEach(function(i){
     var cls=i.ok?'pagamento-item':'pagamento-item inativo';
     var badge=i.ok?'<div class="pagamento-ok">✓ Aceito</div>':'<div class="pagamento-no">✗ Não</div>';
     grid.innerHTML+='<div class="'+cls+'"><div class="pagamento-icon">'+i.icon+'</div><div>'+i.label+'</div>'+badge+'</div>';
@@ -789,7 +818,7 @@ function renderPagamento(desc,modalidade,apiData){
   if(rw)rw.style.display='block';
   if(rc){
     var cmTxt={
-      limitada:'As despesas de condomínio vencidas e não pagas são de responsabilidade da CAIXA Econômica Federal, limitadas ao equivalente a 10% (dez por cento) do valor de avaliação do imóvel; as despesas que ultrapassarem esse limite são de responsabilidade do adquirente.',
+      limitada:'Condomínio: Sob responsabilidade do comprador, até o limite de 10% em relação ao valor de avaliação do imóvel. A CAIXA realizará o pagamento apenas do valor que exceder o limite de 10% do valor de avaliação.',
       comprador:'As despesas de condomínio são de responsabilidade do adquirente.',
     };
     var iptuTxt={
@@ -823,6 +852,30 @@ async function buscarDadosApi(hdn){
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
     var data = await resp.json();
     if (data && data.sucesso) {
+      /* ── Status especial da CAIXA ── */
+      if (data.status_caixa) {
+        var banner = document.getElementById('banner-status-caixa');
+        if (!banner) {
+          banner = document.createElement('div');
+          banner.id = 'banner-status-caixa';
+          banner.style.cssText = 'margin:0 0 18px';
+          var conteudo = document.getElementById('det-conteudo');
+          if (conteudo) conteudo.parentNode.insertBefore(banner, conteudo);
+        }
+        if (data.status_caixa.startsWith('encerrada:')) {
+          var dtEnc = data.status_caixa.replace('encerrada:', '');
+          banner.style.cssText = 'background:#fef3c7;border:1px solid #f59e0b;border-radius:10px;padding:14px 18px;margin:0 0 18px;display:flex;align-items:flex-start;gap:12px;font-size:.93rem;color:#92400e;';
+          banner.innerHTML = '<span style="font-size:1.3rem;flex-shrink:0">⏰</span><div><strong>Venda online encerrada em ' + dtEnc + '</strong><br><span style="font-size:.85rem">Este imóvel encerrou o período de propostas. Acesse o site da CAIXA para verificar a situação atual.</span></div>';
+        } else if (data.status_caixa === 'removido') {
+          banner.style.cssText = 'background:#fee2e2;border:1px solid #f87171;border-radius:10px;padding:14px 18px;margin:0 0 18px;display:flex;align-items:flex-start;gap:12px;font-size:.93rem;color:#991b1b;';
+          banner.innerHTML = '<span style="font-size:1.3rem;flex-shrink:0">⚠️</span><div><strong>O imóvel que você procura não está mais disponível para venda.</strong><br><span style="font-size:.85rem">O imóvel pode ter sido vendido ou retirado do leilão pela CAIXA. Verifique diretamente no portal da CAIXA.</span></div>';
+          // Efeito visual de "imóvel passado" — página em preto e branco desbotado
+          document.querySelector('.det-wrap'||'main'||'body').style.cssText += '';
+          var style = document.createElement('style');
+          style.textContent = '#det-conteudo{filter:grayscale(85%) opacity(.8)!important}#banner-status-caixa{filter:none!important;opacity:1!important}';
+          document.head.appendChild(style);
+        }
+      }
       base.fgts = data.fgts;
       base.financiamento = data.financiamento;
       if (data.condominio) base.condominio = data.condominio;
@@ -837,9 +890,9 @@ async function buscarDadosApi(hdn){
         if (fotoEl) { var ti=new Image(); ti.onload=function(){fotoEl.src=data.foto_url;}; ti.src=data.foto_url; }
       }
 
-      // Documentos: edital com URL do scraper ou fallback para página da CAIXA
-      var edUrl = data.edital_url || linkCaixaFb;
-      setHref('doc-edital', edUrl);
+      // Documentos: só atualiza edital se scraper encontrou URL específica
+      // (preserva o href do PHP — regras-VOL para Compra Direta, link da CAIXA para outros)
+      if (data.edital_url) setHref('doc-edital', data.edital_url);
       var edWrap = document.getElementById('doc-edital-wrap');
       if (edWrap) edWrap.style.display = 'flex';
 
@@ -849,9 +902,7 @@ async function buscarDadosApi(hdn){
       // Badges condição
       var condRow = document.getElementById('cond-row');
       if (condRow) {
-        var modLabel = window.corrigirModalidade(base.modalidade_raw || base.modalidade) || '';
         condRow.innerHTML = '';
-        if (modLabel) condRow.innerHTML += '<span class="badge-cond badge-mod">📋 ' + modLabel + '</span>';
         if (data.fgts == 1) condRow.innerHTML += '<span class="badge-cond badge-fgts">✅ Aceita FGTS</span>';
         if (data.financiamento == 1) condRow.innerHTML += '<span class="badge-cond badge-fin">🏦 Aceita Financiamento</span>';
         if (base.disputa == 1) condRow.innerHTML += '<span class="badge-cond badge-disputa">⚡ Em disputa</span>';
@@ -864,20 +915,23 @@ async function buscarDadosApi(hdn){
           var modC2api = canonModalidade(base.modalidade_raw || base.modalidade || '');
 
           if (modC2api === 'leilao_sfi' && (data.data_leilao_1 || data.data_encerramento)) {
-            // SFI: atualiza/cria linha do 1º e 2º Leilão
-            var r1 = infoList.querySelector('[data-field="data_leilao_1"]');
-            var v1 = fmtData(data.data_leilao_1 || '');
-            if (r1) { r1.querySelector('.info-val').textContent = v1 || '—'; }
-            else { infoList.innerHTML += '<div class="info-row" data-field="data_leilao_1"><span class="info-label">📅 1º Leilão</span><span class="info-val">' + (v1||'—') + '</span></div>'; }
-
+            // SFI: 1º Leilão e 2º Leilão
+            if (data.data_leilao_1) {
+              var r1 = infoList.querySelector('[data-field="data_leilao_1"]');
+              var v1 = fmtData(data.data_leilao_1);
+              if (r1) { r1.querySelector('.info-val').textContent = v1 || '—'; }
+              else { infoList.innerHTML += '<div class="info-row" data-field="data_leilao_1"><span class="info-label">📅 1º Leilão</span><span class="info-val">' + (v1||'—') + '</span></div>'; }
+            }
             var r2 = infoList.querySelector('[data-field="data_encerramento"]');
             var v2 = fmtData(data.data_encerramento || '');
-            if (r2) { r2.querySelector('.info-val').textContent = v2 || '—'; }
-            else { infoList.innerHTML += '<div class="info-row" data-field="data_encerramento"><span class="info-label">📅 2º Leilão</span><span class="info-val">' + (v2||'—') + '</span></div>'; }
+            if (r2) {
+              r2.querySelector('.info-label').textContent = '📅 2º Leilão';
+              r2.querySelector('.info-val').textContent = v2 || '—';
+            } else { infoList.innerHTML += '<div class="info-row" data-field="data_encerramento"><span class="info-label">📅 2º Leilão</span><span class="info-val">' + (v2||'—') + '</span></div>'; }
           } else if (data.data_encerramento) {
             // Demais modalidades: única data de encerramento
             var labelApi = '📅 Encerra em';
-            if (modC2api === 'licitacao_aberta') labelApi = '📅 Data da Licitação';
+            if (modC2api === 'licitacao_aberta') labelApi = '📅 Data';
             else if (modC2api === 'compra_direta') labelApi = '📅 Disponível até';
             var vEnc = fmtData(data.data_encerramento);
             var existsRow = infoList.querySelector('[data-field="data_encerramento"]');
@@ -949,41 +1003,56 @@ function montarPagina(item){
     var condRow=document.getElementById('cond-row');
     if(condRow&&apiData){condRow.innerHTML='';if(apiData.fgts==1)condRow.innerHTML+='<span class="badge-cond badge-fgts">✅ Aceita FGTS</span>';if(apiData.financiamento==1)condRow.innerHTML+='<span class="badge-cond badge-fin">🏦 Aceita Financiamento</span>';if(apiData.disputa==1)condRow.innerHTML+='<span class="badge-cond badge-disputa">⚡ Em disputa</span>';}
     var infoList=document.getElementById('info-list');
-    if(infoList&&apiData){
-      var cmInfo={limitada:'CAIXA paga até 10% do valor de avaliação; excedente é do adquirente.',comprador:'Responsabilidade do adquirente.'};
+    if(infoList&&apiData&&(apiData.condominio||apiData.iptu)){
+      var cmInfo={limitada:'Comprador paga até 10% do valor de avaliação; excedente é pago pela CAIXA.',comprador:'Responsabilidade do adquirente.'};
       var iptuInfo={caixa:'Responsabilidade da CAIXA até a data da venda.',comprador:'Responsabilidade do adquirente.'};
-      var condLabel=apiData.condominio?(cmInfo[apiData.condominio]||apiData.condominio):'Consulte o edital';
-      var iptuLabel=apiData.iptu?(iptuInfo[apiData.iptu]||apiData.iptu):'Consulte o edital';
-      infoList.innerHTML+='<div class="info-row"><span class="info-label">Condomínio</span><span class="info-val">'+condLabel+'</span></div>';
-      infoList.innerHTML+='<div class="info-row"><span class="info-label">Tributos</span><span class="info-val">'+iptuLabel+'</span></div>';
+      if(apiData.condominio){
+        var condLabel=cmInfo[apiData.condominio]||apiData.condominio;
+        var rCond=infoList.querySelector('[data-field="condominio"]');
+        if(rCond){rCond.querySelector('.info-val').textContent=condLabel;}
+        else{infoList.innerHTML+='<div class="info-row" data-field="condominio"><span class="info-label">Condomínio</span><span class="info-val">'+condLabel+'</span></div>';}
+      }
+      if(apiData.iptu){
+        var iptuLabel=iptuInfo[apiData.iptu]||apiData.iptu;
+        var rIptu=infoList.querySelector('[data-field="iptu"]');
+        if(rIptu){rIptu.querySelector('.info-val').textContent=iptuLabel;}
+        else{infoList.innerHTML+='<div class="info-row" data-field="iptu"><span class="info-label">Tributos</span><span class="info-val">'+iptuLabel+'</span></div>';}
+      }
     }
   });
   if(typeof buildChipsRow==='function'){var ar=buildChipsRow(item.descricao||'');var arWrap=document.getElementById('atributos-row');if(ar&&arWrap)arWrap.appendChild(ar);}
   var condRow=document.getElementById('cond-row');
-  if(condRow&&modLabel)condRow.innerHTML='<span class="badge-cond badge-mod">📋 '+modLabel+'</span>';
-  var infoList=document.getElementById('info-list');
-  var infoItems=[{l:'Nº do imóvel',v:item.num_imovel||hdn||'—'},{l:'Cidade',v:(item.cidade||'—')+' · '+(item.uf||'SP')},{l:'Modalidade',v:modLabel||'—'}];
-  var modC2=canonModalidade(item.modalidade||'');
-
-  // Datas de leilão — SFI tem 2 datas; demais modalidades têm apenas encerramento
-  var dataLeil1 = item.data_leilao_1 || '';
-  var dataEnc   = item.data_encerramento || '';
-
-  if (modC2 === 'leilao_sfi' && dataLeil1) {
-    // SFI: exibe 1º e 2º Leilão separadamente
-    infoItems.push({l: '📅 1º Leilão', v: fmtData(dataLeil1) || '—'});
-    infoItems.push({l: '📅 2º Leilão', v: fmtData(dataEnc)   || '—'});
-  } else {
-    // Licitação Aberta / Venda Online / Compra Direta: uma única data
-    var labelData = '📅 Encerra em';
-    if (modC2 === 'licitacao_aberta') labelData = '📅 Data da Licitação';
-    else if (modC2 === 'compra_direta') labelData = '📅 Disponível até';
-    if (modC2 !== 'compra_direta' || dataEnc) {
-      infoItems.push({l: labelData, v: fmtData(dataEnc) || '—'});
-    }
+  if(condRow){
+    condRow.innerHTML='';
+    if(item.fgts==1)condRow.innerHTML+='<span class="badge-cond badge-fgts">✅ Aceita FGTS</span>';
+    if(item.financiamento==1)condRow.innerHTML+='<span class="badge-cond badge-fin">🏦 Aceita Financiamento</span>';
+    if(item.disputa==1)condRow.innerHTML+='<span class="badge-cond badge-disputa">⚡ Em disputa</span>';
   }
-  infoItems=infoItems.concat([{l:'Preço de venda',v:fmtBRL(item.preco)||'—'},{l:'Avaliação',v:item.avaliacao?fmtBRL(item.avaliacao):'—'},{l:'Desconto',v:pct>0?pct.toFixed(0)+'%':'—'}]);
-  if(infoList)infoItems.forEach(function(i){infoList.innerHTML+='<div class="info-row"><span class="info-label">'+i.l+'</span><span class="info-val">'+i.v+'</span></div>';});
+  var infoList=document.getElementById('info-list');
+  var modC2=canonModalidade(item.modalidade||'');
+  var dataLeil1=item.data_leilao_1||'';
+  var dataEnc=item.data_encerramento||'';
+  function addRow(label,val,field){
+    var df=field?(' data-field="'+field+'"'):'';
+    if(infoList)infoList.innerHTML+='<div class="info-row"'+df+'><span class="info-label">'+label+'</span><span class="info-val">'+val+'</span></div>';
+  }
+  // Ordem: Cidade · Preço · Avaliação · Modalidade · Desconto · Data · Código · (Condomínio/Tributos via API)
+  addRow('Cidade',(item.cidade||'—')+' · '+(item.uf||'SP'));
+  addRow('Preço de venda',fmtBRL(item.preco)||'—');
+  addRow('Avaliação',item.avaliacao?fmtBRL(item.avaliacao):'—');
+  addRow('Desconto',pct>0?pct.toFixed(0)+'%':'—');
+  addRow('Modalidade',modLabel||'—');
+  // Datas
+  if(modC2==='leilao_sfi'){
+    addRow('📅 1º Leilão',fmtData(dataLeil1)||'—','data_leilao_1');
+    addRow('📅 2º Leilão',fmtData(dataEnc)||'—','data_encerramento');
+  } else if(modC2!=='compra_direta'||dataEnc){
+    var labelData='📅 Encerra em';
+    if(modC2==='licitacao_aberta')labelData='📅 Data';
+    else if(modC2==='compra_direta')labelData='📅 Disponível até';
+    addRow(labelData,fmtData(dataEnc)||'—','data_encerramento');
+  }
+  addRow('Código do imóvel',item.num_imovel||hdn||'—');
   var linkCaixa=item.link||'#';
   // Nota: doc-edital e doc-matricula já têm hrefs do PHP (SSR); buscarDadosApi pode atualizá-los se scraper funcionar
   setHref('link-caixa-mobile',linkCaixa);setHref('doc-caixa',linkCaixa);setHref('link-caixa-btn',linkCaixa);

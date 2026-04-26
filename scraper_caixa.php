@@ -126,6 +126,18 @@ function hdnFrom($link) {
     return '';
 }
 
+function parseAreas(string $ds): array {
+    $a = ['area_total' => 0.0, 'area_privativa' => 0.0, 'area_terreno' => 0.0];
+    // Suporta 'área', 'area', 'ýrea' (corrupção de encoding do CSV da CAIXA)
+    if (preg_match('/(\d+[\.,]\d+)\s+de\s+[aáý]rea\s+total/iu', $ds, $m))
+        $a['area_total'] = (float) str_replace(',', '.', $m[1]);
+    if (preg_match('/(\d+[\.,]\d+)\s+de\s+[aáý]rea\s+privativa/iu', $ds, $m))
+        $a['area_privativa'] = (float) str_replace(',', '.', $m[1]);
+    if (preg_match('/(\d+[\.,]\d+)\s+de\s+[aáý]rea\s+d[oa]\s+terreno/iu', $ds, $m))
+        $a['area_terreno'] = (float) str_replace(',', '.', $m[1]);
+    return $a;
+}
+
 /* ══════════════════════════════════════════════
    FASE 1 — Download CSVs para pasta temporária
    ══════════════════════════════════════════════ */
@@ -247,15 +259,19 @@ $db->exec("CREATE TABLE imoveis(
     tipo TEXT DEFAULT '', modalidade TEXT DEFAULT '', modalidade_raw TEXT DEFAULT '',
     descricao TEXT DEFAULT '', condominio TEXT DEFAULT '', iptu TEXT DEFAULT '',
     link TEXT DEFAULT '', data_leilao_1 TEXT DEFAULT '', data_encerramento TEXT DEFAULT '',
-    foto_url TEXT DEFAULT '', scraped_at TEXT DEFAULT ''
+    foto_url TEXT DEFAULT '', scraped_at TEXT DEFAULT '',
+    area_privativa REAL DEFAULT 0, area_total REAL DEFAULT 0, area_terreno REAL DEFAULT 0,
+    status_caixa TEXT DEFAULT '', edital_url TEXT DEFAULT ''
 )");
 foreach (['uf','cidade','preco','tipo','desconto','modalidade','hdnimovel','fgts','financiamento'] as $idx)
     $db->exec("CREATE INDEX idx_{$idx} ON imoveis({$idx})");
 
 $ins = $db->prepare(
     "INSERT INTO imoveis(hdnimovel,numero,uf,cidade,bairro,endereco,preco,avaliacao,desconto,
-     financiamento,fgts,disputa,tipo,modalidade,modalidade_raw,descricao,link)
-     VALUES(:h,:n,:uf,:ci,:ba,:en,:pr,:av,:de,:fi,:fg,:di,:ti,:mo,:mr,:ds,:li)"
+     financiamento,fgts,disputa,tipo,modalidade,modalidade_raw,descricao,link,
+     area_total,area_privativa,area_terreno)
+     VALUES(:h,:n,:uf,:ci,:ba,:en,:pr,:av,:de,:fi,:fg,:di,:ti,:mo,:mr,:ds,:li,
+     :at,:ap,:atr)"
 );
 
 $ok = 0; $skip = 0;
@@ -326,10 +342,9 @@ foreach ($csvValidos as $uf => $csv) {
         if (!preg_match('/^\d/', str_replace(' ', '', $num))) { $skip++; continue; }
         if ($pr === 0 && $av === 0) { $skip++; continue; }
         $hdn  = hdnFrom($li) ?: preg_replace('/\D/', '', $num);
-        $tipo = inferTipo($ds);
+        $tipo  = inferTipo($ds);
+        $areas = parseAreas($ds);
         // FGTS é INDEPENDENTE de financiamento — jamais derivado do CSV.
-        // Valor real vem SOMENTE da página de detalhe da Caixa (frase "Permite utilização de FGTS"),
-        // preenchido pelo caixa-scrape-detalhe.php (sob demanda) ou fgts-batch-scraper.php (em lote).
         $fg   = 0;
         $ins->execute([
             ':h'  => $hdn, ':n' => $num, ':uf' => $ufR, ':ci' => $ci,
@@ -338,6 +353,9 @@ foreach ($csvValidos as $uf => $csv) {
             ':fi' => $fi,  ':fg' => $fg, ':di' => inferDisp($mo),
             ':ti' => $tipo, ':mo' => normMod($mo),
             ':mr' => $mo,  ':ds' => $ds, ':li' => $li,
+            ':at' => $areas['area_total'],
+            ':ap' => $areas['area_privativa'],
+            ':atr'=> $areas['area_terreno'],
         ]);
         $ok++;
     }
@@ -373,6 +391,11 @@ if (file_exists(DB_PATH)) {
                 caixa_paga_excedente = COALESCE((SELECT o.caixa_paga_excedente FROM old.imoveis o WHERE o.hdnimovel = imoveis.hdnimovel AND o.scraped_at != ''), 0),
                 fgts                = COALESCE((SELECT o.fgts FROM old.imoveis o WHERE o.hdnimovel = imoveis.hdnimovel AND o.scraped_at != ''), imoveis.fgts),
                 financiamento       = COALESCE((SELECT o.financiamento FROM old.imoveis o WHERE o.hdnimovel = imoveis.hdnimovel AND o.scraped_at != ''), imoveis.financiamento),
+                area_privativa      = COALESCE((SELECT o.area_privativa FROM old.imoveis o WHERE o.hdnimovel = imoveis.hdnimovel AND o.scraped_at != '' AND o.area_privativa > 0), imoveis.area_privativa),
+                area_total          = COALESCE((SELECT o.area_total FROM old.imoveis o WHERE o.hdnimovel = imoveis.hdnimovel AND o.scraped_at != '' AND o.area_total > 0), imoveis.area_total),
+                area_terreno        = COALESCE((SELECT o.area_terreno FROM old.imoveis o WHERE o.hdnimovel = imoveis.hdnimovel AND o.scraped_at != '' AND o.area_terreno > 0), imoveis.area_terreno),
+                status_caixa        = COALESCE((SELECT o.status_caixa FROM old.imoveis o WHERE o.hdnimovel = imoveis.hdnimovel AND o.scraped_at != ''), ''),
+                edital_url          = COALESCE((SELECT o.edital_url FROM old.imoveis o WHERE o.hdnimovel = imoveis.hdnimovel AND o.scraped_at != ''), ''),
                 scraped_at          = COALESCE((SELECT o.scraped_at FROM old.imoveis o WHERE o.hdnimovel = imoveis.hdnimovel AND o.scraped_at != ''), '')
             WHERE EXISTS (SELECT 1 FROM old.imoveis o WHERE o.hdnimovel = imoveis.hdnimovel AND o.scraped_at != '')
         ");

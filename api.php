@@ -93,7 +93,11 @@ function row(array $r): array {
         'iptu'           => $r['iptu']          ?? '',
         'link'           => $r['link']          ?? '',
         'data_encerramento' => $r['data_encerramento'] ?? '',
+        'data_leilao_1'  => $r['data_leilao_1'] ?? '',
         'foto_url'       => $r['foto_url']      ?? '',
+        'area_privativa' => (float)($r['area_privativa'] ?? 0),
+        'area_total'     => (float)($r['area_total']     ?? 0),
+        'area_terreno'   => (float)($r['area_terreno']   ?? 0),
     ];
 }
 
@@ -153,13 +157,13 @@ try {
         if ($dMin !== '') { $where[] = 'desconto >= :dmin'; $params[':dmin'] = (float)$dMin; }
         if ($dMax !== '') { $where[] = 'desconto <= :dmax'; $params[':dmax'] = (float)$dMax; }
 
-        /* Tipo (múltiplos) — filtra pelo campo tipo do banco */
+        /* Tipo (múltiplos) — busca por início da descricao */
         $tipos = array_filter(array_map('trim', explode(',', strtolower(g('tipos')))));
         if ($tipos) {
             $or = [];
             foreach ($tipos as $i => $t) {
-                $or[] = "tipo = :t{$i}";
-                $params[":t{$i}"] = $t;
+                $or[] = "LOWER(descricao) LIKE :t{$i}";
+                $params[":t{$i}"] = $t . '%';
             }
             $where[] = '(' . implode(' OR ', $or) . ')';
         }
@@ -167,8 +171,8 @@ try {
         /* Tipo simples (parâmetro único legado) */
         $tipoSimples = strtolower(g('tipo'));
         if ($tipoSimples !== '' && !$tipos) {
-            $where[] = 'tipo = :tsimples';
-            $params[':tsimples'] = $tipoSimples;
+            $where[] = 'LOWER(descricao) LIKE :tsimples';
+            $params[':tsimples'] = '%' . $tipoSimples . '%';
         }
 
         /* Modalidades (múltiplas) — mapeadas para padrões ASCII que funcionam
@@ -264,23 +268,24 @@ try {
             $params[':dataate'] = $dataAte;
         }
 
-        /* Área (busca no campo descricao) */
-        $areaTipo = g('area_tipo');
-        $areaMin = g('area_min');
-        $areaMax = g('area_max');
+        /* Área — filtra por colunas numéricas reais (area_privativa, area_total, area_terreno) */
+        $areaTipo = strtolower(trim(g('area_tipo')));
+        $areaMin  = g('area_min');
+        $areaMax  = g('area_max');
         if ($areaMin !== '' || $areaMax !== '') {
-            /* Área é extraída da descrição via CAST. Tipo: total, privativa, terreno */
-            $areaField = 'área total';
-            if ($areaTipo === 'privativa') $areaField = 'área privativa';
-            elseif ($areaTipo === 'terreno') $areaField = 'área do terreno';
-            
-            /* SQLite: extrair número antes de " de área" usando LIKE + CAST trick
-               Como SQLite não tem regex extract fácil, filtramos via descrição LIKE */
+            /* Mapeia tipo para coluna numérica */
+            $areaCol = 'area_total'; // padrão
+            if ($areaTipo === 'privativa') $areaCol = 'area_privativa';
+            elseif ($areaTipo === 'terreno') $areaCol = 'area_terreno';
+            /* Só filtra imóveis que têm o tipo de área preenchido */
+            $where[] = "{$areaCol} > 0";
             if ($areaMin !== '') {
-                /* Não dá pra filtrar por valor numérico em campo texto diretamente.
-                   Usamos um truque: filtramos imóveis que mencionam o tipo de área. */
-                $where[] = "LOWER(descricao) LIKE :areafld";
-                $params[':areafld'] = '%' . strtolower($areaField) . '%';
+                $where[] = "{$areaCol} >= :areamin";
+                $params[':areamin'] = (float)str_replace(',', '.', $areaMin);
+            }
+            if ($areaMax !== '') {
+                $where[] = "{$areaCol} <= :areamax";
+                $params[':areamax'] = (float)str_replace(',', '.', $areaMax);
             }
         }
 

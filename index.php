@@ -76,6 +76,8 @@ input,select,textarea{background-color:#fff;color:#0f172a}
 .btn-primary:hover{filter:brightness(1.05)}
 .btn-ghost{background:#dce8ff;border:1.5px solid #93b4e8;border-radius:999px;padding:9px 18px;font-weight:900;font-size:.84rem;color:#1e40af;cursor:pointer;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;font-family:inherit}
 .btn-ghost:hover{background:#c7daff;border-color:#6b9fdc}
+#btnFiltros{background:var(--azul);color:#fff;border-color:var(--azul)}
+#btnFiltros:hover{background:var(--azul-esc);border-color:var(--azul-esc)}
 
 /* SEÇÕES */
 .sec-outer{width:100%}
@@ -216,11 +218,10 @@ input,select,textarea{background-color:#fff;color:#0f172a}
 .btn-nav-cta:hover{filter:brightness(1.08)}
 .nav-links a.active{opacity:1;background:rgba(255,255,255,.18);border-radius:8px;padding:4px 10px;font-weight:900}
 .nav-mobile a.active{background:#c0d8f8;color:var(--azul-esc);font-weight:900}
-.hamburger{display:none;align-items:center;justify-content:center;width:44px;height:44px;flex-shrink:0;background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.3);border-radius:10px;cursor:pointer;color:#fff;transition:background .15s}
-.hamburger svg{width:20px;height:20px;display:block}
-    .hamburger:hover,.hamburger:focus-visible{background:rgba(255,255,255,.22);outline:none}
+.hamburger{display:none;align-items:center;justify-content:center;width:44px;height:44px;flex-shrink:0;background:rgba(255,255,255,.1);border:2px solid rgba(255,255,255,.4);border-radius:10px;cursor:pointer;color:#fff}
+.hamburger svg{width:22px;height:22px;display:block}
 .nav-mobile{display:none;flex-direction:column;width:100%;background:#dceeff;border-top:2px solid #a8cfee}
-.menu-chk:checked~.nav-mobile{display:flex!important}
+.menu-chk:checked~.nav-mobile{display:flex!important;position:absolute;width:100%;left:0;top:100%;box-shadow:0 8px 24px rgba(0,0,0,.22)}
 .nav-mobile a{display:block;padding:14px 20px;font-size:.97rem;font-weight:700;color:#0b1a33;background:#e8f3ff;border-bottom:1px solid #b8d8f5;text-decoration:none;transition:background .15s}
 .nav-mobile a:hover{background:#cde5ff}
 .nav-mob-cta{background:#e97500!important;color:#fff!important;font-weight:900!important;border-bottom:none!important}
@@ -232,16 +233,20 @@ input,select,textarea{background-color:#fff;color:#0f172a}
 @media(max-width:900px){
   .hdr{padding:0 8px 0 6px;min-height:80px;gap:6px}
   .nav-links{display:none!important}
-  .hamburger{display:flex}
-  .logo-icon{width:48px;height:48px}
-  .logo-icon-img{width:48px;height:48px}
-  .logo-aio{font-size:1.2rem}
-  .logo{flex-shrink:1;min-width:0;gap:5px}
+  .hamburger{display:flex!important}
+  .logo-icon{width:48px!important;height:48px!important}
+  .logo-icon-img{width:48px!important;height:48px!important}
+  .logo-aio{font-size:1.0rem}
   .logo-txt{max-width:calc(100vw - 112px)}
   .logo-sub-full{display:none}
   .logo-sub-mobile{display:block}
-  .logo-sub{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:.71rem;text-align:left;text-align-last:left}
-  .hero-inner{grid-template-columns:1fr}
+  .logo-sub{white-space:normal;font-size:.71rem;text-align:left;text-align-last:left}
+  .hero-inner{grid-template-columns:1fr;gap:8px}
+  .hero{padding:14px 16px 18px}
+  .hero-title{font-size:1.2rem;margin-bottom:4px}
+  .hero-sub{display:none}
+  .filter-card{padding:14px}
+  .filter-card-title{margin-bottom:8px}
   .hero-stats{grid-template-columns:repeat(2,1fr)}
   .sim-wrap{grid-template-columns:1fr}
   .faq-grid{grid-template-columns:1fr}
@@ -915,15 +920,11 @@ function aceitaFgts(item) {
   // Terrenos NUNCA aceitam FGTS
   var tipo = norm(item.descricao || '');
   if (tipo.indexOf('terreno') !== -1 || tipo.indexOf('lote') !== -1 || tipo.indexOf('gleba') !== -1) return false;
-  if (item.fgts === 1 || item.fgts === '1') return true;
-  var t = norm((item.descricao || '') + ' ' + corrigirModalidade(item.modalidade));
-  return t.indexOf('fgts') !== -1;
+  return item.fgts === 1 || item.fgts === '1';
 }
 
 function aceitaFinanciamento(item) {
-  if (item.financiamento === 1 || item.financiamento === '1') return true;
-  var t = norm((item.descricao || '') + ' ' + corrigirModalidade(item.modalidade));
-  return t.indexOf('financi') !== -1 || t.indexOf('sfh') !== -1 || t.indexOf('sbpe') !== -1;
+  return item.financiamento === 1 || item.financiamento === '1';
 }
 
 function estaEmDisputa(item) {
@@ -1091,7 +1092,7 @@ function buildCard(item) {
   if (estaEmDisputa(item)) {
     var dp = document.createElement('span');
     dp.className = 'badge-cond badge-disputa';
-    dp.textContent = 'Em disputa';
+    dp.textContent = '⚡ Em disputa';
     condRow.appendChild(dp);
   }
   if (condRow.childNodes.length > 0) chips.appendChild(condRow);
@@ -1153,26 +1154,59 @@ function buildCard(item) {
   body.appendChild(titulo);
   body.appendChild(endereco);
   body.appendChild(precos);
-  /* Data do leilão */
+  /* DATA + DISPUTA — linha abaixo do bloco de preços */
   function fmtDataIdx(raw){if(!raw||!/^\d{4}-\d{2}-\d{2}/.test(raw))return raw||'';var dp=raw.split(/[T ]/);var pts=dp[0].split('-');var s=pts[2]+'/'+pts[1]+'/'+pts[0];if(dp[1])s+=' às '+dp[1].substring(0,5);return s;}
   var modIdx = (item.modalidade||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
   var isSfiIdx = modIdx.indexOf('leilao sfi') !== -1;
   var isCompDirIdx = modIdx.indexOf('direta') !== -1;
-  if (!isCompDirIdx) {
-    if (isSfiIdx && (item.data_leilao_1 || item.data_encerramento)) {
-      if (item.data_leilao_1) { var r1=document.createElement('div'); r1.style.cssText='font-size:.75rem;color:#1d4ed8;font-weight:700;margin:6px 0 0 0'; r1.textContent='🔨 1º Leilão: '+fmtDataIdx(item.data_leilao_1); precos.appendChild(r1); }
-      if (item.data_encerramento) { var r2=document.createElement('div'); r2.style.cssText='font-size:.75rem;color:#1e3a8a;font-weight:700;margin:2px 0 0 0'; r2.textContent='🔨 2º Leilão: '+fmtDataIdx(item.data_encerramento); precos.appendChild(r2); }
-    } else if (item.data_encerramento) {
-      var dataRow = document.createElement('div');
-      dataRow.style.cssText = 'font-size:.75rem;color:#64748b;font-weight:600;margin:6px 0 0 0';
-      dataRow.textContent = '📅 ' + fmtDataIdx(item.data_encerramento);
-      precos.appendChild(dataRow);
+  var disputa = estaEmDisputa(item);
+  /* Próxima data futura — nunca exibe data já passada */
+  function parseBRT(s){if(!s)return null;return new Date(s.replace(' ','T')+'-03:00');}
+  var now=new Date();
+  var d1=parseBRT(item.data_leilao_1), d2=parseBRT(item.data_encerramento);
+  var nextDate=null, nextLabel='', hasSecond=false;
+  if(!isCompDirIdx){
+    if(isSfiIdx){
+      if(d1&&d1>now){nextDate=item.data_leilao_1;nextLabel='🔨 1º Leilão:';hasSecond=!!(d2&&d2>now);}
+      else if(d2&&d2>now){nextDate=item.data_encerramento;nextLabel='🔨 2º Leilão:';}
+    } else {
+      if(d2&&d2>now){nextDate=item.data_encerramento;nextLabel='📅';}
     }
+  }
+  if (nextDate) {
+    var ddr = document.createElement('div');
+    ddr.style.cssText = 'display:flex;align-items:center;padding:5px 14px 0';
+    var datePart = document.createElement('div');
+    datePart.style.cssText = 'display:flex;align-items:center;gap:5px';
+    var drSpan=document.createElement('span');
+    drSpan.style.cssText='font-size:.73rem;color:#1d4ed8;font-weight:700';
+    drSpan.textContent=(nextLabel?nextLabel+' ':'')+fmtDataIdx(nextDate);
+    datePart.appendChild(drSpan);
+    if(hasSecond){
+      var s2=document.createElement('span');
+      s2.style.cssText='font-size:.65rem;color:#94a3b8;font-weight:600;background:#f1f5f9;border-radius:4px;padding:1px 5px';
+      s2.textContent='+2º';
+      datePart.appendChild(s2);
+    }
+    /* Badge urgência — encerra em até 3 dias */
+    var nextDateObj = parseBRT(nextDate);
+    if(nextDateObj){
+      var diffDias = Math.ceil((nextDateObj - now) / (1000*60*60*24));
+      if(diffDias >= 0 && diffDias <= 3){
+        var urg = document.createElement('span');
+        urg.style.cssText='font-size:.65rem;font-weight:700;color:#fff;background:#dc2626;border-radius:4px;padding:1px 6px;margin-left:6px';
+        urg.textContent = diffDias === 0 ? '⏳ Hoje!' : '⏳ ' + diffDias + (diffDias===1?' dia':' dias');
+        datePart.appendChild(urg);
+      }
+    }
+    ddr.appendChild(datePart);
+    body.appendChild(ddr);
   }
   if (atribRow) body.appendChild(atribRow);
   body.appendChild(chips);
-  /* CRECI só para imóveis de SP */
+  /* CRECI — sempre última linha do body (margin-top:auto empurra para o fundo) */
   if ((item.uf || '').toUpperCase() === 'SP') {
+    creciRow.style.marginTop = 'auto';
     body.appendChild(creciRow);
   } else {
     var bnNac = document.createElement('span');
@@ -1180,6 +1214,7 @@ function buildCard(item) {
     bnNac.textContent = '🌎 Plataforma nacional de leilões CAIXA';
     var bnWrap = document.createElement('div');
     bnWrap.className = 'imovel-creci';
+    bnWrap.style.marginTop = 'auto';
     bnWrap.appendChild(bnNac);
     body.appendChild(bnWrap);
   }
@@ -1402,6 +1437,7 @@ window.parseCSV = parseCSVCaixa;
       });
   }
 
+
   var sec = document.getElementById('oportunidades');
   if (sec && 'IntersectionObserver' in window) {
     var obs = new IntersectionObserver(function (entries) {
@@ -1546,7 +1582,8 @@ function aplicarFiltros() {
   if (amax && amax.value.trim()) qs.set('area_max', amax.value.replace(/[^\d]/g,''));
 
   fecharModal();
-  window.open('resultados.html?' + qs.toString(), '_blank', 'noopener,noreferrer');
+  var _url='resultados.html?'+qs.toString();
+  if('ontouchstart' in window||navigator.maxTouchPoints>0){window.location.href=_url;}else{window.open(_url,'_blank','noopener,noreferrer');}
 }
 
 /* ── 13. BUSCAR (barra principal do hero) ── */
@@ -1617,7 +1654,8 @@ function buscar() {
   if (rCond) qs.set('r_cond', rCond.value);
   if (rIptu) qs.set('r_iptu', rIptu.value);
 
-  window.open('resultados.html?' + qs.toString(), '_blank', 'noopener,noreferrer');
+  var _url='resultados.html?'+qs.toString();
+  if('ontouchstart' in window||navigator.maxTouchPoints>0){window.location.href=_url;}else{window.open(_url,'_blank','noopener,noreferrer');}
 }
 
 /* ── 14. SIMULADOR ── */

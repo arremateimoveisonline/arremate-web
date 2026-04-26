@@ -34,17 +34,18 @@ function extrairChips(desc){
   }
 
   // Área privativa — suporta: "45,16M2 DE AREA PRIVATIVA" e "Área Privativa: 45,16 m²"
-  m = desc.match(/([\d,\.]+)\s*(?:m[²2])?\s*de\s*[aá]rea\s*privativa/i) ||
-      desc.match(/[aá]rea\s*privativa[:\s]+([\d,\.]+)/i);
+  // [aáý] cobre UTF-8 correto (á), ASCII (a) e corrupção ISO-8859-1 (ý = 0xFD lido como á)
+  m = desc.match(/([\d,\.]+)\s*(?:m[²2])?\s*de\s*[aáý]rea\s*privativa/i) ||
+      desc.match(/[aáý]rea\s*privativa[:\s]+([\d,\.]+)/i);
   if(m){
     var ap = parseFloat((m[1]||m[2]||'0').replace(',','.'));
     if(ap>0) chips.push({ icon:'📐', texto: ap.toLocaleString('pt-BR',{maximumFractionDigits:1})+'m²' });
   }
 
   // Área total (só se não tiver privativa)
-  if(!desc.match(/[aá]rea\s*privativa/i)){
-    m = desc.match(/([\d,\.]+)\s*(?:m[²2])?\s*de\s*[aá]rea\s*total/i) ||
-        desc.match(/[aá]rea\s*total[:\s]+([\d,\.]+)/i);
+  if(!desc.match(/[aáý]rea\s*privativa/i)){
+    m = desc.match(/([\d,\.]+)\s*(?:m[²2])?\s*de\s*[aáý]rea\s*total/i) ||
+        desc.match(/[aáý]rea\s*total[:\s]+([\d,\.]+)/i);
     if(m){
       var at = parseFloat((m[1]||m[2]||'0').replace(',','.'));
       if(at>0) chips.push({ icon:'📐', texto: at.toLocaleString('pt-BR',{maximumFractionDigits:1})+'m²' });
@@ -52,8 +53,8 @@ function extrairChips(desc){
   }
 
   // Área do terreno
-  m = desc.match(/([\d,\.]+)\s*(?:m[²2])?\s*de\s*[aá]rea\s*do\s*terreno/i) ||
-      desc.match(/[aá]rea\s*(?:do\s*)?terreno[:\s]+([\d,\.]+)/i);
+  m = desc.match(/([\d,\.]+)\s*(?:m[²2])?\s*de\s*[aáý]rea\s*do\s*terreno/i) ||
+      desc.match(/[aáý]rea\s*(?:do\s*)?terreno[:\s]+([\d,\.]+)/i);
   if(m){
     var tr = parseFloat((m[1]||m[2]||'0').replace(',','.'));
     if(tr>0) chips.push({ icon:'🌳', texto: tr.toLocaleString('pt-BR',{maximumFractionDigits:1})+'m² terreno' });

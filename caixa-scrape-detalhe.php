@@ -37,7 +37,7 @@ try {
     $db = new PDO('sqlite:' . DB_PATH);
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     
-    $stmt = $db->prepare('SELECT scraped_at, fgts, financiamento, condominio, caixa_paga_excedente, iptu, foto_url, data_leilao_1, data_encerramento, descricao FROM imoveis WHERE hdnimovel = :h LIMIT 1');
+    $stmt = $db->prepare('SELECT scraped_at, fgts, financiamento, condominio, caixa_paga_excedente, iptu, foto_url, data_leilao_1, data_encerramento, descricao, status_caixa FROM imoveis WHERE hdnimovel = :h LIMIT 1');
     $stmt->execute([':h' => $hdn]);
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -57,18 +57,19 @@ try {
         $a = ['privativa' => 0.0, 'total' => 0.0, 'terreno' => 0.0];
         if (empty($desc)) return $a;
         // Formato "45,16 de área privativa" ou "45,16M2 DE AREA PRIVATIVA"
-        if (preg_match('/([\d]+[.,]?[\d]*)\s*(?:m[²2])?\s*de\s*[aá]rea\s*privativa/iu', $desc, $m))
+        // [aáý] cobre UTF-8 correto (á), ASCII (a) e corrupção ISO-8859-1 (ý = byte 0xFD lido como á)
+        if (preg_match('/([\d]+[.,]?[\d]*)\s*(?:m[²2])?\s*de\s*[aáý]rea\s*privativa/iu', $desc, $m))
             $a['privativa'] = (float) str_replace(',', '.', $m[1]);
-        if (preg_match('/([\d]+[.,]?[\d]*)\s*(?:m[²2])?\s*de\s*[aá]rea\s*total/iu', $desc, $m))
+        if (preg_match('/([\d]+[.,]?[\d]*)\s*(?:m[²2])?\s*de\s*[aáý]rea\s*total/iu', $desc, $m))
             $a['total'] = (float) str_replace(',', '.', $m[1]);
-        if (preg_match('/([\d]+[.,]?[\d]*)\s*(?:m[²2])?\s*de\s*[aá]rea\s*do\s*terreno/iu', $desc, $m))
+        if (preg_match('/([\d]+[.,]?[\d]*)\s*(?:m[²2])?\s*de\s*[aáý]rea\s*do\s*terreno/iu', $desc, $m))
             $a['terreno'] = (float) str_replace(',', '.', $m[1]);
         // Formato "Área Privativa: 45,16" (saída do scraper)
-        if (!$a['privativa'] && preg_match('/[aá]rea\s*privativa[:\s]+([\d]+[.,]?[\d]*)/iu', $desc, $m))
+        if (!$a['privativa'] && preg_match('/[aáý]rea\s*privativa[:\s]+([\d]+[.,]?[\d]*)/iu', $desc, $m))
             $a['privativa'] = (float) str_replace(',', '.', $m[1]);
-        if (!$a['total'] && preg_match('/[aá]rea\s*total[:\s]+([\d]+[.,]?[\d]*)/iu', $desc, $m))
+        if (!$a['total'] && preg_match('/[aáý]rea\s*total[:\s]+([\d]+[.,]?[\d]*)/iu', $desc, $m))
             $a['total'] = (float) str_replace(',', '.', $m[1]);
-        if (!$a['terreno'] && preg_match('/[aá]rea\s*(?:do\s*)?terreno[:\s]+([\d]+[.,]?[\d]*)/iu', $desc, $m))
+        if (!$a['terreno'] && preg_match('/[aáý]rea\s*(?:do\s*)?terreno[:\s]+([\d]+[.,]?[\d]*)/iu', $desc, $m))
             $a['terreno'] = (float) str_replace(',', '.', $m[1]);
         return $a;
     }
@@ -88,6 +89,8 @@ try {
             'foto_url'             => $row['foto_url'],
             'data_leilao_1'        => $row['data_leilao_1'] ?? '',
             'data_encerramento'    => $row['data_encerramento'] ?? '',
+            'status_caixa'         => $row['status_caixa'] ?? '',
+            'edital_url'           => $row['edital_url'] ?? '',
             'descricao'            => $desc_cache,
             'area_privativa'       => $cached_areas['privativa'],
             'area_total'           => $cached_areas['total'],
@@ -116,6 +119,8 @@ function dbFallbackResponse(array $row, string $extra_key): string {
         'foto_url'             => $row['foto_url'],
         'data_leilao_1'        => $row['data_leilao_1'] ?? '',
         'data_encerramento'    => $row['data_encerramento'] ?? '',
+        'status_caixa'         => $row['status_caixa'] ?? '',
+        'edital_url'           => $row['edital_url'] ?? '',
         'descricao'            => $desc,
         'area_privativa'       => $areas['privativa'],
         'area_total'           => $areas['total'],
@@ -136,18 +141,21 @@ function extrairDatasLeilao(string $htmlDec): array {
     $d1 = '';
     $d2 = '';
 
+    // Formato CAIXA: "DD/MM/YYYY - HHhMM" ou "DD/MM/YYYY às HH:MM"
+    $RE_SEP = '(?:\s*[-–]\s*|\s+(?:[àa]s\s+)?)';
+
     // 1º Leilão explícito (SFI)
-    if (preg_match('/1[ºo°]?\s*Leil[aã]o[^\d]{0,60}(\d{2})\/(\d{2})\/(\d{4})\s+[àa]s\s+(\d{2}):(\d{2})/iu', $htmlDec, $m)) {
+    if (preg_match('/(?:Data\s+d[oa]\s+)?1[ºo°]?\s*Leil[aã]o[^\d]{0,80}(\d{2})\/(\d{2})\/(\d{4})(?:\s*[-–]\s*|\s+(?:[àa]s\s+)?)(\d{2})[h:](\d{2})/iu', $htmlDec, $m)) {
         $d1 = validarData($m[3], $m[2], $m[1], $m[4], $m[5]);
     }
     // 2º Leilão explícito (SFI)
-    if (preg_match('/2[ºo°]?\s*Leil[aã]o[^\d]{0,60}(\d{2})\/(\d{2})\/(\d{4})\s+[àa]s\s+(\d{2}):(\d{2})/iu', $htmlDec, $m)) {
+    if (preg_match('/(?:Data\s+d[oa]\s+)?2[ºo°]?\s*Leil[aã]o[^\d]{0,80}(\d{2})\/(\d{2})\/(\d{4})(?:\s*[-–]\s*|\s+(?:[àa]s\s+)?)(\d{2})[h:](\d{2})/iu', $htmlDec, $m)) {
         $d2 = validarData($m[3], $m[2], $m[1], $m[4], $m[5]);
     }
 
-    // Se não achou "Nº Leilão" explícito, captura todas DD/MM/YYYY HH:MM e ordena
+    // Se não achou "Nº Leilão" explícito, captura todas DD/MM/YYYY com hora e ordena
     if (!$d1 && !$d2) {
-        preg_match_all('/(\d{2})\/(\d{2})\/(\d{4})\s+[àa]s\s+(\d{2}):(\d{2})/iu', $htmlDec, $all, PREG_SET_ORDER);
+        preg_match_all('/(\d{2})\/(\d{2})\/(\d{4})(?:\s*[-–]\s*|\s+(?:[àa]s\s+)?)(\d{2})[h:](\d{2})/iu', $htmlDec, $all, PREG_SET_ORDER);
         $datas = [];
         foreach ($all as $mm) {
             $v = validarData($mm[3], $mm[2], $mm[1], $mm[4], $mm[5]);
@@ -286,9 +294,22 @@ if (preg_match('/editais\/matricula\/[A-Z]{2}\/\d+\.pdf/i', $html, $m)) {
     $matricula_url = 'https://venda-imoveis.caixa.gov.br/' . $m[0];
 }
 
+// Status da CAIXA — mensagens especiais exibidas na página
+$html_decoded = html_entity_decode($html, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+$html_txt     = preg_replace('/\s+/', ' ', strip_tags($html_decoded));
+$status_caixa = '';
+if (preg_match('/Venda\s+online\s+encerrada\s+em\s+([\d]{2}\/[\d]{2}\/[\d]{4}\s+[\d]{2}:[\d]{2}:[\d]{2})/i', $html_txt, $mst)) {
+    $status_caixa = 'encerrada:' . $mst[1];
+} elseif (
+    preg_match('/n[aã]o\s+est[aá]\s+mais\s+dispon[ií]vel\s+para\s+venda/i', $html_txt) ||
+    preg_match('/im[oó]vel\s+que\s+voc[eê]\s+procura\s+n[aã]o\s+est[aá]/i', $html_txt) ||
+    preg_match('/ocorreu\s+um\s+erro\s+ao\s+tentar\s+recuperar\s+os\s+dados/i', $html_txt)
+) {
+    $status_caixa = 'removido';
+}
+
 // Data e horário do leilão/encerramento (formato: YYYY-MM-DD HH:MM:SS)
 // Captura 1º Leilão + 2º Leilão separadamente quando SFI; data única para Licitação/Venda Online
-$html_decoded = html_entity_decode($html, ENT_QUOTES | ENT_HTML5, 'UTF-8');
 $datas = extrairDatasLeilao($html_decoded);
 $data_leilao_1     = $datas['data_leilao_1'];
 $data_encerramento = $datas['data_encerramento'];
@@ -343,7 +364,12 @@ try {
             foto_url = :fo,
             data_leilao_1 = :d1,
             data_encerramento = :de,
+            status_caixa = :sc,
             descricao = :desc,
+            area_privativa = :ap,
+            area_total = :at,
+            area_terreno = :ater,
+            edital_url = :eu,
             scraped_at = :ts
          WHERE hdnimovel = :h"
     );
@@ -356,7 +382,12 @@ try {
         ':fo'   => $foto_url,
         ':d1'   => $data_leilao_1,
         ':de'   => $data_encerramento,
+        ':sc'   => $status_caixa,
         ':desc' => $descricao_nova,
+        ':ap'   => $area_privativa,
+        ':at'   => $area_total,
+        ':ater' => $area_terreno,
+        ':eu'   => $edital_url,
         ':ts'   => date('Y-m-d H:i:s'),
         ':h'    => $hdn,
     ]);
@@ -378,6 +409,7 @@ echo json_encode([
     'matricula_url'        => $matricula_url,
     'data_leilao_1'        => $data_leilao_1,
     'data_encerramento'    => $data_encerramento,
+    'status_caixa'         => $status_caixa,
     'descricao'            => $descricao_nova,
     'area_privativa'       => $area_privativa,
     'area_total'           => $area_total,
