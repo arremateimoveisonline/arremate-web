@@ -319,8 +319,18 @@ async function main() {
   const dateFilter = FORCE ? '' :
     `AND (scraped_at IS NULL OR scraped_at = ''
           OR data_encerramento LIKE '%23:59%'
-          OR scraped_at < datetime('now', '-12 hours'))`;
-  const query = `SELECT hdnimovel FROM imoveis WHERE 1=1 ${ufFilter} ${dateFilter} ORDER BY CASE WHEN uf='SP' THEN 0 ELSE 1 END, RANDOM() LIMIT ${LIMIT};`;
+          OR csv_updated_at > scraped_at
+          OR scraped_at < datetime('now', '-7 days'))`;
+  const query = `
+    SELECT hdnimovel FROM imoveis WHERE 1=1 ${ufFilter} ${dateFilter}
+    ORDER BY
+      CASE
+        WHEN scraped_at IS NULL OR scraped_at = '' THEN 0
+        WHEN csv_updated_at > scraped_at THEN 1
+        ELSE 2
+      END ASC,
+      scraped_at ASC
+    LIMIT ${LIMIT};`;
 
   const rows = sqlQuery(query);
   if (rows.length === 0) { log('Nenhum imóvel pendente.'); return; }

@@ -84,6 +84,7 @@ async function main() {
     `sqlite3 /var/www/dados/imoveis.db "ALTER TABLE imoveis ADD COLUMN area_terreno REAL DEFAULT 0;" 2>/dev/null && echo "  ✅ area_terreno adicionada" || echo "  ℹ️  area_terreno já existe"`,
     `sqlite3 /var/www/dados/imoveis.db "ALTER TABLE imoveis ADD COLUMN status_caixa TEXT DEFAULT '';" 2>/dev/null && echo "  ✅ status_caixa adicionada" || echo "  ℹ️  status_caixa já existe"`,
     `sqlite3 /var/www/dados/imoveis.db "ALTER TABLE imoveis ADD COLUMN edital_url TEXT DEFAULT '';" 2>/dev/null && echo "  ✅ edital_url adicionada" || echo "  ℹ️  edital_url já existe"`,
+    `sqlite3 /var/www/dados/imoveis.db "ALTER TABLE imoveis ADD COLUMN csv_updated_at TEXT DEFAULT '';" 2>/dev/null && echo "  ✅ csv_updated_at adicionada" || echo "  ℹ️  csv_updated_at já existe"`,
   ];
   for (const cmd of migrationCmds) {
     await sshExec(conn, cmd);

@@ -259,7 +259,7 @@ $db->exec("CREATE TABLE imoveis(
     tipo TEXT DEFAULT '', modalidade TEXT DEFAULT '', modalidade_raw TEXT DEFAULT '',
     descricao TEXT DEFAULT '', condominio TEXT DEFAULT '', iptu TEXT DEFAULT '',
     link TEXT DEFAULT '', data_leilao_1 TEXT DEFAULT '', data_encerramento TEXT DEFAULT '',
-    foto_url TEXT DEFAULT '', scraped_at TEXT DEFAULT '',
+    foto_url TEXT DEFAULT '', scraped_at TEXT DEFAULT '', csv_updated_at TEXT DEFAULT '',
     area_privativa REAL DEFAULT 0, area_total REAL DEFAULT 0, area_terreno REAL DEFAULT 0,
     status_caixa TEXT DEFAULT '', edital_url TEXT DEFAULT ''
 )");
@@ -399,6 +399,23 @@ if (file_exists(DB_PATH)) {
                 scraped_at          = COALESCE((SELECT o.scraped_at FROM old.imoveis o WHERE o.hdnimovel = imoveis.hdnimovel AND o.scraped_at != ''), '')
             WHERE EXISTS (SELECT 1 FROM old.imoveis o WHERE o.hdnimovel = imoveis.hdnimovel AND o.scraped_at != '')
         ");
+
+        // Copia csv_updated_at do banco antigo (preserva histórico)
+        $db->exec("
+            UPDATE imoveis
+            SET csv_updated_at = (SELECT o.csv_updated_at FROM old.imoveis o WHERE o.hdnimovel = imoveis.hdnimovel AND o.csv_updated_at != '')
+            WHERE EXISTS (SELECT 1 FROM old.imoveis o WHERE o.hdnimovel = imoveis.hdnimovel AND o.csv_updated_at != '')
+        ");
+
+        // Marca novos ou com dados CSV alterados para re-scraping prioritário
+        $changed = $db->exec("
+            UPDATE imoveis SET csv_updated_at = datetime('now')
+            WHERE NOT EXISTS (SELECT 1 FROM old.imoveis o WHERE o.hdnimovel = imoveis.hdnimovel)
+               OR (SELECT o.preco     FROM old.imoveis o WHERE o.hdnimovel = imoveis.hdnimovel) != imoveis.preco
+               OR (SELECT o.modalidade FROM old.imoveis o WHERE o.hdnimovel = imoveis.hdnimovel) != imoveis.modalidade
+        ");
+        logMsg("📌 {$changed} imóveis marcados para re-scraping prioritário (novos ou alterados no CSV)");
+
         $db->exec("DETACH DATABASE old");
         logMsg("🔄 Dados de detalhe preservados de {$copied} imóveis scraped anteriormente");
     } catch (Exception $e) {
