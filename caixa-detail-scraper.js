@@ -228,6 +228,13 @@ function extrairCampos(html, pageText) {
   // Datas — usa txt (texto limpo, JS já renderizado) para garantir match correto
   const datas = extrairDatas(txt);
 
+  // Fallback Venda Online: data de encerramento fica em JS da página (carregaContador),
+  // não no DOM visível — formato: "DD/MM/YYYY HH:MM:SS" dentro de strLista
+  if (!datas.data_encerramento) {
+    const mVO = html.match(/"(\d{2})\/(\d{2})\/(20\d{2})\s+(\d{2}):(\d{2}):\d{2}"/);
+    if (mVO) datas.data_encerramento = validarData(mVO[3], mVO[2], mVO[1], mVO[4], mVO[5]);
+  }
+
   // Modalidade — aparece como linha solo no innerText (sem prefixo "Modalidade:")
   // Variantes vistas: "Compra Direta", "Venda Online", "Licitação Aberta",
   //                   "Leilão Único", "Leilão SFI - Edital Único", "1º Leilão", "2º Leilão"
