@@ -23,7 +23,7 @@ O site exibe imóveis da Caixa Econômica Federal. Esses imóveis precisam estar
 
 | Campo | Fonte | Frequência |
 |---|---|---|
-| Preço, avaliação, desconto | CSV da CAIXA | 2x por dia (6h e 18h) |
+| Preço, avaliação, desconto | CSV da CAIXA | 2x por dia (6h e 18h BRT) |
 | Cidade, bairro, endereço, UF | CSV da CAIXA | 2x por dia |
 | Tipo do imóvel (casa, apto...) | CSV da CAIXA | 2x por dia |
 | Descrição | CSV da CAIXA | 2x por dia |
@@ -41,7 +41,7 @@ O site exibe imóveis da Caixa Econômica Federal. Esses imóveis precisam estar
 
 ---
 
-## Fluxo diário hora a hora
+## Fluxo diário hora a hora (BRT)
 
 ```
 05h55  cron_atualizar.sh começa
@@ -50,6 +50,10 @@ O site exibe imóveis da Caixa Econômica Federal. Esses imóveis precisam estar
          → ~450 imóveis marcados com csv_updated_at = agora
            (novos ou com preço/modalidade alterados)
          → dados do scraper anterior preservados (datas, FGTS, etc.)
+
+06h05  monitor-mudancas.js registra movimentação do dia
+         → compara com snapshot de ontem
+         → loga entradas, saídas e mudanças de status
 
 06h30  caixa-detail-scraper.js roda (cron a cada 30 min, --limit 100)
          → Prioridade 1: imóveis nunca raspados
@@ -61,7 +65,10 @@ O site exibe imóveis da Caixa Econômica Federal. Esses imóveis precisam estar
 ...
 ~10h00 os ~450 imóveis que mudaram hoje já foram todos re-raspados ✅
 
-18h00  segundo import CSV (mesma lógica)
+08h00  status-diario-ti.sh envia resumo matinal via Telegram
+
+18h00  segundo import CSV (mesma lógica do 06h00)
+18h05  monitor-mudancas.js (segunda rodada)
 18h30  scraper processa o novo lote marcado
 
 Resto do dia  scraper faz manutenção: raspa imóveis mais antigos
@@ -90,11 +97,13 @@ Resto do dia  scraper faz manutenção: raspa imóveis mais antigos
 
 **Lógica de marcação `csv_updated_at`:**
 ```
-Imóvel marcado como "precisa re-scraping" quando:
+Imóvel marcado como "precisa re-scraping prioritário" quando:
   → É um imóvel novo (não existia ontem)
   → O preço mudou
   → A modalidade mudou
 ```
+
+**Log:** `/var/log/arremate_scraper.log`
 
 ---
 
@@ -105,11 +114,13 @@ Imóvel marcado como "precisa re-scraping" quando:
 
 **Crontab:**
 ```
-30 * * * *  node caixa-detail-scraper.js --limit 100
+30 * * * *  cd /var/www/arremate-br && node caixa-detail-scraper.js --limit 100
 ```
 Roda a cada 30 minutos, processa 100 imóveis por vez = 4.800/dia.
 
 **Lock file:** `/tmp/arremate_detail_scraper.lock` — impede duas instâncias simultâneas.
+
+**Sessão renovada:** a cada 50 imóveis o browser reinicia para evitar acúmulo de memória.
 
 **Prioridade de processamento:**
 ```
@@ -122,25 +133,25 @@ Roda a cada 30 minutos, processa 100 imóveis por vez = 4.800/dia.
 | Texto na página CAIXA | Gravado no banco como |
 |---|---|
 | "Compra Direta" | Compra Direta |
-| "Venda Direta Online" | Compra Direta (mesma coisa, nome diferente no CSV) |
+| "Venda Direta Online" | Compra Direta (mesmo produto, nome diferente no CSV) |
 | "Venda Online" | Venda Online |
 | "Licitação Aberta" | Licitação Aberta |
 | "1º Leilão", "2º Leilão", "Leilão Único"... | Leilão SFI - Edital Único |
 
 **Extração de data para Venda Online:**
-A data de encerramento dos imóveis Venda Online não aparece no texto visível da página — fica dentro de um trecho JavaScript (`carregaContador`). O scraper busca o padrão `"DD/MM/YYYY HH:MM:SS"` diretamente no HTML bruto quando não encontra data pelo texto visível.
+A data de encerramento dos imóveis Venda Online não aparece no texto visível da página — fica dentro de um trecho JavaScript (`carregaContador`). O scraper busca o padrão `"DD/MM/YYYY HH:MM:SS"` diretamente no HTML bruto quando não encontra data pelo texto visível. Para Leilão e Licitação, a data está no texto visível nos formatos `DD/MM/YYYY - HHhMM` ou `DD/MM/YYYY às HH:MM`.
 
-**Sessão renovada:** a cada 50 imóveis o browser reinicia para evitar acúmulo de memória.
+**Log:** `/var/log/arremate_detail_scraper.log` (VPS) | `scraper-local.log` (local)
 
 ---
 
 ### 4. `monitor-mudancas.js`
-**O que faz:** Compara o banco de hoje com o snapshot de ontem e registra quantos imóveis entraram, saíram ou mudaram de status. Apenas monitora — não altera dados.
+**O que faz:** Compara o banco de hoje com o snapshot de ontem e registra quantos imóveis entraram, saíram ou mudaram de status. Apenas monitora — não altera dados. Média histórica: ~450 movimentações/dia.
 
 **Crontab:**
 ```
-5 6  * * *  node monitor-mudancas.js
-5 18 * * *  node monitor-mudancas.js
+5 6  * * *  cd /var/www/arremate-br && node monitor-mudancas.js
+5 18 * * *  cd /var/www/arremate-br && node monitor-mudancas.js
 ```
 
 **Log:** `/var/log/arremate_mudancas.log`
@@ -148,14 +159,56 @@ A data de encerramento dos imóveis Venda Online não aparece no texto visível 
 ---
 
 ### 5. `status-diario-ti.sh`
-**O que faz:** Toda manhã às 8h coleta métricas da VPS (disco, memória, n8n, SSL, banco) e envia mensagem via Telegram usando Gemini AI com a persona do "Agente TI". Se o Gemini falhar, envia um resumo de fallback direto.
+**O que faz:** Toda manhã às 8h BRT coleta métricas da VPS (disco, memória, n8n, SSL, banco) e envia mensagem via Telegram usando Gemini AI (modelo `gemini-2.5-flash-lite`, 1.500 req/dia grátis) com a persona do "Agente TI". Se o Gemini falhar, envia um resumo de fallback com os dados brutos.
+
+**Métricas coletadas:** disco %, memória livre %, uptime, CPU load, status container n8n, dias SSL, IPs banidos (fail2ban), total imóveis, atualizados em 24h, último import CSV, movimentação do dia.
+
+**Thresholds de alerta:**
+```
+Disco    > 85%  → CRÍTICO | > 70% → ATENÇÃO
+Memória  < 15%  → CRÍTICO | < 25% → ATENÇÃO
+SSL      < 7 dias → CRÍTICO
+n8n parado → CRÍTICO
+fail2ban > 5 IPs/h → ATENÇÃO (possível ataque)
+```
 
 **Crontab:**
 ```
-0 8 * * *  /var/www/arremate-br/status-diario-ti.sh
+0 8 * * *  /bin/bash /var/www/arremate-br/status-diario-ti.sh
 ```
 
 **Log:** `/var/log/arremate_status_diario.log`
+
+---
+
+### 6. `monitor-vps.sh`
+**O que faz:** Roda a cada 5 minutos e dispara alertas Telegram imediatos se algum threshold crítico for atingido (disco, memória, n8n, SSL). É o sistema de alerta em tempo real — complementar ao status diário do item 5.
+
+**Crontab:**
+```
+*/5 * * * *  bash /opt/arremate-imoveis/scripts/monitor-vps.sh
+```
+
+---
+
+### 7. `deploy-hotfix.js`
+**O que faz:** Script local (roda no PC do César) que faz deploy de código e banco para a VPS via SFTP+SSH. Inclui migrações de banco automáticas.
+
+**Como usar:**
+```
+node deploy-hotfix.js
+```
+Roda na pasta `C:/Users/César/Downloads/arremate-br/`
+
+**O que o deploy faz:**
+1. Upload dos arquivos PHP/JS/HTML via SFTP
+2. Migrações de banco (ALTER TABLE para novas colunas)
+3. Correções de dados (encoding, normalização de modalidades)
+4. **Cria backup automático do banco** antes de qualquer alteração destrutiva:
+   `/var/www/dados/imoveis.db.backup-YYYYMMDD-HHMM`
+
+**Para subir o banco local para VPS** (após scraping em lote):
+O script de upload do banco está incorporado no `deploy-hotfix.js` — faz backup automático antes de sobrescrever.
 
 ---
 
@@ -165,13 +218,16 @@ A data de encerramento dos imóveis Venda Online não aparece no texto visível 
 - Produção (VPS): `/var/www/dados/imoveis.db`
 - Local (desenvolvimento): `C:/xampp/htdocs/dados/imoveis.db`
 
-**Tamanho atual:** ~21MB | **Total de imóveis:** 35.079
+**Tamanho:** ~21MB | **Total de imóveis:** 35.079
 
 **Backups na VPS:**
 ```
 /var/www/dados/imoveis.db.backup-20260419-0041
 /var/www/dados/imoveis.db.backup-20260426-0846  ← mais recente
 ```
+> Backups são criados automaticamente pelo `deploy-hotfix.js` antes de subir um banco novo.
+
+**Código-fonte no GitHub:** `github.com/arremateimoveisonline/arremate-web` (branch `main`)
 
 **Colunas principais da tabela `imoveis`:**
 
@@ -190,6 +246,8 @@ A data de encerramento dos imóveis Venda Online não aparece no texto visível 
 | `edital_url` | Puppeteer | URL do PDF do edital |
 | `foto_url` | Puppeteer | URL da foto principal |
 | `area_privativa` | Puppeteer | Área privativa em m² |
+| `area_total` | Puppeteer | Área total em m² |
+| `area_terreno` | Puppeteer | Área do terreno em m² |
 
 ---
 
@@ -206,7 +264,7 @@ A data de encerramento dos imóveis Venda Online não aparece no texto visível 
 
 ## Por que Puppeteer e não curl/PHP?
 
-A CAIXA usa o **Radware Bot Manager** que detecta e bloqueia requisições automatizadas simples (curl, PHP). O Puppeteer abre um Chrome real que resolve os desafios JavaScript do Radware normalmente. Bloqueio identificado em abril/2026.
+A CAIXA usa o **Radware Bot Manager** que detecta e bloqueia requisições automatizadas simples (curl, PHP) — retorna uma página CAPTCHA de ~6KB no lugar do conteúdo real. O Puppeteer abre um Chrome real que resolve os desafios JavaScript do Radware normalmente. O bloqueio é por IP e temporário (libera após horas/dias). Identificado em abril/2026.
 
 ---
 
@@ -216,23 +274,46 @@ A CAIXA usa o **Radware Bot Manager** que detecta e bloqueia requisições autom
 |---|---|
 | Lock file | Impede duas instâncias simultâneas |
 | Sessão renovada | Browser reinicia a cada 50 imóveis |
-| Limite por execução | --limit 100 por cron (ritmo seguro) |
+| Limite por execução | --limit 100 por cron (ritmo seguro, não dispara Radware) |
 | Detecção de bloqueio | HTML < 10KB = Radware bloqueando, pula o imóvel |
-| Fallback de banco | Se better-sqlite3 falhar, usa sqlite3 CLI (Linux) |
+| Fallback de banco | Se better-sqlite3 falhar, usa sqlite3 CLI (Linux/VPS) |
+
+---
+
+## Todos os logs do sistema
+
+| Log | Localização | O que registra |
+|---|---|---|
+| Import CSV | `/var/log/arremate_scraper.log` | Importações, total de imóveis, erros |
+| Detail scraper | `/var/log/arremate_detail_scraper.log` | Cada imóvel raspado, dados extraídos |
+| Mudanças CAIXA | `/var/log/arremate_mudancas.log` | Entradas, saídas, mudanças de status diárias |
+| Status TI | `/var/log/arremate_status_diario.log` | Mensagem matinal enviada + erros Gemini |
 
 ---
 
 ## Crontab completo da VPS (root)
 
 ```
-*/5 * * * *   bash /opt/arremate-imoveis/scripts/monitor-vps.sh
-5 6    * * *  cd /var/www/arremate-br && node monitor-mudancas.js
-5 18   * * *  cd /var/www/arremate-br && node monitor-mudancas.js
-30 * * * *    cd /var/www/arremate-br && node caixa-detail-scraper.js --limit 100
+*/5 * * * *   bash /opt/arremate-imoveis/scripts/monitor-vps.sh > /dev/null 2>&1
+5 6    * * *  cd /var/www/arremate-br && node monitor-mudancas.js >> /var/log/arremate_mudancas.log 2>&1
+5 18   * * *  cd /var/www/arremate-br && node monitor-mudancas.js >> /var/log/arremate_mudancas.log 2>&1
+30 * * * *    cd /var/www/arremate-br && /usr/bin/node caixa-detail-scraper.js --limit 100 >> /var/log/arremate_scraper.log 2>&1
 0 6    * * *  /bin/bash /var/www/arremate-br/cron_atualizar.sh
 0 18   * * *  /bin/bash /var/www/arremate-br/cron_atualizar.sh
 0 8    * * *  /bin/bash /var/www/arremate-br/status-diario-ti.sh
 ```
+
+---
+
+## Como recuperar a VPS do zero
+
+Se a VPS travar ou precisar reconfigurar:
+
+1. **Código:** `git clone github.com/arremateimoveisonline/arremate-web` na pasta `/var/www/arremate-br/`
+2. **Banco:** copiar o backup mais recente de `/var/www/dados/imoveis.db.backup-*` para `/var/www/dados/imoveis.db`
+3. **Crontab:** copiar o bloco da seção anterior e rodar `crontab -e` como root
+4. **Variáveis de ambiente:** restaurar `/opt/arremate-imoveis/.env` (TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, GEMINI_API_KEY)
+5. **Permissões:** `chown www-data:www-data /var/www/dados/imoveis.db && chmod 664 /var/www/dados/imoveis.db`
 
 ---
 
@@ -241,7 +322,15 @@ A CAIXA usa o **Radware Bot Manager** que detecta e bloqueia requisições autom
 | Item | Prioridade | Descrição |
 |---|---|---|
 | Swap permanente na VPS | Média | `echo '/swapfile none swap sw 0 0' >> /etc/fstab` |
-| Backup automático do banco | Alta | Hoje é manual. Criar cron semanal de backup |
+| Backup automático agendado | Média | Cron semanal de backup do banco (hoje é gerado só no deploy) |
+
+---
+
+## Histórico de versões
+
+| Versão | Data | Resumo |
+|---|---|---|
+| v1 | 2026-04-26 | Documento inicial — estado completo do sistema |
 
 ---
 
@@ -252,5 +341,6 @@ Quando uma mudança relevante acontecer (novo cron, nova lógica de scraping, no
 1. Copie este arquivo → salve como `fluxo-atualizacao-v2.md`
 2. Preencha "O que mudou nesta versão" no topo
 3. Atualize as seções afetadas
-4. Atualize o link no `docs/README.md`
-5. **Não apague este arquivo (v1)**
+4. Adicione uma linha na tabela "Histórico de versões" deste arquivo
+5. Atualize o link no `docs/README.md`
+6. **Não apague este arquivo (v1)**
