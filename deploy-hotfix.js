@@ -76,7 +76,17 @@ async function main() {
     }
   }
 
-  // 2. Migração do banco — adiciona colunas novas se ainda não existirem
+  // 2. Backup + upload do banco local (35k imóveis completamente raspados)
+  console.log('\n📦 Fazendo backup do banco atual na VPS...');
+  const ts = new Date().toISOString().slice(0,16).replace(/[-T:]/g,'').replace('','').slice(0,12);
+  const backupPath = `/var/www/dados/imoveis.db.backup-${ts}`;
+  await sshExec(conn, `cp /var/www/dados/imoveis.db ${backupPath} && echo "  ✅ Backup: ${backupPath}" || echo "  ⚠️  Backup falhou"`);
+
+  console.log('\n📤 Enviando banco local para VPS (~20MB, aguarde)...');
+  await sftpPut(sftp, 'C:/xampp/htdocs/dados/imoveis.db', '/var/www/dados/imoveis.db');
+  console.log('  ✅ Banco enviado');
+
+  // 3. Migração do banco — adiciona colunas novas se ainda não existirem
   console.log('\n🗄️  Migrando banco de dados...');
   const migrationCmds = [
     `sqlite3 /var/www/dados/imoveis.db "ALTER TABLE imoveis ADD COLUMN area_privativa REAL DEFAULT 0;" 2>/dev/null && echo "  ✅ area_privativa adicionada" || echo "  ℹ️  area_privativa já existe"`,
@@ -97,12 +107,15 @@ async function main() {
   await sshExec(conn, `sqlite3 /var/www/dados/imoveis.db "UPDATE imoveis SET modalidade = 'Compra Direta' WHERE modalidade = 'Venda Direta Online';" && echo "  ✅ Compra Direta unificado"`);
   await sshExec(conn, `sqlite3 /var/www/dados/imoveis.db "SELECT modalidade, COUNT(*) as n FROM imoveis GROUP BY modalidade ORDER BY n DESC;"`);
 
-  // 4. Verifica banco
-  console.log('\n📊 Estado do banco após migração:');
+  // 5. Verifica banco
+  console.log('\n📊 Estado do banco após envio:');
   await sshExec(conn, `sqlite3 /var/www/dados/imoveis.db "SELECT COUNT(*) as total_imoveis FROM imoveis;"`);
-  await sshExec(conn, `sqlite3 /var/www/dados/imoveis.db "PRAGMA table_info(imoveis);" | grep -E "area_|status_caixa"`);
+  await sshExec(conn, `sqlite3 /var/www/dados/imoveis.db "SELECT modalidade, COUNT(*) as n FROM imoveis WHERE status_caixa != 'removido' GROUP BY modalidade ORDER BY n DESC;"`);
+  await sshExec(conn, `sqlite3 /var/www/dados/imoveis.db "SELECT COUNT(*) FROM imoveis WHERE modalidade='Venda Online' AND data_encerramento IS NOT NULL AND data_encerramento != '' AND data_encerramento NOT LIKE '%23:59%';"`);
+  await sshExec(conn, `sqlite3 /var/www/dados/imoveis.db "SELECT COUNT(*) as removidos FROM imoveis WHERE status_caixa='removido';"`);
+  await sshExec(conn, `ls -lh /var/www/dados/imoveis.db`);
 
-  // 5. Permissões
+  // 6. Permissões
   await sshExec(conn, `chown www-data:www-data /var/www/dados/imoveis.db 2>/dev/null; chmod 664 /var/www/dados/imoveis.db 2>/dev/null; true`);
 
   conn.end();

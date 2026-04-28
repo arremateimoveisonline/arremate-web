@@ -114,7 +114,7 @@ try {
         $offset = max(gi('offset', 0), 0);
         $ordem  = g('ordem', 'preco_asc');
 
-        $where  = [];
+        $where  = ["status_caixa != 'removido'"];
         $params = [];
 
         /* UF — padrão SP quando não informado */
@@ -353,9 +353,9 @@ try {
     } elseif ($acao === 'cidades') {
 
         $uf  = strtoupper(g('uf'));
-        $sql = 'SELECT cidade, uf, COUNT(*) as total FROM imoveis';
+        $sql = "SELECT cidade, uf, COUNT(*) as total FROM imoveis WHERE status_caixa != 'removido'";
         $p   = [];
-        if ($uf) { $sql .= ' WHERE UPPER(uf) = :uf'; $p[':uf'] = $uf; }
+        if ($uf) { $sql .= ' AND UPPER(uf) = :uf'; $p[':uf'] = $uf; }
         $sql .= ' GROUP BY cidade ORDER BY cidade ASC';
         $stmt = db()->prepare($sql);
         $stmt->execute($p);
@@ -369,11 +369,11 @@ try {
        ══════════════════════════════════════════════════════ */
     } elseif ($acao === 'stats') {
 
-        $total = (int)db()->query('SELECT COUNT(*) FROM imoveis')->fetchColumn();
-        $sp    = (int)db()->query("SELECT COUNT(*) FROM imoveis WHERE uf='SP'")->fetchColumn();
-        $ufs   = db()->query("SELECT DISTINCT uf FROM imoveis ORDER BY uf")->fetchAll(PDO::FETCH_COLUMN);
-        $minP  = (int)db()->query('SELECT MIN(preco) FROM imoveis WHERE preco > 0')->fetchColumn();
-        $maxP  = (int)db()->query('SELECT MAX(preco) FROM imoveis')->fetchColumn();
+        $total = (int)db()->query("SELECT COUNT(*) FROM imoveis WHERE status_caixa != 'removido'")->fetchColumn();
+        $sp    = (int)db()->query("SELECT COUNT(*) FROM imoveis WHERE uf='SP' AND status_caixa != 'removido'")->fetchColumn();
+        $ufs   = db()->query("SELECT DISTINCT uf FROM imoveis WHERE status_caixa != 'removido' ORDER BY uf")->fetchAll(PDO::FETCH_COLUMN);
+        $minP  = (int)db()->query("SELECT MIN(preco) FROM imoveis WHERE preco > 0 AND status_caixa != 'removido'")->fetchColumn();
+        $maxP  = (int)db()->query("SELECT MAX(preco) FROM imoveis WHERE status_caixa != 'removido'")->fetchColumn();
 
         echo json_encode([
             'sucesso'       => true,

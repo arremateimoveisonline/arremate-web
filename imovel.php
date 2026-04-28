@@ -43,8 +43,9 @@ if ($hdnimovel === '') {
         $stmt = $db->prepare('SELECT * FROM imoveis WHERE hdnimovel = :h OR numero = :h LIMIT 1');
         $stmt->execute([':h' => $hdnimovel]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        if ($row) { $found = true; $imovel = $row; }
-        else { $erroMsg = 'Imóvel não encontrado ou já removido.'; }
+        if ($row && ($row['status_caixa'] ?? '') === 'removido') { $erroMsg = 'removido'; }
+        elseif ($row) { $found = true; $imovel = $row; }
+        else { $erroMsg = 'nao_encontrado'; }
     } catch (Exception $e) {
         $erroMsg = 'Erro interno ao consultar o banco.';
     }
@@ -122,8 +123,12 @@ if ($found) {
     $isSP=true; $isCompDireta=false; $fotoUrl=''; $foto_url='';
     $waUrl='https://wa.me/'.WA_NUMBER;
     $linkEdital='#'; $linkEditalAlt='#'; $linkMatricula='#';
-    $pageTitle='Imóvel não encontrado | Arremate Imóveis Online';
-    $pageDesc='Imóvel não encontrado. Busque outros imóveis CAIXA disponíveis.';
+    $pageTitle = $erroMsg === 'removido'
+        ? 'Imóvel indisponível | Arremate Imóveis Online'
+        : 'Imóvel não encontrado | Arremate Imóveis Online';
+    $pageDesc = $erroMsg === 'removido'
+        ? 'Este imóvel foi removido pela CAIXA. Busque outros imóveis disponíveis.'
+        : 'Imóvel não encontrado. Busque outros imóveis CAIXA disponíveis.';
 }
 ?>
 <!DOCTYPE html>
@@ -429,8 +434,13 @@ document.addEventListener("DOMContentLoaded",function(){
   </div>
 
   <div class="erro-wrap" id="erro-wrap" style="display:<?= $found ? 'none' : 'block' ?>">
+<?php if ($erroMsg === 'removido'): ?>
+    <h2>Imóvel indisponível</h2>
+    <p>Este imóvel foi removido pela CAIXA e não está mais disponível para venda.<br>Confira outros imóveis disponíveis.</p>
+<?php else: ?>
     <h2>😕 Imóvel não encontrado</h2>
     <p>Este imóvel pode ter sido vendido ou removido.<br>Tente buscar outro imóvel disponível.</p>
+<?php endif; ?>
     <a href="resultados.html" style="display:inline-block;margin-top:16px;background:var(--azul);color:#fff;padding:10px 24px;border-radius:999px;font-weight:900;">← Voltar para busca</a>
   </div>
 
