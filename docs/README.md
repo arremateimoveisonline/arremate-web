@@ -28,7 +28,7 @@ Cada documento importante do projeto tem **versões numeradas**. Nunca apagamos 
 
 | Documento | Versão atual | O que descreve |
 |---|---|---|
-| [Fluxo de Atualização](fluxo-atualizacao-v1.md) | **v1** (2026-04-26) | Como os imóveis são importados, raspados e atualizados diariamente |
+| [Fluxo de Atualização](fluxo-atualizacao-v1.md) | **v1** (2026-04-27) | Como os imóveis são importados, raspados e atualizados diariamente |
 
 ---
 

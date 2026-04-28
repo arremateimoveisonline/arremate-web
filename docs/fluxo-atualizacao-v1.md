@@ -3,7 +3,7 @@
 | Campo | Valor |
 |---|---|
 | **Versão** | v1 |
-| **Data** | 2026-04-26 |
+| **Data** | 2026-04-27 |
 | **Autor** | César + Claude |
 | **Versão anterior** | — (documento inicial) |
 | **Próxima versão** | Crie `fluxo-atualizacao-v2.md` quando algo mudar |
@@ -77,6 +77,18 @@ Resto do dia  scraper faz manutenção: raspa imóveis mais antigos
 
 ---
 
+## Comportamento de imóveis removidos
+
+Quando a CAIXA remove um imóvel, o scraper detecta (`status_caixa = 'removido'`) e o imóvel:
+
+- **Fica no banco** — nunca é deletado (a CAIXA às vezes reativa imóveis)
+- **Some da busca** — `api.php` filtra `status_caixa != 'removido'` em todos os resultados
+- **Acesso direto** — `imovel.php` exibe página "Imóvel indisponível — foi removido pela CAIXA"
+- **Favoritos** — aparece com badge "Removido" para o usuário saber o que aconteceu
+- **Reativação automática** — se a CAIXA reativar, o scraper detecta e o imóvel volta à busca sem intervenção
+
+---
+
 ## Componentes do sistema
 
 ### 1. `cron_atualizar.sh`
@@ -112,7 +124,7 @@ Imóvel marcado como "precisa re-scraping prioritário" quando:
 
 **Onde fica:** `/var/www/arremate-br/caixa-detail-scraper.js`
 
-**Crontab:**
+**Crontab VPS:**
 ```
 30 * * * *  cd /var/www/arremate-br && node caixa-detail-scraper.js --limit 100
 ```
@@ -191,8 +203,22 @@ fail2ban > 5 IPs/h → ATENÇÃO (possível ataque)
 
 ---
 
-### 7. `deploy-hotfix.js`
-**O que faz:** Script local (roda no PC do César) que faz deploy de código e banco para a VPS via SFTP+SSH. Inclui migrações de banco automáticas.
+### 7. `api.php`
+**O que faz:** API JSON consumida pelo frontend para busca, filtro e paginação de imóveis. Todas as queries excluem automaticamente imóveis com `status_caixa = 'removido'` — busca, contagem por cidade e totais gerais.
+
+**Ações disponíveis:** `buscar` | `detalhe` | `cidades` | `stats`
+
+> A ação `detalhe` retorna o imóvel mesmo se removido — necessário para o badge de "Removido" nos favoritos.
+
+---
+
+### 8. `imovel.php`
+**O que faz:** Página de detalhe de um imóvel. Se o imóvel tiver `status_caixa = 'removido'`, exibe página "Imóvel indisponível — foi removido pela CAIXA" em vez dos dados. Se não encontrado, exibe "Imóvel não encontrado".
+
+---
+
+### 9. `deploy-hotfix.js`
+**O que faz:** Script local (roda no PC do César) que faz deploy de código e banco para a VPS via SFTP+SSH.
 
 **Como usar:**
 ```
@@ -200,15 +226,13 @@ node deploy-hotfix.js
 ```
 Roda na pasta `C:/Users/César/Downloads/arremate-br/`
 
-**O que o deploy faz:**
+**O que o deploy faz (em ordem):**
 1. Upload dos arquivos PHP/JS/HTML via SFTP
-2. Migrações de banco (ALTER TABLE para novas colunas)
-3. Correções de dados (encoding, normalização de modalidades)
-4. **Cria backup automático do banco** antes de qualquer alteração destrutiva:
-   `/var/www/dados/imoveis.db.backup-YYYYMMDD-HHMM`
-
-**Para subir o banco local para VPS** (após scraping em lote):
-O script de upload do banco está incorporado no `deploy-hotfix.js` — faz backup automático antes de sobrescrever.
+2. **Backup automático do banco** na VPS: `/var/www/dados/imoveis.db.backup-YYYYMMDDHHMM`
+3. **Upload do banco local** (`C:/xampp/htdocs/dados/imoveis.db`) para a VPS
+4. Migrações de banco (ALTER TABLE para novas colunas — idempotente)
+5. Correções de dados (encoding, normalização de modalidades)
+6. Ajuste de permissões (`www-data`)
 
 ---
 
@@ -218,12 +242,11 @@ O script de upload do banco está incorporado no `deploy-hotfix.js` — faz back
 - Produção (VPS): `/var/www/dados/imoveis.db`
 - Local (desenvolvimento): `C:/xampp/htdocs/dados/imoveis.db`
 
-**Tamanho:** ~21MB | **Total de imóveis:** 35.079
+**Tamanho:** ~22MB | **Total de imóveis:** 35.079
 
 **Backups na VPS:**
 ```
-/var/www/dados/imoveis.db.backup-20260419-0041
-/var/www/dados/imoveis.db.backup-20260426-0846  ← mais recente
+/var/www/dados/imoveis.db.backup-202604271832  ← mais recente (2026-04-27)
 ```
 > Backups são criados automaticamente pelo `deploy-hotfix.js` antes de subir um banco novo.
 
@@ -251,14 +274,17 @@ O script de upload do banco está incorporado no `deploy-hotfix.js` — faz back
 
 ---
 
-## Distribuição de modalidades (estado em 2026-04-26)
+## Distribuição de modalidades (estado em 2026-04-27)
 
-| Modalidade | Quantidade |
-|---|---|
-| Compra Direta | 15.137 |
-| Leilão SFI - Edital Único | 8.578 |
-| Venda Online | 7.622 |
-| Licitação Aberta | 3.741 |
+| Modalidade | Ativos | Removidos |
+|---|---|---|
+| Compra Direta | 15.857 | — |
+| Leilão SFI - Edital Único | 8.305 | — |
+| Venda Online | 5.146 | — |
+| Licitação Aberta | 3.082 | — |
+| **Total ativos** | **32.391** | **2.688** |
+
+> Venda Online com data de encerramento preenchida: **4.882** (demais estavam encerrados ou removidos no momento do scraping).
 
 ---
 
@@ -274,7 +300,7 @@ A CAIXA usa o **Radware Bot Manager** que detecta e bloqueia requisições autom
 |---|---|
 | Lock file | Impede duas instâncias simultâneas |
 | Sessão renovada | Browser reinicia a cada 50 imóveis |
-| Limite por execução | --limit 100 por cron (ritmo seguro, não dispara Radware) |
+| Limite por execução | `--limit 100` por cron (ritmo seguro, não dispara Radware) |
 | Detecção de bloqueio | HTML < 10KB = Radware bloqueando, pula o imóvel |
 | Fallback de banco | Se better-sqlite3 falhar, usa sqlite3 CLI (Linux/VPS) |
 
@@ -330,7 +356,7 @@ Se a VPS travar ou precisar reconfigurar:
 
 | Versão | Data | Resumo |
 |---|---|---|
-| v1 | 2026-04-26 | Documento inicial — estado completo do sistema |
+| v1 | 2026-04-27 | Documento inicial — estado completo do sistema após scraping total e filtro de removidos |
 
 ---
 
