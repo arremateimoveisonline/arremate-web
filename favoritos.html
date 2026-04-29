@@ -129,7 +129,7 @@
     .badge-disputa{background:#fee2e2;color:#b91c1c}
     .imovel-creci{margin-top:6px;font-size:.78rem;color:#4b5563;display:flex;align-items:center;gap:6px}
     .badge-nacional{display:inline-flex;align-items:center;gap:5px;background:#ede9fe;color:#5b21b6;border-radius:999px;padding:3px 10px;font-size:.72rem;font-weight:800;margin-top:4px}
-    .imovel-footer{padding:9px 14px 11px;border-top:1px solid #e5e7eb;background:#f8fafc;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:nowrap}
+    .imovel-footer{padding:9px 14px 11px;border-top:1px solid #e5e7eb;background:#f8fafc;display:flex;align-items:center;justify-content:space-between;gap:10px}
     .status-ok{background:#d1fae5;color:#065f46;border-radius:999px;padding:4px 10px;font-weight:900;font-size:.72rem}
     .status-atenc{background:#fef3c7;color:#92400e;border-radius:999px;padding:4px 10px;font-weight:900;font-size:.72rem}
     .imovel-link{background:var(--laranja);color:#3b1f00;padding:8px 16px;border-radius:999px;font-weight:900;font-size:.86rem;text-decoration:none;box-shadow:0 3px 8px rgba(0,0,0,.2)}
@@ -153,10 +153,12 @@
     @keyframes cardOut{to{opacity:0;transform:scale(.92)}}
 
     /* ── ANOTAÇÕES ── */
-    .btn-nota{display:flex;align-items:center;gap:5px;background:transparent;border:1.5px solid #e2e8f0;color:#64748b;border-radius:999px;padding:6px 12px;font-size:.75rem;font-weight:700;cursor:pointer;transition:all .15s;flex-shrink:0}
-    .btn-nota:hover,.btn-nota.tem-nota{border-color:#f59e0b;color:#92400e;background:#fffbeb}
-    .btn-nota.tem-nota{background:#fef3c7;border-color:#fbbf24}
-    .nota-dot{width:6px;height:6px;border-radius:50%;background:#f59e0b;flex-shrink:0}
+    .nota-strip{display:flex;align-items:center;gap:7px;margin-top:8px;padding:7px 10px;border-radius:8px;border:1.5px dashed #e2e8f0;background:transparent;cursor:pointer;transition:all .18s;text-align:left;width:100%;box-sizing:border-box;font-family:inherit}
+    .nota-strip:hover{border-color:#f59e0b;background:#fffbeb}
+    .nota-strip.tem-nota{border-style:solid;border-color:#fbbf24;background:#fef9c3}
+    .nota-strip-icon{font-size:.85rem;flex-shrink:0;line-height:1}
+    .nota-strip-txt{font-size:.74rem;color:#94a3b8;font-style:italic;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+    .nota-strip.tem-nota .nota-strip-txt{color:#92400e;font-style:normal;font-weight:600}
     .nota-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:10000;display:flex;align-items:center;justify-content:center;padding:16px;opacity:0;pointer-events:none;transition:opacity .2s}
     .nota-modal-overlay.open{opacity:1;pointer-events:all}
     .nota-modal{background:#fff;border-radius:16px;width:100%;max-width:480px;box-shadow:0 24px 60px rgba(0,0,0,.28);display:flex;flex-direction:column;transform:scale(.94) translateY(12px);transition:transform .2s;overflow:hidden}
@@ -438,12 +440,13 @@
     mostrarToast('Anotação removida.');
   }
 
-  function atualizarBtnNota(btn, hdn, texto) {
-    if (!btn) return;
+  function atualizarBtnNota(strip, hdn, texto) {
+    if (!strip) return;
     var temNota = !!texto;
-    btn.className = 'btn-nota' + (temNota ? ' tem-nota' : '');
-    btn.title = temNota ? 'Ver/editar anotação' : 'Adicionar anotação';
-    btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>' + (temNota ? '<span class="nota-dot"></span>' : 'Nota');
+    strip.className = 'nota-strip' + (temNota ? ' tem-nota' : '');
+    strip.setAttribute('aria-label', temNota ? 'Editar anotação' : 'Adicionar anotação');
+    strip.innerHTML = '<span class="nota-strip-icon">' + (temNota ? '📝' : '✏️') + '</span>'
+      + '<span class="nota-strip-txt">' + (temNota ? texto : 'Adicionar anotação...') + '</span>';
   }
 
   /* ── UTILS ───────────────────────────────────────────────────── */
@@ -725,11 +728,25 @@
       aut.appendChild(dataAdic);
     }
 
+    /* Faixa de anotação (post-it) */
+    var notaTexto = lerNota(hdn);
+    var notaStrip = document.createElement('button');
+    notaStrip.className = 'nota-strip' + (notaTexto ? ' tem-nota' : '');
+    notaStrip.setAttribute('aria-label', notaTexto ? 'Editar anotação' : 'Adicionar anotação');
+    notaStrip.innerHTML = '<span class="nota-strip-icon">' + (notaTexto ? '📝' : '✏️') + '</span>'
+      + '<span class="nota-strip-txt">' + (notaTexto ? notaTexto : 'Adicionar anotação...') + '</span>';
+    notaStrip.addEventListener('click', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      abrirModalNota(hdn, tipo, item.cidade || '', notaStrip);
+    });
+
     body.appendChild(local);
     body.appendChild(titulo);
     body.appendChild(endereco);
     body.appendChild(precos);
     body.appendChild(chips);
+    body.appendChild(notaStrip);
     aut.style.marginTop = 'auto';
     body.appendChild(aut);
 
@@ -742,19 +759,6 @@
     else if (pct > 0) { st.className = 'status-atenc'; st.textContent = 'Desconto ' + pct.toFixed(0) + '%'; }
     else              { st.className = 'status-atenc'; st.textContent = 'Sem desconto listado'; }
 
-    /* Botão de anotação */
-    var notaExiste = !!lerNota(hdn);
-    var btnNota = document.createElement('button');
-    btnNota.className = 'btn-nota' + (notaExiste ? ' tem-nota' : '');
-    btnNota.setAttribute('aria-label', 'Anotação');
-    btnNota.title = notaExiste ? 'Ver/editar anotação' : 'Adicionar anotação';
-    btnNota.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>' + (notaExiste ? '<span class="nota-dot"></span>' : 'Nota');
-    btnNota.addEventListener('click', function (e) {
-      e.preventDefault();
-      e.stopPropagation();
-      abrirModalNota(hdn, tipo, item.cidade || '', btnNota);
-    });
-
     var link = document.createElement('a');
     link.className = 'imovel-link';
     link.href = '/imovel.php?id=' + encodeURIComponent(hdn);
@@ -763,7 +767,6 @@
     link.textContent = 'Saiba mais →';
 
     footer.appendChild(st);
-    footer.appendChild(btnNota);
     footer.appendChild(link);
 
     card.appendChild(thumb);
