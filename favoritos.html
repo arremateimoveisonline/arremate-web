@@ -423,9 +423,9 @@
     if (ctxEl) {
       var preco = imovelData && imovelData.preco ? fmtBRL(imovelData.preco) : '';
       var end   = imovelData && imovelData.endereco ? imovelData.endereco : '';
-      ctxEl.innerHTML = (preco ? '<span class="nota-ctx-preco">' + preco + '</span>' : '')
-        + '<div class="nota-ctx-imovel">' + (tipo || 'Imóvel') + (cidade ? ' — ' + cidade : '') + '</div>'
-        + (end ? '<div class="nota-ctx-end">' + end + '</div>' : '');
+      ctxEl.innerHTML = '<div class="nota-ctx-imovel">' + (tipo || 'Imóvel') + (cidade ? ' — ' + cidade : '') + '</div>'
+        + (end ? '<div class="nota-ctx-end">' + end + '</div>' : '')
+        + (preco ? '<span class="nota-ctx-preco">' + preco + '</span>' : '');
     }
 
     textarea.value = textoAtual;
