@@ -91,9 +91,10 @@
     .sort-select{border:1px solid #cbd5e1;border-radius:10px;padding:6px 10px;font-size:.82rem;background:#fff;color:#0f172a;cursor:pointer}
     .sort-select:focus{border-color:var(--azul);outline:none}
 
-    /* ── GRID (idêntico ao resultados.html) ── */
-    .imoveis-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
-    @media(max-width:1200px){.imoveis-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    /* ── GRID — max-width igual ao index.php para cards do mesmo tamanho ── */
+    .imoveis-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+    @media(max-width:1200px){.imoveis-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+    @media(max-width:900px){.imoveis-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
     @media(max-width:700px){.imoveis-grid{grid-template-columns:1fr}}
 
     /* ── CARD (cópia exata do resultados.html) ── */
