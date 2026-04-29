@@ -1,32 +1,42 @@
 <?php
 /**
  * foto-proxy.php — Proxy de imagem para OG tags (WhatsApp/redes sociais)
- * Busca a foto do imóvel na CAIXA e serve pelo nosso domínio.
- * Cache em /tmp por 24h para não sobrecarregar a VPS.
+ * Busca a foto_url real do banco e serve pelo nosso domínio com cache 24h.
  */
 
-$hdn = preg_replace('/[^0-9]/', '', $_GET['h'] ?? '');
-if (!$hdn || strlen($hdn) < 5) {
-    http_response_code(400);
-    exit;
-}
+$hdn = preg_replace('/[^0-9a-zA-Z]/', '', $_GET['h'] ?? '');
+if (!$hdn) { http_response_code(400); exit; }
 
-$hdn       = str_pad($hdn, 14, '0', STR_PAD_LEFT);
 $cacheFile = sys_get_temp_dir() . '/arremate_foto_' . $hdn . '.jpg';
-$cacheTTL  = 86400; // 24 horas
+$cacheTTL  = 86400;
 
 /* Serve do cache se ainda válido */
 if (file_exists($cacheFile) && (time() - filemtime($cacheFile)) < $cacheTTL) {
     header('Content-Type: image/jpeg');
     header('Cache-Control: public, max-age=86400');
-    header('X-Cache: HIT');
     readfile($cacheFile);
     exit;
 }
 
+/* Busca foto_url no banco */
+$dbPath = getenv('DB_PATH') ?: '/var/www/dados/imoveis.db';
+try {
+    $db   = new PDO('sqlite:' . $dbPath);
+    $stmt = $db->prepare('SELECT foto_url, hdnimovel FROM imoveis WHERE hdnimovel = :h OR numero = :h LIMIT 1');
+    $stmt->execute([':h' => $hdn]);
+    $row  = $stmt->fetch(PDO::FETCH_ASSOC);
+} catch (Exception $e) {
+    http_response_code(500); exit;
+}
+
+if (!$row || empty($row['foto_url'])) {
+    http_response_code(404); exit;
+}
+
+$url = $row['foto_url'];
+
 /* Busca da CAIXA */
-$url = "https://venda-imoveis.caixa.gov.br/fotos/F{$hdn}21.jpg";
-$ch  = curl_init($url);
+$ch = curl_init($url);
 curl_setopt_array($ch, [
     CURLOPT_RETURNTRANSFER => true,
     CURLOPT_FOLLOWLOCATION => true,
@@ -39,15 +49,12 @@ $data = curl_exec($ch);
 $info = curl_getinfo($ch);
 curl_close($ch);
 
-if (!$data || $info['http_code'] !== 200 || $info['size_download'] < 1000) {
-    http_response_code(404);
-    exit;
+if (!$data || $info['http_code'] !== 200 || $info['size_download'] < 500) {
+    http_response_code(404); exit;
 }
 
-/* Salva no cache */
 file_put_contents($cacheFile, $data);
 
 header('Content-Type: image/jpeg');
 header('Cache-Control: public, max-age=86400');
-header('X-Cache: MISS');
 echo $data;

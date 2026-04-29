@@ -6,6 +6,17 @@
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
   <meta name="color-scheme" content="light">
   <title>Arremate Imóveis Online | Resultados</title>
+  <meta name="description" content="Busque imóveis da CAIXA com filtros por estado, cidade, tipo e modalidade. Dados atualizados diariamente.">
+  <meta property="og:title" content="Arremate Imóveis Online | Busca de Imóveis CAIXA">
+  <meta property="og:description" content="Busque imóveis da CAIXA com filtros por estado, cidade, tipo e modalidade. Dados atualizados diariamente.">
+  <meta property="og:image" content="https://arremateimoveisonline.com.br/logo-Horizontal-8k.jpeg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:url" content="https://arremateimoveisonline.com.br/resultados.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Arremate Imóveis Online">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://arremateimoveisonline.com.br/logo-Horizontal-8k.jpeg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -44,18 +55,18 @@
     .hamburger{display:none;align-items:center;justify-content:center;width:44px;height:44px;flex-shrink:0;background:rgba(255,255,255,.1);border:2px solid rgba(255,255,255,.4);border-radius:10px;cursor:pointer;color:#fff}
     .hamburger svg{width:22px;height:22px;display:block}
     .nav-mobile{display:none;flex-direction:column;width:100%;background:#dceeff;border-top:2px solid #a8cfee}
-    .menu-chk:checked~.nav-mobile{display:flex!important}
+    .menu-chk:checked~.nav-mobile{display:flex!important;position:absolute;width:100%;left:0;top:100%;box-shadow:0 8px 24px rgba(0,0,0,.22)}
     .nav-mobile a{display:block;padding:14px 20px;font-size:.97rem;font-weight:700;color:#0b1a33;background:#e8f3ff;border-bottom:1px solid #b8d8f5;text-decoration:none;transition:background .15s}
     .nav-mobile a:hover{background:#cde5ff}
     .nav-mob-cta{background:#e97500!important;color:#fff!important;font-weight:900!important}
     .nav-mob-close{display:flex;align-items:center;padding:12px 20px;font-size:.9rem;font-weight:700;color:#01468d;background:#c8e0f8;border-bottom:2px solid #a8cfee;cursor:pointer}
     @media(max-width:900px){
-      .hdr{padding:0 12px;min-height:76px;gap:8px}
+      .hdr{padding:0 8px 0 6px;min-height:80px;gap:6px}
       .nav-links{display:none!important}
       .hamburger{display:flex!important}
-      .logo-icon{width:54px!important;height:54px!important}
-      .logo-icon-img{width:54px!important;height:54px!important}
-      .logo-aio{font-size:1.13rem}
+      .logo-icon{width:48px!important;height:48px!important}
+      .logo-icon-img{width:48px!important;height:48px!important}
+      .logo-aio{font-size:1.0rem}
       .logo-sub-full{display:none}
       .logo-sub-mobile{display:block}
       .logo-txt{max-width:calc(100vw - 112px)}
@@ -79,28 +90,33 @@
       .results-area{height:100%;overflow-y:auto}
     }
     @media(max-width:1024px){
-      .layout{grid-template-columns:1fr}
+      .layout{grid-template-columns:1fr;gap:4px}
       .sidebar{display:none!important}
-      .sidebar.mobile-open{display:flex!important;position:fixed!important;inset:0!important;top:var(--hdrH,72px)!important;z-index:400!important;border-radius:0!important;border:none!important;overflow:hidden!important;width:100%!important;height:calc(100vh - var(--hdrH,72px))!important}
-      .mob-filter-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:399;touch-action:none}
+      .sidebar.mobile-open{display:flex!important;flex-direction:column!important;position:fixed!important;left:12px!important;right:12px!important;z-index:400!important;border-radius:16px!important;border:1px solid var(--borda)!important;overflow:hidden!important;box-shadow:0 20px 60px rgba(0,0,0,.35)!important;background:#f7fbff!important}
+      .mob-filter-backdrop{display:none;position:fixed;inset:0;background:rgba(2,6,23,.65);z-index:399;touch-action:none}
       .mob-filter-backdrop.open{display:block}
-      .mobile-filter-toggle{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;background:var(--azul);color:#fff;border:none;border-radius:12px;padding:12px;font-weight:900;font-size:.9rem;cursor:pointer;margin-bottom:12px;font-family:inherit}
+      .mob-action-bar{display:flex;margin-bottom:4px}
+      .mobile-filter-toggle{width:100%;display:flex;align-items:center;justify-content:center;gap:6px;background:var(--azul);color:#fff;border:none;border-radius:8px;padding:9px 12px;font-weight:900;font-size:.92rem;cursor:pointer;font-family:inherit}
       .mobile-filter-toggle:hover{filter:brightness(1.1)}
+      .mob-info-bar{font-size:.8rem;color:#64748b;font-weight:700;margin-bottom:6px;padding-left:2px}
+      .results-header{display:none!important}
       .btn-fechar-filtro{display:flex!important}
       .sidebar-top .btn-small{display:none}
       /* visual mobile */
       .sidebar{background:#f7fbff}
-      .sidebar-top{background:#fff;border-bottom:1px solid #e2e8f0;padding:14px 18px;border-radius:0}
-      .sidebar-scroll{padding:16px 18px;display:flex;flex-direction:column;gap:14px}
+      .sidebar-top{background:#fff;border-bottom:1px solid #e2e8f0;padding:14px 18px;border-radius:16px 16px 0 0}
+      .sidebar-scroll{flex:1;overflow-y:auto;min-height:0;padding:16px 18px;display:flex;flex-direction:column;gap:14px}
       .sidebar-scroll>details.fsec{background:#fff;border:1px solid var(--borda);border-radius:12px;padding:0 14px;border-top:none}
       .sidebar-scroll>details.fsec>summary{padding:12px 0}
-      .sidebar-actions{display:flex!important;flex-direction:row;gap:10px;padding:12px 18px}
+      .sidebar-actions{display:flex!important;flex-direction:row;flex-shrink:0!important;gap:10px;padding:12px 18px;background:#fff;border-top:1px solid #e2e8f0}
       .sidebar-title{font-size:1rem;color:#111827;text-transform:none;letter-spacing:0}
       .btn-aplicar{width:auto;flex:1.4;padding:11px;font-size:.88rem;margin-top:0}
       .btn-limpar{width:auto;flex:1;padding:11px;font-size:.88rem;margin-top:0;background:#dce8ff;border-color:#93b4e8;color:#1e40af}
       .btn-limpar:hover{background:#c7daff;border-color:#6b9fdc}
     }
     @media(min-width:1025px){
+      .mob-action-bar{display:none!important}
+      .mob-info-bar{display:none!important}
       .mobile-filter-toggle{display:none!important}
       .mob-filter-backdrop{display:none!important}
       .btn-fechar-filtro{display:none!important}
@@ -285,11 +301,14 @@
 <div class="page-wrap">
 
   <div class="layout">
-    <button class="mobile-filter-toggle" id="mobile-filter-btn" onclick="toggleFiltrosMob(this)">🔍 Ver filtros</button>
+    <div class="mob-action-bar">
+      <button class="mobile-filter-toggle" id="mobile-filter-btn" onclick="toggleFiltrosMob(this)">🔍 Ver filtros</button>
+    </div>
+    <div class="mob-info-bar" id="mob-info-bar"></div>
     <aside class="sidebar">
       <div class="sidebar-top">
         <div class="sidebar-title">
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>Filtros
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>Filtros Avançados
         </div>
         <button class="btn-fechar-filtro" type="button" onclick="fecharFiltrosMob()" title="Fechar filtros">✕</button>
       </div>
@@ -389,6 +408,7 @@
       <details class="fsec">
         <summary><span class="sum-left">🏘️ Condomínio</span><span class="chev">▾</span></summary>
         <div class="radio-col">
+          <label class="chk-item"><input type="radio" name="r_cond" value="" checked> Todos</label>
           <label class="chk-item"><input type="radio" name="r_cond" value="limitada"> Limitada a 10%</label>
           <label class="chk-item"><input type="radio" name="r_cond" value="comprador"> Arrematante paga</label>
         </div>
@@ -397,6 +417,7 @@
       <details class="fsec">
         <summary><span class="sum-left">🧾 IPTU</span><span class="chev">▾</span></summary>
         <div class="radio-col">
+          <label class="chk-item"><input type="radio" name="r_iptu" value="" checked> Todos</label>
           <label class="chk-item"><input type="radio" name="r_iptu" value="caixa"> Caixa paga</label>
           <label class="chk-item"><input type="radio" name="r_iptu" value="comprador"> Arrematante paga</label>
         </div>
@@ -404,7 +425,7 @@
 
       <details class="fsec">
         <summary><span class="sum-left">📅 Data do leilão</span><span class="chev">▾</span></summary>
-        <div class="fgroup"><label>Data limite</label><input type="date" id="adv_data"></div>
+        <div class="fgroup"><label>Data limite</label><input type="date" id="data_ate"></div>
       </details>
 
       <details class="fsec">
@@ -413,9 +434,9 @@
           <label>Tipo de área</label>
           <select id="area_tipo">
             <option value="">Selecione o tipo</option>
-            <option value="Área Privativa">Área Privativa</option>
-            <option value="Área Total">Área Total</option>
-            <option value="Área do Terreno">Área do Terreno</option>
+            <option value="privativa">Área Privativa</option>
+            <option value="total">Área Total</option>
+            <option value="terreno">Área do Terreno</option>
           </select>
         </div>
         <div class="range-row">
@@ -602,13 +623,10 @@ function mascaraM2Focus(el){
   function aceitaFgts(item) {
     var tipo=norm(item.descricao||'');
     if(tipo.indexOf('terreno')!==-1||tipo.indexOf('lote')!==-1||tipo.indexOf('gleba')!==-1) return false;
-    if(item.fgts===1||item.fgts==='1') return true;
-    return norm((item.descricao||'')+' '+(item.modalidade||'')).indexOf('fgts')!==-1;
+    return item.fgts===1||item.fgts==='1';
   }
   function aceitaFinanciamento(item) {
-    if(item.financiamento===1||item.financiamento==='1') return true;
-    var t=norm((item.descricao||'')+' '+(item.modalidade||''));
-    return t.indexOf('financi')!==-1||t.indexOf('sfh')!==-1;
+    return item.financiamento===1||item.financiamento==='1';
   }
   function estaEmDisputa(item) {
     var mn=norm(item.modalidade||'');
@@ -693,7 +711,8 @@ function mascaraM2Focus(el){
     if(item.fgts==1||item.fgts=='1'){var fg=document.createElement('span'); fg.className='badge-cond badge-fgts'; fg.textContent='✅ FGTS'; cr.appendChild(fg);}
     if(item.financiamento==1||item.financiamento=='1'){var fn=document.createElement('span'); fn.className='badge-cond badge-fin'; fn.textContent='✅ Financiamento'; cr.appendChild(fn);}
     var isCompraDir=norm(item.modalidade||'').indexOf('direta')!==-1;
-    if(!isCompraDir&&(item.disputa==1||item.disputa=='1'||norm(item.modalidade||'').indexOf('online')!==-1)){var dp=document.createElement('span'); dp.className='badge-cond badge-disputa'; dp.textContent='🔴 Em disputa'; cr.appendChild(dp);}
+    var isDisputaCr=!isCompraDir&&(item.disputa==1||item.disputa=='1'||norm(item.modalidade||'').indexOf('online')!==-1);
+    if(isDisputaCr){var dp=document.createElement('span');dp.className='badge-cond badge-disputa';dp.textContent='⚡ Em disputa';cr.appendChild(dp);}
     if(cr.childNodes.length) chips.appendChild(cr);
     var aut=document.createElement('div'); aut.className='imovel-creci';
     if(isSP){
@@ -711,29 +730,40 @@ function mascaraM2Focus(el){
     }
     var atribRow=(typeof buildChipsRow==='function')?buildChipsRow(item.descricao||''):null;
     body.appendChild(local); body.appendChild(titulo); body.appendChild(endereco); body.appendChild(precos);
-    if(atribRow) body.appendChild(atribRow);
-    /* Data — label e cor variam por modalidade. Compra Direta não exibe data. */
+    /* DATA + DISPUTA — linha abaixo do bloco de preços */
     var mod=norm(item.modalidade||'');
     var isCompraDir2=mod.indexOf('direta')!==-1;
     var isSfi=mod.indexOf('leilao sfi')!==-1||mod.indexOf('leilão sfi')!==-1;
+    var isDisputa=!isCompraDir&&(item.disputa==1||item.disputa=='1'||mod.indexOf('online')!==-1);
     function fmtDataCard(raw){if(!raw||!/^\d{4}-\d{2}-\d{2}/.test(raw))return raw||'';var dp=raw.split(/[T ]/);var pts=dp[0].split('-');var s=pts[2]+'/'+pts[1]+'/'+pts[0];if(dp[1])s+=' às '+dp[1].substring(0,5);return s;}
+    /* Próxima data futura — nunca exibe data já passada */
+    function parseBRT2(s){if(!s)return null;return new Date(s.replace(' ','T')+'-03:00');}
+    var now2=new Date();
+    var rd1=parseBRT2(item.data_leilao_1),rd2=parseBRT2(item.data_encerramento);
+    var nextDate2=null,nextLabel2='',hasSecond2=false;
     if(!isCompraDir2){
-      if(isSfi && (item.data_leilao_1 || item.data_encerramento)){
-        // SFI: exibe 1º e 2º Leilão em linhas separadas
-        if(item.data_leilao_1){var r1=document.createElement('div');r1.style.cssText='font-size:.75rem;font-weight:700;margin:6px 0 0 0;color:#1d4ed8';r1.textContent='🔨 1º Leilão: '+fmtDataCard(item.data_leilao_1);precos.appendChild(r1);}
-        if(item.data_encerramento){var r2=document.createElement('div');r2.style.cssText='font-size:.75rem;font-weight:700;margin:2px 0 0 0;color:#1e3a8a';r2.textContent='🔨 2º Leilão: '+fmtDataCard(item.data_encerramento);precos.appendChild(r2);}
-      } else if(item.data_encerramento){
-        var dataLabel,dataColor;
-        if(mod.indexOf('venda online')!==-1){dataLabel='⏰ Encerra em: ';dataColor='#b45309';}
-        else if(mod.indexOf('licitacao')!==-1||mod.indexOf('licitação')!==-1){dataLabel='📋 Licitação em: ';dataColor='#065f46';}
-        else{dataLabel='📅 ';dataColor='#64748b';}
-        var dataRow=document.createElement('div');
-        dataRow.style.cssText='font-size:.75rem;font-weight:700;margin:6px 0 0 0;color:'+dataColor;
-        dataRow.textContent=dataLabel+fmtDataCard(item.data_encerramento);
-        precos.appendChild(dataRow);
+      if(isSfi){
+        if(rd1){nextDate2=item.data_leilao_1;nextLabel2='🔨 1º Leilão:';hasSecond2=!!rd2;}
+        else if(rd2){nextDate2=item.data_encerramento;nextLabel2='🔨 2º Leilão:';}
+      } else {
+        if(rd2){
+          if(mod.indexOf('venda online')!==-1){nextLabel2='⏰ Encerra em:';}
+          else if(mod.indexOf('licitacao')!==-1||mod.indexOf('licitação')!==-1){nextLabel2='📋 Licitação em:';}
+          else{nextLabel2='📅';}
+          nextDate2=item.data_encerramento;
+        }
       }
     }
-    body.appendChild(chips); body.appendChild(aut);
+    if(nextDate2){
+      var ddr=document.createElement('div'); ddr.style.cssText='display:flex;align-items:center;padding:5px 0 0';
+      var datePart=document.createElement('div'); datePart.style.cssText='display:flex;align-items:center;gap:5px';
+      var drSpan=document.createElement('span');drSpan.style.cssText='font-size:.78rem;font-weight:700;color:#1d4ed8';drSpan.textContent=(nextLabel2?nextLabel2+' ':'')+fmtDataCard(nextDate2);datePart.appendChild(drSpan);
+      if(hasSecond2){var s2b=document.createElement('span');s2b.style.cssText='font-size:.65rem;color:#94a3b8;font-weight:600;background:#f1f5f9;border-radius:4px;padding:1px 5px';s2b.textContent='+2º';datePart.appendChild(s2b);}
+      ddr.appendChild(datePart);
+      body.appendChild(ddr);
+    }
+    if(atribRow) body.appendChild(atribRow);
+    body.appendChild(chips); aut.style.marginTop='auto'; body.appendChild(aut);
     var footer=document.createElement('div'); footer.className='imovel-footer';
     var st=document.createElement('span');
     if(pct!==null&&pct>=25){st.className='status-ok';st.textContent='Ótima oportunidade!';}
@@ -747,7 +777,11 @@ function mascaraM2Focus(el){
     var cardUrl=hdnBtn?'imovel.php?hdnimovel='+hdnBtn:(item.link||'#');
     card.addEventListener('click',function(e){
       if(e.target.closest('.btn-card-action,.imovel-link')) return;
-      window.open(cardUrl,'_blank','noopener,noreferrer');
+      if('ontouchstart' in window||navigator.maxTouchPoints>0){
+        window.location.href=cardUrl;
+      } else {
+        window.open(cardUrl,'_blank','noopener,noreferrer');
+      }
     });
 
     return card;
@@ -804,12 +838,12 @@ function mascaraM2Focus(el){
       fin:  !!(document.getElementById('c_fin') &&document.getElementById('c_fin').checked),
       disputa: !!(document.getElementById('c_disputa')&&document.getElementById('c_disputa').checked),
       codigo: gv('f_codigo').trim(),
-      r_cond: urlP.get('r_cond')||'',
-      r_iptu: urlP.get('r_iptu')||'',
-      data_ate: urlP.get('data_ate')||'',
-      area_tipo: urlP.get('area_tipo')||'',
-      area_min: urlP.get('area_min')||'',
-      area_max: urlP.get('area_max')||''
+      r_cond: (function(){var r=document.querySelector('input[name="r_cond"]:checked');return r?r.value:urlP.get('r_cond')||'';}()),
+      r_iptu: (function(){var r=document.querySelector('input[name="r_iptu"]:checked');return r?r.value:urlP.get('r_iptu')||'';}()),
+      data_ate: gv('data_ate')||urlP.get('data_ate')||'',
+      area_tipo: gv('area_tipo')||urlP.get('area_tipo')||'',
+      area_min: gv('area_min')||urlP.get('area_min')||'',
+      area_max: gv('area_max')||urlP.get('area_max')||''
     };
   }
 
@@ -881,6 +915,8 @@ function mascaraM2Focus(el){
         _total=data.total||0;
         var cnt=document.getElementById('results-count');
         if(cnt) cnt.textContent=(_total===1?'1 imóvel encontrado':_total.toLocaleString('pt-BR')+' imóveis encontrados');
+        var mobInfo=document.getElementById('mob-info-bar');
+        if(mobInfo) mobInfo.textContent=(_total===1?'1 imóvel encontrado':_total.toLocaleString('pt-BR')+' imóveis encontrados');
         atualizarSubtitulo(_total);
         TODOS=(data.imoveis||[]).map(function(it){
           return {num_imovel:it.hdnimovel||it.numero,uf:it.uf,cidade:it.cidade,bairro:it.bairro,endereco:it.endereco,descricao:it.descricao,modalidade:it.modalidade_raw||it.modalidade,link:it.link,preco:parseInt(it.preco,10)||0,avaliacao:parseInt(it.avaliacao,10)||0,desconto:String(it.desconto),fgts:it.fgts,financiamento:it.financiamento,disputa:it.disputa,condominio:it.condominio||'',iptu:it.iptu||'',data_encerramento:it.data_encerramento||'',data_leilao_1:it.data_leilao_1||''};
@@ -1035,10 +1071,16 @@ function mascaraM2Focus(el){
     var aberto=sidebar.classList.contains('mobile-open');
     if(aberto){
       sidebar.classList.remove('mobile-open');
+      sidebar.style.top='';
+      sidebar.style.maxHeight='';
       if(backdrop) backdrop.classList.remove('open');
       document.body.style.overflow='';
       if(btn) btn.textContent='🔍 Ver filtros';
     } else {
+      var hdrEl=document.querySelector('header')||document.querySelector('.hdr');
+      var hdrH=hdrEl?hdrEl.getBoundingClientRect().height:80;
+      sidebar.style.top=(hdrH+12)+'px';
+      sidebar.style.maxHeight=(window.innerHeight-hdrH-24)+'px';
       sidebar.classList.add('mobile-open');
       if(backdrop) backdrop.classList.add('open');
       document.body.style.overflow='hidden';
@@ -1047,7 +1089,7 @@ function mascaraM2Focus(el){
   };
   window.fecharFiltrosMob = function(){
     var sidebar=document.querySelector('.sidebar');
-    if(sidebar) sidebar.classList.remove('mobile-open');
+    if(sidebar){sidebar.classList.remove('mobile-open');sidebar.style.top='';sidebar.style.maxHeight='';}
     var backdrop=document.getElementById('mob-filter-backdrop');
     if(backdrop) backdrop.classList.remove('open');
     document.body.style.overflow='';
@@ -1058,24 +1100,47 @@ function mascaraM2Focus(el){
     cidadeSelecionadas.length=0;
     var chips=document.getElementById('cidade-chips'); if(chips) chips.textContent='';
     var inp=document.getElementById('cidade-search'); if(inp) inp.value='';
-    ['f_codigo','preco_min','preco_max','desc_min','desc_max','area_min','area_max'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});
+    ['f_codigo','preco_min','preco_max','desc_min','desc_max','area_min','area_max','data_ate'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});
+    var atEl=document.getElementById('area_tipo');if(atEl)atEl.value='';
     Array.prototype.forEach.call(document.querySelectorAll('.tipo_chk,.mod_chk,#c_fgts,#c_fin,#c_disputa'),function(e){e.checked=false;});
+    var rcTodos=document.querySelector('input[name="r_cond"][value=""]');if(rcTodos)rcTodos.checked=true;
+    var riTodos=document.querySelector('input[name="r_iptu"][value=""]');if(riTodos)riTodos.checked=true;
     ['slider-preco-min','slider-preco-max','slider-desc-min','slider-desc-max'].forEach(function(id){var el=document.getElementById(id);if(!el)return;el.value=id.indexOf('max')!==-1?el.max:el.min;});
     ['slider-preco-fill','slider-desc-fill'].forEach(function(id){var f=document.getElementById(id);if(f){f.style.left='0%';f.style.right='0%';}});
     _page=1; _loading=false; doFetch(1);
   };
 
   /* ── ORDENAÇÃO ── */
+  var _sortOpts=[['preco_asc','↑ Menor preço'],['preco_desc','↓ Maior preço'],['desconto_desc','% Desconto'],['data_asc','📅 Data']];
   function injetarOrdenacao() {
     if(document.getElementById('sort-sel')) return;
-    var container=document.getElementById('sort-container'); if(!container) return;
-    var lbl=document.createElement('label'); lbl.textContent='Ordenar: '; lbl.style.cssText='font-size:13px;color:#6b7280;white-space:nowrap;';
-    var sel=document.createElement('select'); sel.id='sort-sel'; sel.style.cssText='padding:5px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;cursor:pointer;';
-    [['preco_asc','↑ Menor preço'],['preco_desc','↓ Maior preço'],['desconto_desc','↓ Maiores descontos'],['data_asc','📅 Data próxima'],['data_desc','📅 Data distante']].forEach(function(o){
-      var opt=document.createElement('option'); opt.value=o[0]; opt.textContent=o[1]; sel.appendChild(opt);
-    });
-    sel.addEventListener('change',function(){_order=this.value;_page=1;_loading=false;doFetch(1);});
-    container.appendChild(lbl); container.appendChild(sel);
+    var isMob = window.innerWidth <= 1024;
+
+    if(isMob){
+      var slot=document.getElementById('mob-sort-slot'); if(!slot) return;
+      var chips=document.createElement('div'); chips.className='mob-sort-chips';
+      _sortOpts.forEach(function(o){
+        var c=document.createElement('button'); c.className='mob-sort-chip'+(o[0]===_order?' active':'');
+        c.textContent=o[1]; c.dataset.val=o[0];
+        c.addEventListener('click',function(){
+          _order=o[0]; _page=1; _loading=false;
+          chips.querySelectorAll('.mob-sort-chip').forEach(function(x){x.classList.remove('active');});
+          c.classList.add('active');
+          doFetch(1);
+        });
+        chips.appendChild(c);
+      });
+      slot.appendChild(chips);
+    } else {
+      var container=document.getElementById('sort-container'); if(!container) return;
+      var lbl=document.createElement('label'); lbl.textContent='Ordenar: '; lbl.style.cssText='font-size:13px;color:#6b7280;white-space:nowrap;';
+      var sel=document.createElement('select'); sel.id='sort-sel'; sel.style.cssText='padding:5px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;cursor:pointer;';
+      [['preco_asc','↑ Menor preço'],['preco_desc','↓ Maior preço'],['desconto_desc','↓ Maiores descontos'],['data_asc','📅 Data próxima'],['data_desc','📅 Data distante']].forEach(function(o){
+        var opt=document.createElement('option'); opt.value=o[0]; opt.textContent=o[1]; sel.appendChild(opt);
+      });
+      sel.addEventListener('change',function(){_order=this.value;_page=1;_loading=false;doFetch(1);});
+      container.appendChild(lbl); container.appendChild(sel);
+    }
   }
 
   document.addEventListener('DOMContentLoaded', function() {
@@ -1099,6 +1164,10 @@ function mascaraM2Focus(el){
     if(p.get('fin')==='1'){var ef2=document.getElementById('c_fin');if(ef2)ef2.checked=true;}
     if(p.get('disputa')==='1'){var ef3=document.getElementById('c_disputa');if(ef3)ef3.checked=true;}
     var codigo=p.get('codigo'); if(codigo){var ec=document.getElementById('f_codigo');if(ec)ec.value=codigo;}
+    var rcond=p.get('r_cond'); if(rcond){var rcEl=document.querySelector('input[name="r_cond"][value="'+rcond+'"]');if(rcEl)rcEl.checked=true;}
+    var riptu=p.get('r_iptu'); if(riptu){var riEl=document.querySelector('input[name="r_iptu"][value="'+riptu+'"]');if(riEl)riEl.checked=true;}
+    var atipo=p.get('area_tipo'); if(atipo){var atEl=document.getElementById('area_tipo');if(atEl)atEl.value=atipo;}
+    var dataAteUrl=p.get('data_ate'); if(dataAteUrl){var daEl=document.getElementById('data_ate');if(daEl)daEl.value=dataAteUrl;}
 
     /* Aplica UF da URL ao select antes de qualquer fetch */
     var ufFromUrl = p.get('uf') || '';
