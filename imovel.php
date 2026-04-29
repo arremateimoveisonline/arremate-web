@@ -108,6 +108,8 @@ if ($found) {
     $linkEditalAlt = $edital_url_db ?: ($link ?: '#');
     $linkMatricula = $hdn ? 'https://venda-imoveis.caixa.gov.br/editais/matricula/' . $uf . '/' . $hdn . '.pdf' : $link;
     $fotoUrl       = $foto_url ?: 'https://venda-imoveis.caixa.gov.br/fotos/F' . str_pad($hdn, 14, '0', STR_PAD_LEFT) . '21.jpg';
+    /* OG image via proxy — WhatsApp/bots não conseguem buscar direto da CAIXA (Radware) */
+    $ogFotoUrl     = $proto . '://' . ($_SERVER['HTTP_HOST'] ?? 'arremateimoveisonline.com.br') . '/foto-proxy.php?h=' . $hdn;
 
     $pageTitle = $tipoTxt . ' em ' . $cidade . ' - CAIXA | Arremate Imóveis Online';
     $pageDesc  = $tipoTxt . ' CAIXA em ' . $cidade . '/' . $uf . '. Preço: ' . $precoBrl . '. '
@@ -143,7 +145,7 @@ if ($found) {
 <?php if ($found): ?>
   <meta property="og:title" content="<?= esc($pageTitle) ?>">
   <meta property="og:description" content="<?= esc($pageDesc) ?>">
-  <meta property="og:image" content="<?= esc($fotoUrl) ?>">
+  <meta property="og:image" content="<?= esc($ogFotoUrl) ?>">
   <meta property="og:image:width" content="800">
   <meta property="og:image:height" content="600">
   <meta property="og:url" content="<?= esc($pageUrl) ?>">

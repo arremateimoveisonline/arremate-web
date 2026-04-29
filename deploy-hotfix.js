@@ -16,6 +16,7 @@ const FILES = [
   'resultados.html',
   'favoritos.html',
   'imovel.php',
+  'foto-proxy.php',
   'imovel-chips.js',
   'caixa-scrape-detalhe.php',
   'scraper_caixa.php',
