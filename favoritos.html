@@ -129,7 +129,7 @@
     .badge-disputa{background:#fee2e2;color:#b91c1c}
     .imovel-creci{margin-top:6px;font-size:.78rem;color:#4b5563;display:flex;align-items:center;gap:6px}
     .badge-nacional{display:inline-flex;align-items:center;gap:5px;background:#ede9fe;color:#5b21b6;border-radius:999px;padding:3px 10px;font-size:.72rem;font-weight:800;margin-top:4px}
-    .imovel-footer{padding:9px 14px 11px;border-top:1px solid #e5e7eb;background:#f8fafc;display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .imovel-footer{padding:9px 14px 11px;border-top:1px solid #e5e7eb;background:#f8fafc;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:nowrap}
     .status-ok{background:#d1fae5;color:#065f46;border-radius:999px;padding:4px 10px;font-weight:900;font-size:.72rem}
     .status-atenc{background:#fef3c7;color:#92400e;border-radius:999px;padding:4px 10px;font-weight:900;font-size:.72rem}
     .imovel-link{background:var(--laranja);color:#3b1f00;padding:8px 16px;border-radius:999px;font-weight:900;font-size:.86rem;text-decoration:none;box-shadow:0 3px 8px rgba(0,0,0,.2)}
@@ -151,6 +151,33 @@
     /* ── CARD SAÍDA (animação de remoção) ── */
     .imovel-card.removing{animation:cardOut .3s ease forwards}
     @keyframes cardOut{to{opacity:0;transform:scale(.92)}}
+
+    /* ── ANOTAÇÕES ── */
+    .btn-nota{display:flex;align-items:center;gap:5px;background:transparent;border:1.5px solid #e2e8f0;color:#64748b;border-radius:999px;padding:6px 12px;font-size:.75rem;font-weight:700;cursor:pointer;transition:all .15s;flex-shrink:0}
+    .btn-nota:hover,.btn-nota.tem-nota{border-color:#f59e0b;color:#92400e;background:#fffbeb}
+    .btn-nota.tem-nota{background:#fef3c7;border-color:#fbbf24}
+    .nota-dot{width:6px;height:6px;border-radius:50%;background:#f59e0b;flex-shrink:0}
+    .nota-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:10000;display:flex;align-items:center;justify-content:center;padding:16px;opacity:0;pointer-events:none;transition:opacity .2s}
+    .nota-modal-overlay.open{opacity:1;pointer-events:all}
+    .nota-modal{background:#fff;border-radius:16px;width:100%;max-width:480px;box-shadow:0 24px 60px rgba(0,0,0,.28);display:flex;flex-direction:column;transform:scale(.94) translateY(12px);transition:transform .2s;overflow:hidden}
+    .nota-modal-overlay.open .nota-modal{transform:scale(1) translateY(0)}
+    .nota-modal-head{background:#0f172a;color:#f8fafc;padding:16px 20px;display:flex;align-items:center;gap:10px}
+    .nota-modal-head-icon{font-size:1.2rem;line-height:1}
+    .nota-modal-title{font-size:.92rem;font-weight:900;flex:1;line-height:1.3}
+    .nota-modal-close{background:none;border:none;color:#94a3b8;cursor:pointer;font-size:1.3rem;line-height:1;padding:4px;border-radius:6px;transition:color .15s}
+    .nota-modal-close:hover{color:#fff}
+    .nota-modal-body{padding:16px 20px}
+    .nota-textarea{width:100%;min-height:140px;max-height:260px;border:1.5px solid #e2e8f0;border-radius:10px;padding:12px 14px;font-size:.88rem;line-height:1.55;color:#0f172a;resize:vertical;font-family:inherit;transition:border-color .15s;box-sizing:border-box}
+    .nota-textarea:focus{outline:none;border-color:#f59e0b;box-shadow:0 0 0 3px rgba(245,158,11,.15)}
+    .nota-char{font-size:.72rem;color:#94a3b8;text-align:right;margin-top:4px}
+    .nota-modal-foot{padding:12px 20px 18px;display:flex;gap:8px;justify-content:flex-end}
+    .btn-nota-salvar{background:#0f172a;color:#fff;border:none;border-radius:999px;padding:9px 22px;font-size:.84rem;font-weight:900;cursor:pointer;transition:filter .15s}
+    .btn-nota-salvar:hover{filter:brightness(1.15)}
+    .btn-nota-apagar{background:transparent;color:#b91c1c;border:1.5px solid #fca5a5;border-radius:999px;padding:9px 16px;font-size:.84rem;font-weight:700;cursor:pointer;transition:background .15s;display:none}
+    .btn-nota-apagar.visible{display:inline-flex}
+    .btn-nota-apagar:hover{background:#fef2f2}
+    .btn-nota-cancelar{background:transparent;color:#64748b;border:1.5px solid #e2e8f0;border-radius:999px;padding:9px 16px;font-size:.84rem;font-weight:700;cursor:pointer;transition:background .15s}
+    .btn-nota-cancelar:hover{background:#f8fafc}
 
     /* ── TOAST ── */
     .fav-toast{position:fixed;right:16px;bottom:16px;background:#fff;border:1px solid rgba(148,163,184,.35);box-shadow:0 10px 25px rgba(15,23,42,.18);padding:10px 16px;border-radius:10px;font-size:.82rem;color:#111827;display:flex;align-items:center;gap:8px;opacity:0;transform:translateY(10px);pointer-events:none;transition:opacity .18s,transform .18s;z-index:9999}
@@ -256,6 +283,26 @@
   </div>
 </div>
 
+<!-- Modal de anotações -->
+<div class="nota-modal-overlay" id="nota-overlay" role="dialog" aria-modal="true" aria-labelledby="nota-modal-title">
+  <div class="nota-modal">
+    <div class="nota-modal-head">
+      <span class="nota-modal-head-icon">📝</span>
+      <div class="nota-modal-title" id="nota-modal-title">Minha anotação</div>
+      <button class="nota-modal-close" id="nota-close-btn" aria-label="Fechar">✕</button>
+    </div>
+    <div class="nota-modal-body">
+      <textarea class="nota-textarea" id="nota-textarea" placeholder="Escreva suas observações sobre este imóvel: preço justo, localização, pontos a visitar, contatos, etc." maxlength="1000"></textarea>
+      <div class="nota-char" id="nota-char">0 / 1000</div>
+    </div>
+    <div class="nota-modal-foot">
+      <button class="btn-nota-apagar" id="btn-nota-apagar">Apagar nota</button>
+      <button class="btn-nota-cancelar" id="btn-nota-cancelar">Cancelar</button>
+      <button class="btn-nota-salvar" id="btn-nota-salvar">Salvar</button>
+    </div>
+  </div>
+</div>
+
 <!-- Toast de remoção -->
 <div class="fav-toast" id="fav-toast">
   <div class="fav-toast-icon">✕</div>
@@ -327,6 +374,77 @@
 
   /* Cache em memória dos dados buscados (evita re-fetch ao reordenar) */
   var cache = {};  /* { hdnimovel: itemData } */
+
+  /* ── NOTAS ───────────────────────────────────────────────────── */
+  var LS_NOTAS_KEY = 'arremate_notas';
+  var _notaHdnAtivo = null;
+  var _notaBtnAtivo = null;
+
+  function lerTodasNotas() {
+    try { return JSON.parse(localStorage.getItem(LS_NOTAS_KEY) || '{}'); } catch(e) { return {}; }
+  }
+  function lerNota(id) {
+    return (lerTodasNotas()[id] || {}).texto || '';
+  }
+  function salvarNota(id, texto) {
+    var notas = lerTodasNotas();
+    if (texto.trim()) {
+      notas[id] = { texto: texto.trim(), updatedAt: Date.now() };
+    } else {
+      delete notas[id];
+    }
+    try { localStorage.setItem(LS_NOTAS_KEY, JSON.stringify(notas)); } catch(e) {}
+  }
+
+  function abrirModalNota(hdn, tipo, cidade, btnNota) {
+    _notaHdnAtivo = hdn;
+    _notaBtnAtivo = btnNota;
+    var overlay = document.getElementById('nota-overlay');
+    var textarea = document.getElementById('nota-textarea');
+    var charEl = document.getElementById('nota-char');
+    var title = document.getElementById('nota-modal-title');
+    var btnApagar = document.getElementById('btn-nota-apagar');
+    var textoAtual = lerNota(hdn);
+    title.textContent = (tipo || 'Imóvel') + (cidade ? ' em ' + cidade : '');
+    textarea.value = textoAtual;
+    if (charEl) charEl.textContent = textoAtual.length + ' / 1000';
+    if (btnApagar) btnApagar.className = 'btn-nota-apagar' + (textoAtual ? ' visible' : '');
+    overlay.classList.add('open');
+    setTimeout(function () { textarea.focus(); textarea.setSelectionRange(textoAtual.length, textoAtual.length); }, 220);
+  }
+
+  function fecharModalNota() {
+    var overlay = document.getElementById('nota-overlay');
+    overlay.classList.remove('open');
+    _notaHdnAtivo = null;
+    _notaBtnAtivo = null;
+  }
+
+  function confirmarNota() {
+    var textarea = document.getElementById('nota-textarea');
+    var texto = textarea ? textarea.value : '';
+    if (!_notaHdnAtivo) return;
+    salvarNota(_notaHdnAtivo, texto);
+    atualizarBtnNota(_notaBtnAtivo, _notaHdnAtivo, texto.trim());
+    fecharModalNota();
+    mostrarToast(texto.trim() ? 'Anotação salva!' : 'Anotação removida.');
+  }
+
+  function apagarNota() {
+    if (!_notaHdnAtivo) return;
+    salvarNota(_notaHdnAtivo, '');
+    atualizarBtnNota(_notaBtnAtivo, _notaHdnAtivo, '');
+    fecharModalNota();
+    mostrarToast('Anotação removida.');
+  }
+
+  function atualizarBtnNota(btn, hdn, texto) {
+    if (!btn) return;
+    var temNota = !!texto;
+    btn.className = 'btn-nota' + (temNota ? ' tem-nota' : '');
+    btn.title = temNota ? 'Ver/editar anotação' : 'Adicionar anotação';
+    btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>' + (temNota ? '<span class="nota-dot"></span>' : 'Nota');
+  }
 
   /* ── UTILS ───────────────────────────────────────────────────── */
   function norm(s) {
@@ -490,15 +608,13 @@
     var cTipo=corTipo(tipo); tagTipo.style.background=cTipo.bg; tagTipo.style.color=cTipo.color;
     thumb.appendChild(tagTipo);
 
-    /* Tag modalidade (sem o botão remover na mesma posição) */
-    if (modLabel && !isCompraDireta) {
-      /* laranja: leilão / licitação — sem overlap com botão remover */
-    }
+    /* Tag modalidade — canto superior direito (igual às outras páginas) */
     if (modLabel) {
       var tagMod = document.createElement('span');
-      /* Posição: left para não colidir com btn-remover no right */
       tagMod.className = 'tag-desc';
-      var cMod=corMod(modLabel); tagMod.style.cssText = 'right:auto;left:50%;transform:translateX(-50%);background:'+cMod.bg+';color:'+cMod.color;
+      var cMod = corMod(modLabel);
+      tagMod.style.background = cMod.bg;
+      tagMod.style.color = cMod.color;
       tagMod.textContent = modLabel;
       thumb.appendChild(tagMod);
     }
@@ -626,6 +742,19 @@
     else if (pct > 0) { st.className = 'status-atenc'; st.textContent = 'Desconto ' + pct.toFixed(0) + '%'; }
     else              { st.className = 'status-atenc'; st.textContent = 'Sem desconto listado'; }
 
+    /* Botão de anotação */
+    var notaExiste = !!lerNota(hdn);
+    var btnNota = document.createElement('button');
+    btnNota.className = 'btn-nota' + (notaExiste ? ' tem-nota' : '');
+    btnNota.setAttribute('aria-label', 'Anotação');
+    btnNota.title = notaExiste ? 'Ver/editar anotação' : 'Adicionar anotação';
+    btnNota.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>' + (notaExiste ? '<span class="nota-dot"></span>' : 'Nota');
+    btnNota.addEventListener('click', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      abrirModalNota(hdn, tipo, item.cidade || '', btnNota);
+    });
+
     var link = document.createElement('a');
     link.className = 'imovel-link';
     link.href = '/imovel.php?id=' + encodeURIComponent(hdn);
@@ -634,6 +763,7 @@
     link.textContent = 'Saiba mais →';
 
     footer.appendChild(st);
+    footer.appendChild(btnNota);
     footer.appendChild(link);
 
     card.appendChild(thumb);
@@ -797,7 +927,40 @@
     }
   };
 
-  document.addEventListener('DOMContentLoaded', init);
+  /* ── INICIALIZAÇÃO DO MODAL DE NOTAS ────────────────────────── */
+  function initModalNotas() {
+    var overlay   = document.getElementById('nota-overlay');
+    var textarea  = document.getElementById('nota-textarea');
+    var charEl    = document.getElementById('nota-char');
+    var btnSalvar = document.getElementById('btn-nota-salvar');
+    var btnCancel = document.getElementById('btn-nota-cancelar');
+    var btnClose  = document.getElementById('nota-close-btn');
+    var btnApagar = document.getElementById('btn-nota-apagar');
+
+    if (textarea && charEl) {
+      textarea.addEventListener('input', function () {
+        charEl.textContent = textarea.value.length + ' / 1000';
+      });
+    }
+    if (btnSalvar) btnSalvar.addEventListener('click', confirmarNota);
+    if (btnCancel) btnCancel.addEventListener('click', fecharModalNota);
+    if (btnClose)  btnClose.addEventListener('click', fecharModalNota);
+    if (btnApagar) btnApagar.addEventListener('click', apagarNota);
+    if (overlay) {
+      overlay.addEventListener('click', function (e) {
+        if (e.target === overlay) fecharModalNota();
+      });
+    }
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && overlay && overlay.classList.contains('open')) fecharModalNota();
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && overlay && overlay.classList.contains('open')) confirmarNota();
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    init();
+    initModalNotas();
+  });
 
 })();
 </script>
