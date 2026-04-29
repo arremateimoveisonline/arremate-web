@@ -350,36 +350,6 @@ if ($found) {
   .status-direta{display:none;background:#f0fdf4;border:1px solid #bbf7d0;color:#166534;padding:15px;border-radius:12px;margin-bottom:20px;font-weight:700;text-align:center}
   body.is-compra-direta .status-direta{display:block!important}
 </style>
-<script>
-document.addEventListener("DOMContentLoaded",function(){
-  const check=()=>{
-    const bt=document.body.innerText.toLowerCase();
-    if(bt.includes("venda direta online")||bt.includes("compra direta")){
-      document.querySelectorAll(".cronometro-box,#countdown,.label-disputa,.badge-disputa").forEach(el=>el.style.display="none");
-      const tag=document.querySelector(".tag-mod-det");
-      if(tag){tag.innerText="Compra Direta";tag.style.backgroundColor="#16a34a";}
-    }
-  };
-  check();setTimeout(check,500);setTimeout(check,2000);
-});
-</script>
-<script id="correcao-final-arremate">
-(function(){
-  const arr_fix=()=>{
-    const modTag=document.querySelector('.tag-mod-det')||document.getElementById('tag-mod');
-    const desc=(document.querySelector('.det-descricao')?.innerText||'').toLowerCase();
-    const rawText=(modTag?.innerText||'').toLowerCase();
-    if(rawText.includes('direta')||desc.includes('direta')||desc.includes('venda direta online')){
-      if(modTag){modTag.innerText='Compra Direta';modTag.style.backgroundColor='#16a34a';modTag.style.color='#fff';}
-      document.querySelectorAll('.cronometro-box,#countdown,.label-disputa,.badge-disputa').forEach(el=>{el.style.display='none';});
-      const lb=document.querySelector('.label-disputa');
-      if(lb){lb.innerText='Disponível para Proposta';lb.style.display='block';}
-    }
-  };
-  window.addEventListener('load',arr_fix);
-  setTimeout(arr_fix,500);setTimeout(arr_fix,2000);
-})();
-</script>
 </head>
 <body<?= $isCompDireta ? ' class="is-direta is-compra-direta"' : '' ?>>
 <header class="site-header">
