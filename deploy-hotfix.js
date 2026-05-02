@@ -5,11 +5,16 @@ const { Client } = require('./node_modules/ssh2');
 const fs   = require('fs');
 const path = require('path');
 
-const HOST  = 'lcmcreativestudio.vps-kinghost.net';
-const USER  = 'root';
-const PASS  = 'M@lu1710';
+const HOST   = process.env.VPS_HOST   || 'lcmcreativestudio.vps-kinghost.net';
+const USER   = process.env.VPS_USER   || 'root';
+const PASS   = process.env.VPS_PASS;  // OBRIGATÓRIO: passar via variável de ambiente
 const REMOTE = '/var/www/arremate-br';
 const LOCAL  = 'C:/xampp/htdocs/arremate-br';
+
+if (!PASS) {
+  console.error('❌ ERRO: VPS_PASS não está definido. Use: set VPS_PASS=sua_senha && node deploy-hotfix.js');
+  process.exit(1);
+}
 
 const FILES = [
   'index.php',

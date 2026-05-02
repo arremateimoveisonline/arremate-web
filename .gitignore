@@ -14,9 +14,15 @@ csv_tmp/
 # Logs
 *.log
 
-# Ambiente PHP local
+# Ambiente PHP local e Node (NUNCA commitar!)
 .env
+.env.local
+.env.*.local
 config.local.php
+
+# Scripts sensíveis (referência apenas, não executável)
+# Remova de .git/config se adicionados
+!/deploy-hotfix.js.example
 
 # OS
 .DS_Store
