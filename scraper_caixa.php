@@ -368,10 +368,10 @@ logMsg("Import total: {$ok} imóveis | Pulados: {$skip}");
 
 // Verifica integridade antes de substituir o banco atual
 $count = (int) $db->query("SELECT COUNT(*) FROM imoveis")->fetchColumn();
-$db    = null; // fecha conexão
 
 if ($count < 1000) {
     logMsg("⚠️  Banco novo tem apenas {$count} imóveis — suspeito. Mantendo banco anterior.");
+    $db = null; // fecha conexão
     unlink($dbTmp);
     exit(3);
 }
@@ -436,6 +436,8 @@ if (file_exists(DB_PATH)) {
         logMsg("⚠️ Não foi possível preservar dados anteriores: " . $e->getMessage());
     }
 }
+
+$db = null; // fecha conexão antes de substituir banco
 
 // Tudo OK — substitui banco atual
 rename($dbTmp, DB_PATH);
