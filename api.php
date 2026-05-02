@@ -98,6 +98,7 @@ function row(array $r): array {
         'area_privativa' => (float)($r['area_privativa'] ?? 0),
         'area_total'     => (float)($r['area_total']     ?? 0),
         'area_terreno'   => (float)($r['area_terreno']   ?? 0),
+        'status_caixa'   => $r['status_caixa'] ?? '',
     ];
 }
 
@@ -114,7 +115,7 @@ try {
         $offset = max(gi('offset', 0), 0);
         $ordem  = g('ordem', 'preco_asc');
 
-        $where  = ["status_caixa != 'removido'"];
+        $where  = ["status_caixa != 'removido'", "status_caixa NOT LIKE 'encerrada%'"];
         $params = [];
 
         /* UF — padrão SP quando não informado */
@@ -331,6 +332,7 @@ try {
     } elseif ($acao === 'detalhe') {
 
         $hdn = g('hdnimovel');
+        $mostrarEncerrados = g('mostrar_encerrados') === '1';
         if ($hdn === '') {
             echo json_encode(['erro' => 'hdnimovel obrigatório']);
             exit;
@@ -345,6 +347,13 @@ try {
             echo json_encode(['erro' => 'Não encontrado', 'nao_encontrado' => true]);
             exit;
         }
+        // Se encerrado/removido e não está pedindo mostrar_encerrados, rejeita
+        $status = $r['status_caixa'] ?? '';
+        if (!$mostrarEncerrados && ($status === 'encerrado' || $status === 'removido')) {
+            http_response_code(404);
+            echo json_encode(['erro' => 'Imóvel não está mais disponível na CAIXA', 'encerrado' => true]);
+            exit;
+        }
         echo json_encode(['sucesso' => true, 'imovel' => row($r)], JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
 
     /* ══════════════════════════════════════════════════════
@@ -353,7 +362,7 @@ try {
     } elseif ($acao === 'cidades') {
 
         $uf  = strtoupper(g('uf'));
-        $sql = "SELECT cidade, uf, COUNT(*) as total FROM imoveis WHERE status_caixa != 'removido'";
+        $sql = "SELECT cidade, uf, COUNT(*) as total FROM imoveis WHERE status_caixa != 'removido' AND status_caixa NOT LIKE 'encerrada%'";
         $p   = [];
         if ($uf) { $sql .= ' AND UPPER(uf) = :uf'; $p[':uf'] = $uf; }
         $sql .= ' GROUP BY cidade ORDER BY cidade ASC';
@@ -369,11 +378,11 @@ try {
        ══════════════════════════════════════════════════════ */
     } elseif ($acao === 'stats') {
 
-        $total = (int)db()->query("SELECT COUNT(*) FROM imoveis WHERE status_caixa != 'removido'")->fetchColumn();
-        $sp    = (int)db()->query("SELECT COUNT(*) FROM imoveis WHERE uf='SP' AND status_caixa != 'removido'")->fetchColumn();
-        $ufs   = db()->query("SELECT DISTINCT uf FROM imoveis WHERE status_caixa != 'removido' ORDER BY uf")->fetchAll(PDO::FETCH_COLUMN);
-        $minP  = (int)db()->query("SELECT MIN(preco) FROM imoveis WHERE preco > 0 AND status_caixa != 'removido'")->fetchColumn();
-        $maxP  = (int)db()->query("SELECT MAX(preco) FROM imoveis WHERE status_caixa != 'removido'")->fetchColumn();
+        $total = (int)db()->query("SELECT COUNT(*) FROM imoveis WHERE status_caixa != 'removido' AND status_caixa NOT LIKE 'encerrada%'")->fetchColumn();
+        $sp    = (int)db()->query("SELECT COUNT(*) FROM imoveis WHERE uf='SP' AND status_caixa != 'removido' AND status_caixa NOT LIKE 'encerrada%'")->fetchColumn();
+        $ufs   = db()->query("SELECT DISTINCT uf FROM imoveis WHERE status_caixa != 'removido' AND status_caixa NOT LIKE 'encerrada%' ORDER BY uf")->fetchAll(PDO::FETCH_COLUMN);
+        $minP  = (int)db()->query("SELECT MIN(preco) FROM imoveis WHERE preco > 0 AND status_caixa != 'removido' AND status_caixa NOT LIKE 'encerrada%'")->fetchColumn();
+        $maxP  = (int)db()->query("SELECT MAX(preco) FROM imoveis WHERE status_caixa != 'removido' AND status_caixa NOT LIKE 'encerrada%'")->fetchColumn();
 
         echo json_encode([
             'sucesso'       => true,

@@ -43,7 +43,8 @@ if ($hdnimovel === '') {
         $stmt = $db->prepare('SELECT * FROM imoveis WHERE hdnimovel = :h OR numero = :h LIMIT 1');
         $stmt->execute([':h' => $hdnimovel]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        if ($row && ($row['status_caixa'] ?? '') === 'removido') { $erroMsg = 'removido'; }
+        $status = $row['status_caixa'] ?? '';
+        if ($row && ($status === 'removido' || $status === 'encerrado')) { $erroMsg = 'removido'; }
         elseif ($row) { $found = true; $imovel = $row; }
         else { $erroMsg = 'nao_encontrado'; }
     } catch (Exception $e) {
@@ -268,6 +269,7 @@ if ($found) {
     .sim-resultado{background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px;padding:12px 14px;font-size:.84rem;line-height:1.8;margin-top:10px;display:none}
     .sim-nota{font-size:.73rem;color:var(--muted);text-align:center;margin-top:10px;line-height:1.5;padding:0 4px}
     .sidebar-det{display:flex;flex-direction:column;gap:16px}
+    .mobile-btns-topo{display:flex;flex-direction:column;gap:10px;margin-bottom:8px}
     .creci-card{background:linear-gradient(135deg,#0b1a33,#01468d);color:#fff;border-radius:10px;padding:10px 14px}
     .creci-card-title{font-size:.7rem;font-weight:900;text-transform:uppercase;letter-spacing:.08em;opacity:.8;margin-bottom:3px}
     .creci-num{font-size:1.1rem;font-weight:900;letter-spacing:.05em;margin-bottom:2px}
@@ -330,7 +332,6 @@ if ($found) {
       .preco-destaque{flex-direction:column;align-items:flex-start;gap:8px}
       .preco-venda-det{font-size:1.3rem}
       .pagamento-grid{grid-template-columns:repeat(2,1fr)}
-      .btn-caixa-mobile-wrap{display:block!important}
       .areas-grid{grid-template-columns:repeat(3,1fr)}
       .panel-body{padding:14px 14px}
       .foto-wrap{height:240px}
@@ -343,6 +344,36 @@ if ($found) {
       .barra-wrap{flex-direction:column;align-items:flex-start;gap:10px}
     }
     .sec-label{font-size:.72rem;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+    .nota-strip{display:flex;align-items:center;gap:7px;padding:9px 12px;border-radius:8px;border:1.5px dashed #e2e8f0;background:transparent;cursor:pointer;transition:border-color .2s,background .2s;width:100%}
+    .nota-strip.tem-nota{border-style:solid;border-color:#fbbf24;background:#fef9c3}
+    .nota-strip-icon{font-size:.85rem;flex-shrink:0}
+    .nota-strip-txt{font-size:.78rem;color:#94a3b8;font-style:italic;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+    .nota-strip.tem-nota .nota-strip-txt{color:#92400e;font-style:normal;font-weight:600}
+    .nota-modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:2000;align-items:center;justify-content:center}
+    .nota-modal-overlay.open{display:flex}
+    .nota-modal{background:#fff;border-radius:16px;padding:20px;width:min(92vw,440px);box-shadow:0 8px 32px rgba(0,0,0,.28);display:flex;flex-direction:column;gap:12px}
+    .nota-modal-header{display:flex;align-items:center;justify-content:space-between;gap:8px}
+    .nota-modal-title{font-size:.95rem;font-weight:900;color:#1e293b}
+    .nota-modal-close{background:none;border:none;font-size:1.3rem;cursor:pointer;color:#94a3b8;padding:0 4px;line-height:1}
+    .nota-modal-ctx{font-size:.8rem;color:#64748b;background:#f8fafc;border-radius:8px;padding:8px 10px;line-height:1.5}
+    .nota-ctx-imovel{font-weight:700;color:#1e3a8a}
+    .nota-ctx-end{color:#64748b;margin-top:2px}
+    .nota-ctx-preco{display:inline-block;font-weight:900;color:#0053a6;margin-top:4px;font-size:.85rem}
+    .nota-textarea{width:100%;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-size:.88rem;font-family:inherit;resize:vertical;min-height:100px;line-height:1.5;color:#1e293b}
+    .nota-textarea:focus{border-color:#fbbf24;outline:none;box-shadow:0 0 0 2px rgba(251,191,36,.2)}
+    .nota-save-status{font-size:.72rem;color:#22c55e;font-weight:700;text-align:right;min-height:1em;opacity:0;transition:opacity .3s}
+    .nota-save-status.visible{opacity:1}
+    .nota-modal-btns{display:flex;gap:8px;justify-content:flex-end}
+    .btn-nota-limpar{background:none;border:1.5px solid #f87171;color:#dc2626;border-radius:999px;padding:7px 16px;font-size:.8rem;font-weight:700;cursor:pointer;font-family:inherit}
+    .btn-nota-fechar{background:var(--azul);color:#fff;border:none;border-radius:999px;padding:7px 20px;font-size:.8rem;font-weight:700;cursor:pointer;font-family:inherit}
+    #mobile-info-panel{display:none}
+    #link-caixa-mobile{display:none}
+    @media(max-width:600px){
+      #mobile-info-panel{display:block}
+      #link-caixa-mobile{display:flex!important}
+      #regras-despesas{display:none!important}
+      .sidebar-info-panel{display:none!important}
+    }
   </style>
 <style id="arremate-logic">
   body.is-compra-direta .tag-mod-det{background:#16a34a!important;color:#fff!important}
@@ -470,6 +501,9 @@ if ($found) {
 <?php if ($isSP): ?>
           <button class="creci-card" id="btn-copiar-creci-mobile" onclick="copiarCreci(event)" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;border:none;font-family:inherit;font-size:.9rem;font-weight:900;letter-spacing:.03em">📋 Copiar CRECI: <?= CRECI_NUM ?></button>
 <?php endif; ?>
+          <div class="nota-strip" id="nota-strip" onclick="abrirModalNota()"><span class="nota-strip-icon">📝</span><span class="nota-strip-txt" id="nota-strip-txt">Adicionar anotação sobre este imóvel...</span></div>
+          <div id="mobile-info-panel"><div class="sec-label" style="margin-top:4px;margin-bottom:6px">📋 Informações do imóvel</div><div class="info-list" id="info-list-mobile"></div></div>
+          <a href="<?= esc($link) ?>" id="link-caixa-mobile" class="creci-card" target="_blank" rel="noopener" style="align-items:center;justify-content:center;gap:8px;font-size:.9rem;font-weight:900;letter-spacing:.03em;text-decoration:none">🏦 Ver no portal da CAIXA ↗</a>
         </div>
 
         <!-- BLOCO 2: Áreas + Pagamento -->
@@ -479,9 +513,6 @@ if ($found) {
             <div class="areas-grid" id="areas-grid"></div>
             <div class="sec-label" style="margin-top:14px">💳 Formas de pagamento aceitas</div>
             <div class="pagamento-grid" id="pagamento-grid"></div>
-            <div class="btn-caixa-mobile-wrap">
-              <a href="<?= esc($link) ?>" class="link-caixa" target="_blank" rel="noopener">🏦 Ver no portal da CAIXA ↗</a>
-            </div>
             <div id="regras-despesas" style="display:none;margin-top:16px">
               <div class="sec-label">🏛️ Regras para pagamento das despesas</div>
               <div id="regras-despesas-content" style="display:flex;flex-direction:column;gap:10px"></div>
@@ -517,7 +548,7 @@ if ($found) {
 
       <!-- SIDEBAR -->
       <div class="sidebar-det">
-        <div class="panel">
+        <div class="panel sidebar-info-panel">
           <div class="panel-body">
             <div class="sec-label">📋 Informações do imóvel</div>
             <div class="info-list" id="info-list"></div>
@@ -702,6 +733,7 @@ function limpaNumeroBR(v){var s=String(v||'').replace(/[R$\s]/g,'').replace(/\./
 function formataMilhar(n){var p=parseFloat(n).toFixed(2).split('.');p[0]=p[0].replace(/\B(?=(\d{3})+(?!\d))/g,'.');return p.join(',');}
 function getHdnFromLink(link){if(!link)return '';try{var u=new URL(String(link).trim());return(u.searchParams.get('hdnimovel')||'').replace(/\D/g,'');}catch(e){var m=String(link).match(/hdnimovel=(\d+)/i);return m?m[1]:'';}}
 function setText(id,val){var el=document.getElementById(id);if(el)el.textContent=val;}
+function syncMobileInfoList(){var d=document.getElementById('info-list'),m=document.getElementById('info-list-mobile');if(d&&m)m.innerHTML=d.innerHTML;}
 function setHref(id,val){var el=document.getElementById(id);if(el)el.href=val;}
 function inferTipoLocal(desc){var d=norm(desc||'');if(d.indexOf('apartamento')!==-1)return 'Apartamento';if(d.indexOf('casa')!==-1)return 'Casa';if(d.indexOf('terreno')!==-1)return 'Terreno';if(d.indexOf('gleba')!==-1)return 'Gleba';if(d.indexOf('loja')!==-1)return 'Loja';if(d.indexOf('predio')!==-1)return 'Prédio';if(d.indexOf('sala')!==-1)return 'Sala';if(d.indexOf('lote')!==-1)return 'Lote';return 'Imóvel';}
 
@@ -1001,6 +1033,7 @@ function montarPagina(item){
         else{infoList.innerHTML+='<div class="info-row" data-field="iptu"><span class="info-label">Tributos</span><span class="info-val">'+iptuLabel+'</span></div>';}
       }
     }
+    syncMobileInfoList();
   });
   if(typeof buildChipsRow==='function'){var ar=buildChipsRow(item.descricao||'');var arWrap=document.getElementById('atributos-row');if(ar&&arWrap)arWrap.appendChild(ar);}
   var condRow=document.getElementById('cond-row');
@@ -1016,7 +1049,9 @@ function montarPagina(item){
   var dataEnc=item.data_encerramento||'';
   function addRow(label,val,field){
     var df=field?(' data-field="'+field+'"'):'';
-    if(infoList)infoList.innerHTML+='<div class="info-row"'+df+'><span class="info-label">'+label+'</span><span class="info-val">'+val+'</span></div>';
+    var html='<div class="info-row"'+df+'><span class="info-label">'+label+'</span><span class="info-val">'+val+'</span></div>';
+    if(infoList)infoList.innerHTML+=html;
+    var mob=document.getElementById('info-list-mobile');if(mob)mob.innerHTML+=html;
   }
   // Ordem: Cidade · Preço · Avaliação · Modalidade · Desconto · Data · Código · (Condomínio/Tributos via API)
   addRow('Cidade',(item.cidade||'—')+' · '+(item.uf||'SP'));
@@ -1233,6 +1268,72 @@ function rodarSim2(){
   });
 })();
 </script>
+<!-- Modal de anotação -->
+<div class="nota-modal-overlay" id="nota-modal-overlay" onclick="if(event.target===this)fecharModalNota()">
+  <div class="nota-modal">
+    <div class="nota-modal-header"><span class="nota-modal-title">📝 Anotação</span><button class="nota-modal-close" onclick="fecharModalNota()">✕</button></div>
+    <div class="nota-modal-ctx" id="nota-modal-ctx"></div>
+    <textarea class="nota-textarea" id="nota-textarea" placeholder="Escreva sua anotação sobre este imóvel..."></textarea>
+    <div class="nota-save-status" id="nota-save-status">✓ Salvo</div>
+    <div class="nota-modal-btns"><button class="btn-nota-limpar" onclick="limparNota()">Limpar</button><button class="btn-nota-fechar" onclick="fecharModalNota()">Fechar</button></div>
+  </div>
+</div>
+
+<script>
+var NOTAS_KEY='arremate_notas';
+var _notaTimeout=null;
+
+function lerNota(hdn){try{var o=JSON.parse(localStorage.getItem(NOTAS_KEY)||'{}');return(o[hdn]&&o[hdn].texto)||'';}catch(e){return'';}}
+function salvarNota(hdn,texto){try{var o=JSON.parse(localStorage.getItem(NOTAS_KEY)||'{}');if(texto.trim()){o[hdn]={texto:texto,updatedAt:Date.now()};}else{delete o[hdn];}localStorage.setItem(NOTAS_KEY,JSON.stringify(o));}catch(e){}}
+function atualizarNotaStrip(hdn){var strip=document.getElementById('nota-strip'),txt=document.getElementById('nota-strip-txt');if(!strip||!txt)return;var nota=lerNota(hdn);if(nota.trim()){strip.classList.add('tem-nota');txt.textContent=nota.length>60?nota.substring(0,60)+'...':nota;}else{strip.classList.remove('tem-nota');txt.textContent='Adicionar anotação sobre este imóvel...';}}
+
+function abrirModalNota(){
+  var d=window.__IMOVEL_DATA__;if(!d)return;
+  var hdn=d.hdnimovel;
+  var overlay=document.getElementById('nota-modal-overlay');
+  var ta=document.getElementById('nota-textarea');
+  var ctxEl=document.getElementById('nota-modal-ctx');
+  if(!overlay||!ta)return;
+  var tipo=inferTipoLocal(d.descricao||'');
+  var preco=d.preco?fmtBRL(d.preco/100):'';
+  if(ctxEl){ctxEl.innerHTML='<div class="nota-ctx-imovel">'+(tipo||'Imóvel')+(d.cidade?' — '+d.cidade:'')+'</div>'+(d.endereco?'<div class="nota-ctx-end">'+d.endereco+'</div>':'')+(preco?'<span class="nota-ctx-preco">'+preco+'</span>':'');}
+  ta.value=lerNota(hdn);
+  overlay.classList.add('open');
+  setTimeout(function(){ta.focus();ta.setSelectionRange(ta.value.length,ta.value.length);},80);
+  ta.oninput=function(){clearTimeout(_notaTimeout);_notaTimeout=setTimeout(function(){autoSalvarNota(hdn);},1200);};
+}
+
+function autoSalvarNota(hdn){
+  var ta=document.getElementById('nota-textarea');
+  var st=document.getElementById('nota-save-status');
+  if(!ta)return;
+  salvarNota(hdn,ta.value);
+  atualizarNotaStrip(hdn);
+  if(st){st.classList.add('visible');clearTimeout(st._t);st._t=setTimeout(function(){st.classList.remove('visible');},2500);}
+}
+
+function fecharModalNota(){
+  var d=window.__IMOVEL_DATA__;if(!d)return;
+  var ta=document.getElementById('nota-textarea');
+  var overlay=document.getElementById('nota-modal-overlay');
+  if(ta){clearTimeout(_notaTimeout);salvarNota(d.hdnimovel,ta.value);atualizarNotaStrip(d.hdnimovel);}
+  if(overlay)overlay.classList.remove('open');
+}
+
+function limparNota(){
+  var d=window.__IMOVEL_DATA__;if(!d)return;
+  var ta=document.getElementById('nota-textarea');
+  if(ta)ta.value='';
+  salvarNota(d.hdnimovel,'');
+  atualizarNotaStrip(d.hdnimovel);
+  var st=document.getElementById('nota-save-status');
+  if(st){st.classList.add('visible');clearTimeout(st._t);st._t=setTimeout(function(){st.classList.remove('visible');},2000);}
+}
+
+document.addEventListener('keydown',function(e){if(e.key==='Escape'){var o=document.getElementById('nota-modal-overlay');if(o&&o.classList.contains('open'))fecharModalNota();}});
+document.addEventListener('DOMContentLoaded',function(){var d=window.__IMOVEL_DATA__;if(d&&d.hdnimovel)atualizarNotaStrip(d.hdnimovel);});
+</script>
+
 <?php include __DIR__ . '/cookie-banner.php'; ?>
 <script src="logo-fit.js"></script>
 </body>

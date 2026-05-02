@@ -22,7 +22,7 @@ if (file_exists($cacheFile) && (time() - filemtime($cacheFile)) < $cacheTTL) {
 $dbPath = getenv('DB_PATH') ?: '/var/www/dados/imoveis.db';
 try {
     $db   = new PDO('sqlite:' . $dbPath);
-    $stmt = $db->prepare('SELECT foto_url, hdnimovel FROM imoveis WHERE hdnimovel = :h OR numero = :h LIMIT 1');
+    $stmt = $db->prepare('SELECT foto_url, hdnimovel, status_caixa FROM imoveis WHERE hdnimovel = :h OR numero = :h LIMIT 1');
     $stmt->execute([':h' => $hdn]);
     $row  = $stmt->fetch(PDO::FETCH_ASSOC);
 } catch (Exception $e) {
@@ -30,6 +30,11 @@ try {
 }
 
 if (!$row || empty($row['foto_url'])) {
+    http_response_code(404); exit;
+}
+
+// Rejeita imóveis encerrados ou removidos (espelha comportamento da CAIXA)
+if ($row['status_caixa'] === 'encerrado' || $row['status_caixa'] === 'removido') {
     http_response_code(404); exit;
 }
 

@@ -107,10 +107,34 @@
       "Bash(git show:*)",
       "Read(//tmp/**)",
       "WebFetch(domain:localhost)",
-      "WebFetch(domain:127.0.0.1)"
+      "WebFetch(domain:127.0.0.1)",
+      "Bash(/c/xampp/php/php *)",
+      "Read(//c/xampp/**)",
+      "Bash(ls C:/xampp/htdocs/arremate-br/*.sql)",
+      "Bash(ipconfig)",
+      "Bash(sqlite3 \"C:/xampp/htdocs/dados/imoveis.db\" \"SELECT hdnimovel, cidade, uf, modalidade, data_leilao_1, data_encerramento FROM imoveis WHERE data_encerramento BETWEEN datetime\\('now'\\) AND datetime\\('now', '+3 days'\\) LIMIT 5;\")",
+      "Bash(\"C:/xampp/mysql/bin/mysql.exe\")",
+      "Bash(\"C:/xampp/sqlite/sqlite3.exe\" \"C:/xampp/htdocs/dados/imoveis.db\" \"SELECT hdnimovel, cidade, uf, data_encerramento FROM imoveis WHERE data_encerramento BETWEEN datetime\\('now'\\) AND datetime\\('now', '+3 days'\\) LIMIT 5;\")",
+      "Bash(C:/xampp/php/php.exe -r ' *)",
+      "Read(//c/Users/César/AppData/Local/Temp/claude/c--Users-C-sar-Downloads-arremate-br/b69ebc62-46e8-4b29-b6f0-da363a155eb1/tasks/**)",
+      "WebFetch(domain:venda-imoveis.caixa.gov.br)",
+      "WebSearch",
+      "Bash(where node *)",
+      "Read(//c/Program Files/Google/Chrome/Application/**)",
+      "Read(//c/Program Files \\(x86\\)/Google/Chrome/Application/**)",
+      "Bash(schtasks /create /tn \"ArremateScraperLocal\" /tr \"\\\\\"C:\\\\xampp\\\\htdocs\\\\arremate-br\\\\rodar-scraper-local.bat\\\\\"\" /sc ONLOGON /ru \"%USERNAME%\" /f)",
+      "Bash(cmd /c 'schtasks /create /tn \"ArremateScraperLocal\" /tr \"C:\\\\\\\\xampp\\\\\\\\htdocs\\\\\\\\arremate-br\\\\\\\\rodar-scraper-local.bat\" /sc ONLOGON /ru \"%USERNAME%\" /f')",
+      "Bash(del \"%TEMP%\\\\arremate_local_scraper.lock\")",
+      "Bash(DB_PATH=\"C:/xampp/htdocs/dados/imoveis.db\" CHROME_PATH=\"C:/Program Files/Google/Chrome/Application/chrome.exe\" node caixa-detail-scraper.js --limit 5)",
+      "Bash(DB_PATH=\"C:/xampp/htdocs/dados/imoveis.db\" CHROME_PATH=\"C:/Program Files/Google/Chrome/Application/chrome.exe\" node caixa-detail-scraper.js --limit 3)",
+      "Bash(rm -f \"$\\(node -e \"console.log\\(require\\('os'\\).tmpdir\\(\\)\\)\"\\)/arremate_detail_scraper.lock\")",
+      "Bash(DB_PATH=\"C:/xampp/htdocs/dados/imoveis.db\" CHROME_PATH=\"C:/Program Files/Google/Chrome/Application/chrome.exe\" node caixa-detail-scraper.js --limit 2)",
+      "Bash(claude mcp *)",
+      "Bash(dir /b C:\\\\xampp\\\\htdocs\\\\dados\\\\csv\\\\*.csv)"
     ],
     "additionalDirectories": [
-      "C:\\xampp\\htdocs\\arremate-br"
+      "C:\\xampp\\htdocs\\arremate-br",
+      "\\tmp"
     ]
   }
 }

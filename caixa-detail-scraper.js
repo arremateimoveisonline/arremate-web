@@ -330,6 +330,7 @@ async function main() {
           OR scraped_at < datetime('now', '-7 days'))`;
   const query = `
     SELECT hdnimovel FROM imoveis WHERE 1=1 ${ufFilter} ${dateFilter}
+    AND status_caixa NOT IN ('encerrado', 'removido')
     ORDER BY
       CASE
         WHEN scraped_at IS NULL OR scraped_at = '' THEN 0

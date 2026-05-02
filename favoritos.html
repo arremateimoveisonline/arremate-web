@@ -100,6 +100,9 @@
     /* ── CARD (cópia exata do resultados.html) ── */
     .imovel-card{background:#fff;border:1px solid var(--borda);border-radius:var(--radius);box-shadow:var(--sombra);display:flex;flex-direction:column;overflow:hidden;transition:box-shadow .15s,transform .15s}
     .imovel-card:hover{box-shadow:0 10px 34px rgba(15,23,42,.25);transform:translateY(-1px)}
+    .imovel-card.card-encerrado{opacity:0.65;filter:grayscale(1)}
+    .imovel-card.card-encerrado:hover{box-shadow:var(--sombra);transform:none}
+    .imovel-card.card-encerrado *{pointer-events:none}
     .imovel-thumb{height:160px;position:relative;overflow:hidden;background:linear-gradient(135deg,#dbeafe,#eff6ff)}
     .imovel-thumb-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
     .thumb-fallback{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:2.2rem;color:#cbd5e1}
@@ -580,10 +583,29 @@
    */
   function fetchImovel(id) {
     if (cache[id]) return Promise.resolve(cache[id]);
+    // Busca direto no SQLite via script especial que retorna mesmo encerrados
     return fetch(API_BASE + '?acao=detalhe&hdnimovel=' + encodeURIComponent(id))
       .then(function (r) { return r.json(); })
       .then(function (data) {
         if (data && data.sucesso && data.imovel) {
+          cache[id] = data.imovel;
+          return data.imovel;
+        }
+        // Se retornou erro (encerrado), tenta buscar direto do banco para mostrar desaturado
+        if (data && data.erro && data.nao_encontrado) {
+          return null; // Verdadeiramente não existe
+        }
+        // Para encerrados, busca com query especial
+        return fetchImovelEncerrado(id);
+      })
+      .catch(function () { return null; });
+  }
+
+  function fetchImovelEncerrado(id) {
+    return fetch(API_BASE + '?acao=detalhe&hdnimovel=' + encodeURIComponent(id) + '&mostrar_encerrados=1')
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (data && data.imovel) {
           cache[id] = data.imovel;
           return data.imovel;
         }
@@ -612,9 +634,10 @@
     var modLabel      = labelModalidade(item.modalidade || '');
     var isCompraDireta = norm(item.modalidade || '').indexOf('direta') !== -1;
     var isSP          = (item.uf || '').trim().toUpperCase() === 'SP';
+    var isEncerrado   = (item.status_caixa === 'encerrado' || item.status_caixa === 'removido');
 
     var card = document.createElement('div');
-    card.className = 'imovel-card';
+    card.className = 'imovel-card' + (isEncerrado ? ' card-encerrado' : '');
     card.dataset.hdn    = hdn;
     card.dataset.preco  = item.preco  || 0;
     card.dataset.desc   = item.desconto || 0;
@@ -666,12 +689,25 @@
     btnRem.setAttribute('aria-label', 'Remover dos favoritos');
     btnRem.title = 'Remover dos favoritos';
     btnRem.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>';
-    btnRem.addEventListener('click', function (e) {
-      e.preventDefault();
-      e.stopPropagation();
-      removerCard(card, hdn, tipo, item.cidade || '');
-    });
+    if (!isEncerrado) {
+      btnRem.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        removerCard(card, hdn, tipo, item.cidade || '');
+      });
+    } else {
+      btnRem.style.display = 'none';
+    }
     thumb.appendChild(btnRem);
+
+    /* ── BADGE ENCERRADO (sobreposto no canto superior direito) ── */
+    if (isEncerrado) {
+      var badgeEnc = document.createElement('span');
+      badgeEnc.className = 'badge-encerrado';
+      badgeEnc.textContent = '🔒 Encerrado';
+      badgeEnc.style.cssText = 'position:absolute;top:8px;right:8px;background:#dc2626;color:#fff;padding:4px 8px;border-radius:6px;font-size:.7rem;font-weight:800;box-shadow:0 2px 6px rgba(0,0,0,.3)';
+      thumb.appendChild(badgeEnc);
+    }
 
     /* ── CORPO ── */
     var body = document.createElement('div');
@@ -781,11 +817,20 @@
     notaStrip.setAttribute('aria-label', notaTexto ? 'Editar anotação' : 'Adicionar anotação');
     notaStrip.innerHTML = '<span class="nota-strip-icon">' + (notaTexto ? '📝' : '✏️') + '</span>'
       + '<span class="nota-strip-txt">' + (notaTexto ? notaTexto : 'Adicionar anotação...') + '</span>';
-    notaStrip.addEventListener('click', function (e) {
-      e.preventDefault();
-      e.stopPropagation();
-      abrirModalNota(hdn, tipo, item.cidade || '', notaStrip, item);
-    });
+    if (!isEncerrado) {
+      notaStrip.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        abrirModalNota(hdn, tipo, item.cidade || '', notaStrip, item);
+      });
+    } else {
+      notaStrip.style.opacity = '0.5';
+      notaStrip.style.cursor = 'not-allowed';
+      notaStrip.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      });
+    }
     body.appendChild(notaStrip);
 
     /* ── RODAPÉ DO CARD ── */
@@ -799,10 +844,21 @@
 
     var link = document.createElement('a');
     link.className = 'imovel-link';
-    link.href = '/imovel.php?id=' + encodeURIComponent(hdn);
-    link.target = '_blank';
-    link.rel = 'noopener noreferrer';
-    link.textContent = 'Saiba mais →';
+    if (isEncerrado) {
+      link.href = '#';
+      link.style.opacity = '0.5';
+      link.style.cursor = 'not-allowed';
+      link.textContent = 'Indisponível';
+      link.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      });
+    } else {
+      link.href = '/imovel.php?id=' + encodeURIComponent(hdn);
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      link.textContent = 'Saiba mais →';
+    }
 
     footer.appendChild(st);
     footer.appendChild(link);
@@ -920,7 +976,7 @@
       var encontrados = 0;
       resultados.forEach(function (r) {
         if (!r.item) {
-          /* Imóvel não encontrado na API (pode ter sido removido da CAIXA) */
+          /* Imóvel não encontrado na API (verdadeiramente deletado) */
           /* Mantém no LS mas não exibe — não polui o grid */
           return;
         }

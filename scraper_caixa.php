@@ -416,7 +416,21 @@ if (file_exists(DB_PATH)) {
         ");
         logMsg("📌 {$changed} imóveis marcados para re-scraping prioritário (novos ou alterados no CSV)");
 
+        // Marca imóveis que sumiram do CSV como "encerrado" (espelha comportamento da CAIXA)
+        $db->exec("ATTACH DATABASE " . $db->quote($dbOld) . " AS old");
+        $encerrado = $db->exec("
+            UPDATE imoveis
+            SET status_caixa = 'encerrado'
+            WHERE hdnimovel IN (
+                SELECT o.hdnimovel FROM old.imoveis o
+                WHERE NOT EXISTS (SELECT 1 FROM imoveis i WHERE i.hdnimovel = o.hdnimovel)
+            )
+        ");
         $db->exec("DETACH DATABASE old");
+        if ($encerrado > 0) {
+            logMsg("🔴 {$encerrado} imóveis marcados como encerrado (não constam mais no CSV da CAIXA)");
+        }
+
         logMsg("🔄 Dados de detalhe preservados de {$copied} imóveis scraped anteriormente");
     } catch (Exception $e) {
         logMsg("⚠️ Não foi possível preservar dados anteriores: " . $e->getMessage());

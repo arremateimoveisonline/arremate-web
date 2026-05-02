@@ -743,7 +743,7 @@ function mascaraM2Focus(el){
     var nextDate2=null,nextLabel2='',hasSecond2=false;
     if(!isCompraDir2){
       if(isSfi){
-        if(rd1){nextDate2=item.data_leilao_1;nextLabel2='🔨 1º Leilão:';hasSecond2=!!rd2;}
+        if(rd1&&rd1>now2){nextDate2=item.data_leilao_1;nextLabel2='🔨 1º Leilão:';hasSecond2=!!rd2;}
         else if(rd2){nextDate2=item.data_encerramento;nextLabel2='🔨 2º Leilão:';}
       } else {
         if(rd2){

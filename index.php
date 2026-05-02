@@ -11,18 +11,18 @@ $ano = date('Y');
   <meta name="color-scheme" content="light">
   <title>Arremate Imóveis Online | Busca de Imóveis da CAIXA com Desconto em Todo o Brasil</title>
   <meta name="keywords" content="imóveis CAIXA, leilão imóveis CAIXA, buscar imóvel CAIXA, imóveis CAIXA desconto, licitação CAIXA, venda direta CAIXA, venda online CAIXA, imóvel CAIXA FGTS, imóvel CAIXA financiamento, imóveis CAIXA São Paulo, imóveis CAIXA abaixo avaliação, plataforma imóveis CAIXA Brasil, busca imóvel CAIXA online, arremate imóveis online">
-  <meta name="description" content="Encontre imóveis da CAIXA com descontos de até 90% em todo o Brasil. Filtre por estado, cidade, tipo, modalidade (leilão, licitação, venda direta e online) e condições de pagamento. Imobiliária parceira credenciada CRECI-SP 043342.">
-  <meta property="og:title" content="Arremate Imóveis Online | Imóveis da CAIXA com Desconto em Todo o Brasil">
-  <meta property="og:description" content="A plataforma mais completa para buscar imóveis da CAIXA. Filtros por estado, cidade, tipo, modalidade e desconto. Dados atualizados diariamente. Imobiliária parceira credenciada CRECI-SP 043342.">
-  <meta property="og:image" content="https://arremateimoveisonline.com.br/logo-Horizontal-8k.jpeg">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
+  <meta name="description" content="Filtros por desconto, FGTS, financiamento, cidade e tipo de imóvel. +30.000 oportunidades da Caixa Econômica Federal. Atualizado todo dia. Gratuito.">
+  <meta property="og:title" content="Encontre Imóveis da CAIXA com até 90% de Desconto em Segundos">
+  <meta property="og:description" content="Filtros por desconto, FGTS, financiamento, cidade e tipo de imóvel. +30.000 oportunidades da Caixa Econômica Federal. Atualizado todo dia. Gratuito.">
+  <meta property="og:image" content="https://arremateimoveisonline.com.br/logo-casa-e-martelo-8K.jpeg">
+  <meta property="og:image:width" content="512">
+  <meta property="og:image:height" content="512">
   <meta property="og:url" content="https://arremateimoveisonline.com.br/">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Arremate Imóveis Online">
   <meta property="og:locale" content="pt_BR">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:image" content="https://arremateimoveisonline.com.br/logo-Horizontal-8k.jpeg">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:image" content="https://arremateimoveisonline.com.br/logo-casa-e-martelo-8K.jpeg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -1174,10 +1174,10 @@ function buildCard(item) {
   var nextDate=null, nextLabel='', hasSecond=false;
   if(!isCompDirIdx){
     if(isSfiIdx){
-      if(d1&&d1>now){nextDate=item.data_leilao_1;nextLabel='🔨 1º Leilão:';hasSecond=!!(d2&&d2>now);}
-      else if(d2&&d2>now){nextDate=item.data_encerramento;nextLabel='🔨 2º Leilão:';}
+      if(d1&&d1>now){nextDate=item.data_leilao_1;nextLabel='🔨 1º Leilão:';hasSecond=!!d2;}
+      else if(d2){nextDate=item.data_encerramento;nextLabel='🔨 2º Leilão:';}
     } else {
-      if(d2&&d2>now){nextDate=item.data_encerramento;nextLabel='📅';}
+      if(d2){nextDate=item.data_encerramento;nextLabel='📅';}
     }
   }
   if (nextDate) {

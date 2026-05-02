@@ -202,6 +202,7 @@ $ufWhere = $ufAlvo ? "AND uf = :uf" : '';
 $sql = "SELECT hdnimovel, uf, cidade, tipo FROM imoveis
         WHERE (scraped_at IS NULL OR scraped_at = '' OR scraped_at LIKE 'ERR%')
         AND hdnimovel IS NOT NULL AND hdnimovel != ''
+        AND status_caixa NOT IN ('encerrado', 'removido')
         {$ufWhere}
         ORDER BY financiamento DESC, id DESC
         LIMIT :lim";

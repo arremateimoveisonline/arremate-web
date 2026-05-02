@@ -46,6 +46,13 @@ try {
         exit;
     }
 
+    // Rejeita imóveis encerrados ou removidos (espelha comportamento da CAIXA)
+    $status = $row['status_caixa'] ?? '';
+    if ($status === 'encerrado' || $status === 'removido') {
+        echo json_encode(['erro' => 'Imóvel não está mais disponível na CAIXA']);
+        exit;
+    }
+
     // Garante UTF-8 nos campos vindos do banco (CSV pode ter sido importado em ISO-8859-1)
     function toUtf8Scraper($s) {
         if (empty($s)) return '';

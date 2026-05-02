@@ -43,9 +43,17 @@ if (file_exists($dbPath)) {
     try {
         $db = new PDO('sqlite:' . $dbPath);
         $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        $stmt = $db->prepare('SELECT foto_url FROM imoveis WHERE hdnimovel = :h LIMIT 1');
+        $stmt = $db->prepare('SELECT foto_url, status_caixa FROM imoveis WHERE hdnimovel = :h LIMIT 1');
         $stmt->execute([':h' => $hdn]);
-        $fotoUrl = $stmt->fetchColumn();
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        // Rejeita imóveis encerrados ou removidos (espelha comportamento da CAIXA)
+        if ($row && ($row['status_caixa'] === 'encerrado' || $row['status_caixa'] === 'removido')) {
+            http_response_code(404);
+            exit;
+        }
+
+        $fotoUrl = $row['foto_url'] ?? null;
         if ($fotoUrl) {
             $img = @file_get_contents($fotoUrl, false, $ctx);
             if ($img && strlen($img) > 1000) {
